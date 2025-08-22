@@ -1,0 +1,953 @@
+/* KrishiSetu Bargain Chat Window Styles */
+
+/* Base Styles */
+:root {
+  --krishi-primary: #4CAF50;
+  --krishi-primary-dark: #388E3C;
+  --krishi-secondary: #FFC107;
+  --krishi-accent: #8BC34A;
+  --krishi-danger: #F44336;
+  --krishi-success: #4CAF50;
+  --krishi-warning: #FF9800;
+  --krishi-info: #2196F3;
+  --krishi-light: #F5F5F5;
+  --krishi-dark: #333;
+  --krishi-white: #FFF;
+  --krishi-gray: #757575;
+  --krishi-light-gray: #E0E0E0;
+  --krishi-chat-bg: #F5F7FA;
+  --krishi-consumer-bg: #E3F2FD;
+  --krishi-farmer-bg: #FFFFFF;
+  --krishi-system-bg: #F1F8E9;
+}
+
+/* Loading State */
+.krishi-bargain-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: var(--krishi-light);
+}
+
+.krishi-loading-content {
+  text-align: center;
+  padding: 2rem;
+  background: var(--krishi-white);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.krishi-spinner {
+  color: var(--krishi-primary);
+  margin-bottom: 1rem;
+}
+
+.krishi-loading-text {
+  color: var(--krishi-dark);
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+/* Main Container */
+.krishi-bargain-container {
+  font-family: 'Poppins', sans-serif;
+  max-width: 100%;
+  margin: 0 auto;
+  height: 100vh;
+  background-color: var(--krishi-light);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Popup Styles */
+.krishi-bargain-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.krishi-bargain-popup {
+  background-color: var(--krishi-white);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  animation: krishi-fadeIn 0.3s ease-out;
+}
+
+.krishi-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  background-color: var(--krishi-primary);
+  color: var(--krishi-white);
+}
+
+.krishi-popup-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.krishi-popup-title h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.krishi-popup-icon {
+  font-size: 1.2rem;
+}
+
+.krishi-popup-close {
+  background: none;
+  border: none;
+  color: var(--krishi-white);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.krishi-popup-close:hover {
+  transform: scale(1.1);
+}
+
+.krishi-popup-body {
+  padding: 1.5rem;
+}
+
+.krishi-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.krishi-form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--krishi-dark);
+}
+
+.krishi-form-select, 
+.krishi-form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--krishi-light-gray);
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  background-color: var(--krishi-white);
+}
+
+.krishi-form-select:focus, 
+.krishi-form-input:focus {
+  outline: none;
+  border-color: var(--krishi-primary);
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+.krishi-quantity-control {
+  position: relative;
+}
+
+.krishi-quantity-range {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--krishi-gray);
+}
+
+.krishi-product-details {
+  margin: 1.5rem 0;
+}
+
+.krishi-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.krishi-detail-icon {
+  color: var(--krishi-primary);
+  width: 1rem;
+  text-align: center;
+}
+
+.krishi-detail-label {
+  font-weight: 500;
+  color: var(--krishi-dark);
+}
+
+.krishi-detail-value {
+  color: var(--krishi-gray);
+}
+
+.krishi-price-summary {
+  background-color: var(--krishi-light);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1.5rem 0;
+}
+
+.krishi-price-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  color: var(--krishi-dark);
+}
+
+.krishi-price-total {
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--krishi-light-gray);
+}
+
+.krishi-error-message {
+  color: var(--krishi-danger);
+  background-color: rgba(244, 67, 54, 0.1);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.krishi-popup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background-color: var(--krishi-light);
+  border-top: 1px solid var(--krishi-light-gray);
+}
+
+/* Button Styles */
+.krishi-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s;
+}
+
+.krishi-btn-primary {
+  background-color: var(--krishi-primary);
+  color: var(--krishi-white);
+}
+
+.krishi-btn-primary:hover {
+  background-color: var(--krishi-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.krishi-btn-primary:disabled {
+  background-color: var(--krishi-light-gray);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.krishi-btn-secondary {
+  background-color: var(--krishi-light);
+  color: var(--krishi-dark);
+}
+
+.krishi-btn-secondary:hover {
+  background-color: #E0E0E0;
+}
+
+.krishi-loading .krishi-spinner {
+  margin-right: 0.5rem;
+}
+
+/* Chat Interface */
+.krishi-chat-interface {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px); /* Adjust for navbar height */
+  background-color: var(--krishi-white);
+  position: relative;
+}
+
+.krishi-exit-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--krishi-light-gray);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--krishi-gray);
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.krishi-exit-btn:hover {
+  background-color: var(--krishi-white);
+  color: var(--krishi-danger);
+  border-color: var(--krishi-danger);
+}
+
+/* Chat Header */
+.krishi-chat-header {
+  background: linear-gradient(135deg, var(--krishi-primary), var(--krishi-accent));
+  color: var(--krishi-white);
+  padding: 1.5rem 1rem 1rem;
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 5;
+}
+
+.krishi-chat-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.krishi-chat-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.krishi-chat-title h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.krishi-connection-status {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+  font-weight: 600;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.krishi-status-connected {
+  background-color: var(--krishi-success);
+}
+
+.krishi-status-connecting {
+  background-color: var(--krishi-warning);
+}
+
+.krishi-status-disconnected,
+.krishi-status-error {
+  background-color: var(--krishi-danger);
+}
+
+.krishi-chat-product-info {
+  background-color: rgba(255, 255, 255, 0.15);
+  padding: 1rem;
+  border-radius: 12px;
+  margin-top: 1rem;
+  backdrop-filter: blur(5px);
+}
+
+.krishi-product-row {
+  display: flex;
+  margin-bottom: 0.5rem;
+}
+
+.krishi-product-label {
+  font-weight: 500;
+  margin-right: 0.5rem;
+}
+
+.krishi-product-value {
+  font-weight: 400;
+}
+
+.krishi-price-info {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.krishi-price-item {
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.krishi-price-label {
+  font-size: 0.85rem;
+}
+
+.krishi-price-value {
+  font-weight: 600;
+}
+
+.krishi-price-total {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.krishi-status-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.krishi-status-accepted {
+  color: #C8E6C9;
+}
+
+.krishi-status-rejected {
+  color: #FFCDD2;
+}
+
+/* Messages Container */
+.krishi-messages-container {
+  flex: 1;
+  padding: 1.5rem 1rem;
+  overflow-y: auto;
+  background-color: var(--krishi-chat-bg);
+  scroll-behavior: smooth;
+}
+
+.krishi-no-messages {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: var(--krishi-gray);
+  font-style: italic;
+}
+
+/* Message Styles */
+.krishi-message {
+  margin-bottom: 1rem;
+  max-width: 85%;
+  animation: krishi-fadeIn 0.3s ease-out;
+}
+
+.krishi-message-consumer {
+  margin-left: auto;
+}
+
+.krishi-message-farmer {
+  margin-right: auto;
+}
+
+.krishi-message-system {
+  margin: 1rem auto;
+  text-align: center;
+  max-width: 90%;
+}
+
+.krishi-message-content {
+  padding: 0.75rem 1rem;
+  border-radius: 18px;
+  position: relative;
+  word-wrap: break-word;
+  line-height: 1.4;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.krishi-message-consumer .krishi-message-content {
+  background-color: var(--krishi-consumer-bg);
+  color: var(--krishi-dark);
+  border-bottom-right-radius: 5px;
+}
+
+.krishi-message-farmer .krishi-message-content {
+  background-color: var(--krishi-farmer-bg);
+  color: var(--krishi-dark);
+  border-bottom-left-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.krishi-message-system .krishi-message-content {
+  background-color: var(--krishi-system-bg);
+  color: var(--krishi-dark);
+  font-size: 0.9rem;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+}
+
+.krishi-system-label {
+  font-weight: 600;
+  color: var(--krishi-primary);
+}
+
+.krishi-message-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  padding: 0 0.5rem;
+  color: var(--krishi-gray);
+}
+
+.krishi-message-sender {
+  font-weight: 500;
+}
+
+/* Typing Indicator */
+.krishi-typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  color: var(--krishi-gray);
+  font-size: 0.9rem;
+}
+
+.krishi-typing-dots {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.krishi-typing-dots div {
+  width: 8px;
+  height: 8px;
+  background-color: var(--krishi-gray);
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: krishi-bounce 1.4s infinite ease-in-out;
+}
+
+.krishi-typing-dots div:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.krishi-typing-dots div:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+/* Chat Controls */
+.krishi-chat-controls {
+  padding: 1rem;
+  background-color: var(--krishi-white);
+  border-top: 1px solid var(--krishi-light-gray);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Result Actions */
+.krishi-result-actions {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.krishi-result-success, 
+.krishi-result-rejected {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.krishi-result-success {
+  color: var(--krishi-success);
+}
+
+.krishi-result-rejected {
+  color: var(--krishi-danger);
+}
+
+.krishi-result-actions h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.krishi-action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.krishi-action-btn {
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.krishi-btn-dashboard {
+  background-color: var(--krishi-primary);
+  color: var(--krishi-white);
+}
+
+.krishi-btn-orders {
+  background-color: var(--krishi-info);
+  color: var(--krishi-white);
+}
+
+.krishi-btn-cart {
+  background-color: var(--krishi-secondary);
+  color: var(--krishi-dark);
+}
+
+.krishi-btn-bargain {
+  background-color: var(--krishi-accent);
+  color: var(--krishi-dark);
+}
+
+.krishi-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Counter Offer */
+.krishi-counter-offer {
+  background-color: var(--krishi-light);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.krishi-offer-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.krishi-offer-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--krishi-dark);
+}
+
+.krishi-offer-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.krishi-offer-btn {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s;
+  font-size: 0.9rem;
+}
+
+.krishi-offer-accept {
+  background-color: var(--krishi-success);
+  color: var(--krishi-white);
+}
+
+.krishi-offer-reject {
+  background-color: var(--krishi-danger);
+  color: var(--krishi-white);
+}
+
+.krishi-offer-counter {
+  background-color: var(--krishi-secondary);
+  color: var(--krishi-dark);
+}
+
+.krishi-offer-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.krishi-offer-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Price Suggestions */
+.krishi-price-suggestions {
+  background-color: var(--krishi-white);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+}
+
+.krishi-suggestion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.krishi-suggestion-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--krishi-dark);
+  font-weight: 600;
+}
+
+.krishi-close-suggestions {
+  background: none;
+  border: none;
+  color: var(--krishi-gray);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: color 0.2s;
+  padding: 0.25rem;
+}
+
+.krishi-close-suggestions:hover {
+  color: var(--krishi-danger);
+}
+
+.krishi-suggestion-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.krishi-suggestion-btn {
+  background-color: var(--krishi-white);
+  border: 1px solid var(--krishi-light-gray);
+  border-radius: 8px;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.krishi-suggestion-btn:hover {
+  border-color: var(--krishi-primary);
+  background-color: var(--krishi-light);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.krishi-suggestion-price {
+  font-weight: 600;
+  color: var(--krishi-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.krishi-suggestion-label {
+  font-size: 0.8rem;
+  color: var(--krishi-gray);
+}
+
+/* Waiting Indicator */
+.krishi-waiting-indicator {
+  text-align: center;
+  padding: 1rem;
+  color: var(--krishi-gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  background-color: var(--krishi-light);
+  border-radius: 8px;
+}
+
+/* Animations */
+@keyframes krishi-fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes krishi-bounce {
+  0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .krishi-bargain-popup {
+    max-width: 95%;
+  }
+  
+  .krishi-offer-actions {
+    flex-direction: column;
+  }
+  
+  .krishi-suggestion-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .krishi-action-buttons {
+    flex-direction: column;
+  }
+  
+  .krishi-action-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .krishi-price-info {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .krishi-message {
+    max-width: 90%;
+  }
+  
+  .krishi-popup-header {
+    padding: 1rem;
+  }
+  
+  .krishi-popup-body {
+    padding: 1rem;
+  }
+  
+  .krishi-popup-actions {
+    flex-direction: column;
+  }
+  
+  .krishi-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Add these new styles and update existing ones */
+
+/* Account for fixed navbar */
+.krishi-chat-interface {
+  padding-top: 60px; /* Height of your navbar */
+  height: 100vh;
+}
+
+.krishi-chat-header {
+  position: fixed;
+  top: 60px; /* Height of your navbar */
+  left: 0;
+  right: 0;
+  z-index: 10;
+  padding: 1rem;
+}
+
+.krishi-messages-container {
+  padding-top: 220px; /* Height of header + navbar */
+  padding-bottom: 180px; /* Height of controls */
+  height: calc(100vh - 60px); /* Adjust for navbar */
+}
+
+.krishi-chat-controls {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+/* Updated header styles */
+.krishi-chat-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.krishi-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.krishi-exit-btn {
+  position: static;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--krishi-light-gray);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--krishi-gray);
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.krishi-exit-btn:hover {
+  background-color: var(--krishi-white);
+  color: var(--krishi-danger);
+  border-color: var(--krishi-danger);
+}
+
+/* Adjust connection status */
+.krishi-connection-status {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+  font-weight: 600;
+  background-color: rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .krishi-chat-header-top {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .krishi-header-controls {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .krishi-messages-container {
+    padding-top: 260px; /* More space for stacked header */
+  }
+}

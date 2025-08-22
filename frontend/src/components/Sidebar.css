@@ -1,0 +1,164 @@
+/* Sidebar Container */
+.sidebar {
+  width: 70px; /* Reduced collapsed width */
+  background-color: rgba(0, 0, 0, 0.9); /* Semi-transparent black to match Navbar2 */
+  height: 100vh; /* Full height */
+  position: fixed; /* Fixed position */
+  top: 60px; /* Below the navbar (height of Navbar2) */
+  left: 0;
+  overflow-x: hidden; /* Hide horizontal overflow */
+  transition: width 0.3s ease; /* Smooth transition for width */
+  z-index: 999; /* Ensure it's below the navbar */
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Sidebar when open */
+.sidebar.open {
+  width: 220px; /* Slightly reduced expanded width */
+}
+
+/* Sidebar Content */
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 15px 10px; /* Reduced padding */
+  gap: 8px; /* Further reduced spacing between buttons */
+}
+
+/* Toggle Button */
+.toggle-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  margin-bottom: 15px; /* Reduced margin */
+  align-self: flex-start; /* Align to the left */
+  transition: color 0.3s ease;
+  padding: 0; /* Remove padding for better alignment */
+}
+
+.toggle-btn:hover {
+  color: #4CAF50; /* Green hover effect */
+}
+
+/* Sidebar Buttons */
+.sidebar button {
+  width: 100%; /* Full width */
+  background: none;
+  border: none;
+  color: white;
+  text-align: left;
+  padding: 8px 12px; /* Reduced padding */
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Reduced space between icon and text */
+  border-radius: 4px;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+/* Active Button */
+.sidebar button.active {
+  background-color: #1abc9c; /* Highlight color for active button */
+}
+
+/* Hover and Active Effects */
+.sidebar button:hover {
+  background-color: rgba(255, 255, 255, 0.1); /* Slight hover effect */
+  transform: scale(1.02);
+}
+
+/* Icons */
+.sidebar button i {
+  font-size: 20px; /* Slightly smaller icon size */
+  min-width: 24px; /* Ensure consistent width */
+  text-align: center; /* Center icons */
+}
+
+/* Tooltip for collapsed buttons */
+.sidebar:not(.open) button::after {
+  content: attr(title);
+  position: absolute;
+  left: 80px; /* Position tooltip to the right */
+  background-color: #333;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  z-index: 1001; /* Ensure tooltip is above other elements */
+}
+
+.sidebar:not(.open) button:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Community Overlay */
+.community-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8); /* Dark overlay */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1001; /* Above sidebar */
+}
+
+.community-iframe {
+  width: 90%;
+  height: 90%;
+  border: none;
+  background: white;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: red;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 60px; /* Further reduce collapsed width for mobile */
+  }
+
+  .sidebar.open {
+    width: 200px; /* Slightly reduce expanded width for mobile */
+  }
+
+  .sidebar-content {
+    padding: 10px 5px; /* Further reduced padding for mobile */
+    gap: 6px; /* Further reduced spacing for mobile */
+  }
+
+  .sidebar button {
+    padding: 6px 10px; /* Further reduced button padding for mobile */
+    font-size: 14px; /* Reduce font size for mobile */
+    gap: 10px; /* Further reduced space between icon and text for mobile */
+  }
+
+  .sidebar button i {
+    font-size: 18px; /* Reduce icon size for mobile */
+  }
+
+  .sidebar:not(.open) button::after {
+    left: 70px; /* Adjust tooltip position for mobile */
+  }
+}

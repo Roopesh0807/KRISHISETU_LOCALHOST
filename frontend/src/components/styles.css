@@ -1,0 +1,773 @@
+/* Reset styles */
+body {
+  font-family: 'Poppins', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f5f5;
+  scroll-behavior: smooth; /* Enable smooth scrolling */
+  color: #333;
+  line-height: 1.6;
+  overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+/* Hero Section */
+.hero-section1 {
+  position: relative;
+  width: 100%;
+  height: 100vh; /* Full viewport height */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6)), url("../assets/background.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed; /* Parallax effect */
+  color: white;
+  perspective: 1000px; /* For 3D effects */
+}
+
+.hero-text1 {
+  text-align: center;
+  animation: fadeIn 2s ease-in-out;
+  transform-style: preserve-3d; /* Enable 3D transformations */
+}
+
+.hero-text1 h1 {
+  font-size: 5rem;
+  margin-bottom: 20px;
+  font-weight: 700;
+  text-shadow: 2px 2px 10px rgba(0, 177, 0, 0.5);
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: float 3s infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.hero-text1 p {
+  font-size: 1.5rem;
+  margin-bottom: 40px;
+  text-shadow: 1px 1px 5px rgba(0, 104, 21, 0.5);
+  animation: fadeIn 2.5s ease-in-out;
+}
+
+/* Login Button */
+.login-btnhome {
+  padding: 10px 20px; /* Fixed padding */
+  font-size: 1.2rem;
+  background-color: #4CAF50; /* Green background */
+  color: white; /* Text color */
+  border: none; /* Remove border */
+  border-radius: 30px; /* Rounded corners */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  animation: bounce 2s infinite;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  display: inline-block; /* Ensure the button wraps around the text */
+  white-space: nowrap; /* Prevent text from wrapping */
+  width: 120px; /* Fixed width for the button */
+}
+
+/* Hover effect */
+.login-btnhome:hover {
+  background-color: #45a049; /* Darker green on hover */
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Ripple effect */
+.login-btnhome::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300%;
+  height: 300%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.5s ease;
+}
+
+.login-btnhome:hover::before {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* Bounce animation */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* About Us Section */
+.about-us-container {
+  padding: 120px 20px;
+  background-color: #fff;
+  margin: 40px auto;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+  animation: slideUp 1s ease-in-out;
+  transform-style: preserve-3d;
+}
+
+.about-us-heading {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: float 3s infinite ease-in-out;
+}
+
+.about-us-description {
+  font-size: 1.2rem;
+  color: #555;
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.8;
+  animation: fadeIn 2s ease-in-out;
+}
+
+/* Bootstrap Carousel Customization */
+.carousel {
+  margin-top: 60px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 1.5s ease-in-out;
+  transform-style: preserve-3d;
+}
+
+.carousel-item img {
+  height: 70vh;
+  object-fit: cover;
+  filter: brightness(0.8);
+  transition: filter 0.5s ease;
+}
+
+.carousel-item:hover img {
+  filter: brightness(1);
+}
+
+.carousel-caption {
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 30px;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  animation: slideUp 1s ease-in-out;
+}
+
+.carousel-caption h5 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: #fff;
+}
+
+.carousel-caption p {
+  font-size: 1.2rem;
+  color: #ddd;
+}
+
+.carousel-control-prev:hover,
+.carousel-control-next:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+  opacity: 1;
+}
+
+/* Contact Us Section */
+.contact-container {
+  width: 80%;
+  max-width: 1000px;
+  margin: 80px auto;
+  padding: 50px;
+  background-color: #fff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  text-align: center;
+  background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+  animation: slideUp 1s ease-in-out;
+  transform-style: preserve-3d;
+}
+
+.contact-container h2 {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #4CAF50;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: float 3s infinite ease-in-out;
+}
+
+.contact-container p {
+  font-size: 1.2rem;
+  color: #555;
+  margin: 10px 0;
+  animation: fadeIn 2s ease-in-out;
+}
+
+/* Form Styling */
+.contact-form {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 1fr;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.contact-form .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-form label {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.contact-form input,
+.contact-form textarea {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: #f9f9f9;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+}
+
+.contact-form button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 15px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.contact-form button:hover {
+  background-color: #45a049;
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid #fff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Social Icons Section */
+.social-icons {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.social-icons p {
+  font-size: 1.2rem;
+  color: #4CAF50;
+  margin-bottom: 15px;
+  animation: fadeIn 2s ease-in-out;
+}
+
+.social-icons .icon {
+  font-size: 2rem;
+  margin: 0 15px;
+  color: #333;
+  transition: all 0.3s ease;
+}
+
+.social-icons .icon:hover {
+  color: #4CAF50;
+  transform: scale(1.2);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-text1 h1 {
+    font-size: 3rem;
+  }
+
+  .hero-text1 p {
+    font-size: 1.2rem;
+  }
+
+  .about-us-heading {
+    font-size: 2.5rem;
+  }
+
+  .about-us-description {
+    font-size: 1rem;
+  }
+
+  .carousel-item img {
+    height: 50vh;
+  }
+
+  .contact-container {
+    width: 90%;
+    padding: 30px;
+  }
+
+  .contact-form input,
+  .contact-form textarea {
+    font-size: 0.9rem;
+  }
+
+  .contact-form button {
+    font-size: 1rem;
+  }
+
+  .social-icons .icon {
+    font-size: 1.5rem;
+  }
+}
+/* Typing Effect */
+.cursor {
+  display: inline-block;
+  margin-left: 2px;
+  animation: blink 0.75s infinite;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+
+
+
+/* Krishisetu Contact Section */
+.ks-contact-container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 80px auto;
+  padding: 40px;
+  background-color: #fff;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  background: linear-gradient(to bottom, #ffffff, #f8fff8);
+  border: 1px solid #e0f0e0;
+}
+
+.ks-contact-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.ks-contact-title {
+  font-size: 2.5rem;
+  color: #2e7d32;
+  margin-bottom: 10px;
+  font-weight: 700;
+  position: relative;
+  display: inline-block;
+}
+
+.ks-contact-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(to right, #4CAF50, #8BC34A);
+}
+
+.ks-contact-subtitle {
+  font-size: 1.1rem;
+  color: #666;
+  margin-top: 10px;
+}
+
+.ks-contact-content {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 40px;
+}
+
+.ks-contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.ks-contact-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.ks-contact-icon {
+  font-size: 1.5rem;
+  color: #4CAF50;
+  margin-top: 5px;
+}
+
+.ks-contact-info-title {
+  font-size: 1.2rem;
+  color: #333;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.ks-contact-info-text {
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+.ks-contact-social {
+  margin-top: 20px;
+}
+
+.ks-social-title {
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.ks-social-icons {
+  display: flex;
+  gap: 15px;
+}
+
+.ks-social-icon {
+  font-size: 1.8rem;
+  color: #555;
+  transition: all 0.3s ease;
+}
+
+.ks-social-icon:hover {
+  color: #4CAF50;
+  transform: translateY(-3px);
+}
+
+.ks-contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ks-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ks-form-label {
+  font-size: 1rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.ks-form-input,
+.ks-form-textarea {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: #f9f9f9;
+  font-family: inherit;
+}
+
+.ks-form-input:focus,
+.ks-form-textarea:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+  background-color: #fff;
+}
+
+.ks-form-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+/* Primary Button Styles */
+/* KRISHISETU BUTTON - 100% VISIBLE SOLUTION */
+.ks-submit-btn {
+  /* ALWAYS VISIBLE INITIAL STATE */
+  background: #2e7d32 !important; /* Dark green always */
+  color: white !important; /* White text always */
+  padding: 14px 25px;
+  border: 2px solid #2e7d32 !important;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+  box-shadow: 0 2px 5px rgba(46, 125, 50, 0.2);
+  transition: all 0.2s ease;
+
+  /* Remove any inherited white backgrounds */
+  background-image: none !important;
+}
+
+/* Hover State */
+.ks-submit-btn:not(:disabled):hover {
+  background: #1b5e20 !important; /* Slightly darker green */
+  transform: translateY(-1px);
+}
+
+/* Disabled State */
+.ks-submit-btn:disabled {
+  background: #e8f5e9 !important; /* Very light green */
+  color: #2e7d32 !important; /* Dark green text */
+  border-color: #c8e6c9 !important;
+}
+
+
+.ks-spinner {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  animation: ks-spin 1s linear infinite;
+}
+
+@keyframes ks-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .ks-contact-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .ks-contact-info {
+    order: 2;
+    margin-top: 30px;
+  }
+  
+  .ks-contact-form {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+}
+
+@media (max-width: 576px) {
+  .ks-contact-container {
+    padding: 30px 20px;
+  }
+  
+  .ks-contact-title {
+    font-size: 2rem;
+  }
+}
+
+
+
+/* ===================== */
+/* KRISHISETU HOME STYLES */
+/* ===================== */
+
+/* Home Container */
+.ks-home-container {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Hero Section */
+.ks-hero-section {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6)), 
+              url("../assets/background.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: white;
+}
+
+.ks-hero-content {
+  max-width: 1200px;
+  padding: 0 20px;
+  animation: ks-fadeIn 1.5s ease-in-out;
+}
+
+.ks-hero-title {
+  font-size: clamp(2.5rem, 5vw, 5rem);
+  margin-bottom: 20px;
+  font-weight: 700;
+  text-shadow: 2px 2px 10px rgba(0, 177, 0, 0.5);
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.2;
+  min-height: 1.2em; /* Prevent layout shift during typing */
+}
+
+.ks-type-cursor {
+  display: inline-block;
+  margin-left: 5px;
+  animation: ks-blink 0.75s infinite;
+  color: #4CAF50;
+}
+
+.ks-hero-subtitle {
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  margin-bottom: 40px;
+  text-shadow: 1px 1px 5px rgba(0, 104, 21, 0.5);
+}
+
+.ks-hero-btn {
+  padding: 12px 30px;
+  font-size: 1.2rem;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.ks-hero-btn:hover {
+  background-color: #45a049;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.ks-hero-btn:active {
+  transform: translateY(1px);
+}
+
+/* Section Styling */
+.ks-about-section,
+.ks-contact-section {
+  padding: 80px 0;
+  background-color: #f9f9f9;
+}
+
+/* Animations */
+@keyframes ks-fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ks-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .ks-hero-title {
+    font-size: 3rem;
+  }
+  
+  .ks-hero-subtitle {
+    font-size: 1.2rem;
+  }
+  
+  .ks-hero-btn {
+    font-size: 1rem;
+    padding: 10px 25px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ks-hero-title {
+    font-size: 2.2rem;
+  }
+  
+  .ks-hero-subtitle {
+    font-size: 1rem;
+  }
+}

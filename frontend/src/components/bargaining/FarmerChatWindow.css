@@ -1,0 +1,904 @@
+/* KrishiSetu Farmer Chat Window Styles */
+
+/* Base Variables */
+:root {
+  --krishi-primary: #4CAF50;
+  --krishi-primary-dark: #388E3C;
+  --krishi-secondary: #FFC107;
+  --krishi-accent: #8BC34A;
+  --krishi-danger: #F44336;
+  --krishi-success: #4CAF50;
+  --krishi-warning: #FF9800;
+  --krishi-info: #2196F3;
+  --krishi-light: #F5F5F5;
+  --krishi-dark: #333;
+  --krishi-white: #FFF;
+  --krishi-gray: #757575;
+  --krishi-light-gray: #E0E0E0;
+  --krishi-chat-bg: #F5F7FA;
+  --krishi-farmer-bg: #E3F2FD;
+  --krishi-consumer-bg: #FFFFFF;
+  --krishi-system-bg: #F1F8E9;
+}
+
+/* Loading State */
+.krishi-farmer-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: var(--krishi-light);
+}
+
+.krishi-loading-content {
+  text-align: center;
+  padding: 2rem;
+  background: var(--krishi-white);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.krishi-spinner {
+  color: var(--krishi-primary);
+  margin-bottom: 1rem;
+}
+
+.krishi-loading-text {
+  color: var(--krishi-dark);
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+/* Error State */
+.krishi-farmer-error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: var(--krishi-light);
+}
+
+.krishi-error-content {
+  background-color: var(--krishi-white);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.krishi-error-content h3 {
+  color: var(--krishi-danger);
+  margin-bottom: 1rem;
+}
+
+.krishi-error-content p {
+  color: var(--krishi-gray);
+  margin-bottom: 1.5rem;
+}
+
+/* Main Chat Container */
+.krishi-farmer-chat {
+  font-family: 'Poppins', sans-serif;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--krishi-white);
+  position: relative;
+}
+
+/* Chat Header */
+.krishi-farmer-header {
+  background: linear-gradient(135deg, var(--krishi-primary), var(--krishi-accent));
+  color: var(--krishi-white);
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 10;
+}
+
+.krishi-header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.krishi-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.krishi-chat-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.krishi-chat-title h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.krishi-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.krishi-connection-status {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+  font-weight: 600;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.krishi-status-connected {
+  background-color: var(--krishi-success);
+}
+
+.krishi-status-connecting {
+  background-color: var(--krishi-warning);
+}
+
+.krishi-status-disconnected,
+.krishi-status-error {
+  background-color: var(--krishi-danger);
+}
+
+.krishi-exit-btn {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--krishi-light-gray);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--krishi-gray);
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.krishi-exit-btn:hover {
+  background-color: var(--krishi-white);
+  color: var(--krishi-danger);
+  border-color: var(--krishi-danger);
+}
+
+/* Product Info */
+.krishi-product-info {
+  background-color: rgba(255, 255, 255, 0.15);
+  padding: 1rem;
+  border-radius: 12px;
+  margin-top: 1rem;
+  backdrop-filter: blur(5px);
+}
+
+.krishi-product-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.krishi-product-icon {
+  color: var(--krishi-white);
+  width: 1rem;
+  opacity: 0.8;
+}
+
+.krishi-product-label {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.krishi-product-value {
+  font-weight: 400;
+}
+
+.krishi-price-info {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.krishi-price-item {
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.krishi-price-label {
+  font-weight: 500;
+}
+
+.krishi-price-value {
+  font-weight: 600;
+}
+
+.krishi-price-total {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.krishi-status-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  font-weight: 500;
+}
+
+.krishi-status-accepted {
+  color: #C8E6C9;
+}
+
+.krishi-status-rejected {
+  color: #FFCDD2;
+}
+
+/* Messages Container */
+.krishi-messages-container {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  background-color: var(--krishi-chat-bg);
+  scroll-behavior: smooth;
+  padding-top: 220px; /* Account for header height */
+  padding-bottom: 180px; /* Account for controls height */
+}
+
+.krishi-no-messages {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: var(--krishi-gray);
+  font-style: italic;
+}
+
+/* Message Styles */
+.krishi-message {
+  margin-bottom: 1rem;
+  max-width: 85%;
+  animation: krishi-fadeIn 0.3s ease-out;
+}
+
+.krishi-message-farmer {
+  margin-left: auto;
+}
+
+.krishi-message-consumer {
+  margin-right: auto;
+}
+
+.krishi-message-system {
+  margin: 1rem auto;
+  text-align: center;
+  max-width: 90%;
+}
+
+.krishi-message-content {
+  padding: 0.75rem 1rem;
+  border-radius: 18px;
+  position: relative;
+  word-wrap: break-word;
+  line-height: 1.4;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.krishi-message-farmer .krishi-message-content {
+  background-color: var(--krishi-farmer-bg);
+  color: var(--krishi-dark);
+  border-bottom-right-radius: 5px;
+}
+
+.krishi-message-consumer .krishi-message-content {
+  background-color: var(--krishi-consumer-bg);
+  color: var(--krishi-dark);
+  border-bottom-left-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.krishi-message-system .krishi-message-content {
+  background-color: var(--krishi-system-bg);
+  color: var(--krishi-dark);
+  font-size: 0.9rem;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+}
+
+.krishi-system-label {
+  font-weight: 600;
+  color: var(--krishi-primary);
+}
+
+.krishi-message-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  padding: 0 0.5rem;
+  color: var(--krishi-gray);
+}
+
+.krishi-message-sender {
+  font-weight: 500;
+}
+
+/* Typing Indicator */
+.krishi-typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  color: var(--krishi-gray);
+  font-size: 0.9rem;
+}
+
+.krishi-typing-dots {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.krishi-typing-dots div {
+  width: 8px;
+  height: 8px;
+  background-color: var(--krishi-gray);
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: krishi-bounce 1.4s infinite ease-in-out;
+}
+
+.krishi-typing-dots div:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.krishi-typing-dots div:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+/* Chat Controls */
+.krishi-chat-controls {
+  padding: 1rem;
+  background-color: var(--krishi-white);
+  border-top: 1px solid var(--krishi-light-gray);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+/* Price Suggestions */
+.krishi-price-suggestions {
+  background-color: var(--krishi-white);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.krishi-suggestion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.krishi-suggestion-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--krishi-dark);
+  font-weight: 600;
+}
+
+.krishi-close-suggestions {
+  background: none;
+  border: none;
+  color: var(--krishi-gray);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: color 0.2s;
+  padding: 0.25rem;
+}
+
+.krishi-close-suggestions:hover {
+  color: var(--krishi-danger);
+}
+
+.krishi-suggestion-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.75rem;
+}
+
+.krishi-suggestion-btn {
+  background-color: var(--krishi-white);
+  border: 1px solid var(--krishi-light-gray);
+  border-radius: 8px;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.krishi-suggestion-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.krishi-suggestion-btn.krishi-increase {
+  border-left: 4px solid var(--krishi-success);
+}
+
+.krishi-suggestion-btn.krishi-decrease {
+  border-left: 4px solid var(--krishi-danger);
+}
+
+.krishi-suggestion-icon {
+  color: var(--krishi-primary);
+  margin-bottom: 0.5rem;
+}
+
+.krishi-suggestion-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.krishi-suggestion-price {
+  font-weight: 600;
+  color: var(--krishi-dark);
+  margin-bottom: 0.25rem;
+}
+
+.krishi-suggestion-diff {
+  font-size: 0.8rem;
+  color: var(--krishi-gray);
+}
+
+.krishi-no-suggestions {
+  text-align: center;
+  padding: 1rem;
+  color: var(--krishi-gray);
+  font-style: italic;
+}
+
+/* Bargain Actions */
+.krishi-bargain-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.krishi-show-suggestions-btn {
+  padding: 0.75rem;
+  background-color: var(--krishi-primary);
+  color: var(--krishi-white);
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background-color 0.3s;
+}
+
+.krishi-show-suggestions-btn:hover {
+  background-color: var(--krishi-primary-dark);
+}
+
+.krishi-show-suggestions-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.krishi-status-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.krishi-accept-btn {
+  flex: 1;
+  padding: 0.75rem;
+  background-color: var(--krishi-success);
+  color: var(--krishi-white);
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background-color 0.3s;
+}
+
+.krishi-accept-btn:hover {
+  background-color: #27ae60;
+}
+
+.krishi-reject-btn {
+  flex: 1;
+  padding: 0.75rem;
+  background-color: var(--krishi-danger);
+  color: var(--krishi-white);
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background-color 0.3s;
+}
+
+.krishi-reject-btn:hover {
+  background-color: #c0392b;
+}
+
+/* Waiting Indicator */
+.krishi-waiting-indicator {
+  text-align: center;
+  padding: 1rem;
+  color: var(--krishi-gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  background-color: var(--krishi-light);
+  border-radius: 8px;
+}
+
+/* Result Actions */
+.krishi-result-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.krishi-action-btn {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.krishi-btn-primary {
+  background-color: var(--krishi-primary);
+  color: var(--krishi-white);
+}
+
+.krishi-btn-primary:hover {
+  background-color: var(--krishi-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.krishi-btn-secondary {
+  background-color: var(--krishi-secondary);
+  color: var(--krishi-dark);
+}
+
+.krishi-btn-secondary:hover {
+  background-color: #FFB300;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Animations */
+@keyframes krishi-fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes krishi-bounce {
+  0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .krishi-header-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .krishi-header-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .krishi-suggestion-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .krishi-messages-container {
+    padding-top: 260px;
+  }
+}
+
+@media (max-width: 480px) {
+  .krishi-chat-title h2 {
+    font-size: 1.1rem;
+  }
+  
+  .krishi-price-info {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .krishi-suggestion-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .krishi-status-buttons {
+    flex-direction: column;
+  }
+  
+  .krishi-result-actions {
+    flex-direction: column;
+  }
+}
+/* Account for navbar and sidebar */
+.krishi-farmer-chat {
+  font-family: 'Poppins', sans-serif;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--krishi-white);
+  position: relative;
+  margin-left: 250px; /* Sidebar width */
+  padding-top: 70px; /* Navbar height */
+}
+
+/* Header adjustments */
+.krishi-farmer-header {
+  background: linear-gradient(135deg, var(--krishi-primary), var(--krishi-accent));
+  color: var(--krishi-white);
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 70px; /* Below navbar */
+  left: 250px; /* Right of sidebar */
+  right: 0;
+  z-index: 10;
+}
+
+/* Messages container adjustments */
+.krishi-messages-container {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  background-color: var(--krishi-chat-bg);
+  scroll-behavior: smooth;
+  padding-top: 220px; /* Account for header height */
+  padding-bottom: 180px; /* Account for controls height */
+  margin-left: 250px; /* Sidebar width */
+  margin-top: 70px; /* Navbar height */
+}
+
+/* Chat controls adjustments */
+.krishi-chat-controls {
+  padding: 1rem;
+  background-color: var(--krishi-white);
+  border-top: 1px solid var(--krishi-light-gray);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+  position: fixed;
+  bottom: 0;
+  left: 250px; /* Right of sidebar */
+  right: 0;
+  z-index: 10;
+}
+
+/* Action buttons in one line */
+.krishi-action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.krishi-action-btn {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s;
+  max-width: 200px;
+}
+
+.krishi-accept-btn {
+  background-color: var(--krishi-success);
+  color: var(--krishi-white);
+}
+
+.krishi-reject-btn {
+  background-color: var(--krishi-danger);
+  color: var(--krishi-white);
+}
+
+.krishi-counter-btn {
+  background-color: var(--krishi-secondary);
+  color: var(--krishi-dark);
+}
+
+.krishi-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.krishi-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .krishi-farmer-chat,
+  .krishi-farmer-header,
+  .krishi-messages-container,
+  .krishi-chat-controls {
+    margin-left: 0;
+  }
+  
+  .krishi-farmer-header {
+    left: 0;
+  }
+  
+  .krishi-chat-controls {
+    left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .krishi-action-buttons {
+    flex-wrap: wrap;
+  }
+  
+  .krishi-action-btn {
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .krishi-farmer-chat {
+    padding-top: 60px;
+  }
+  
+  .krishi-farmer-header {
+    top: 60px;
+  }
+  
+  .krishi-action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .krishi-action-btn {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+/* Account for collapsed sidebar by default */
+.krishi-farmer-chat {
+  font-family: 'Poppins', sans-serif;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--krishi-white);
+  position: relative;
+  margin-left: 80px; /* Collapsed sidebar width */
+  padding-top: 70px; /* Navbar height */
+  transition: margin-left 0.3s ease;
+}
+
+/* Expanded state when sidebar is open */
+.krishi-farmer-chat.sidebar-expanded {
+  margin-left: 250px; /* Expanded sidebar width */
+}
+
+/* Header adjustments */
+.krishi-farmer-header {
+  background: linear-gradient(135deg, var(--krishi-primary), var(--krishi-accent));
+  color: var(--krishi-white);
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 70px; /* Below navbar */
+  left: 80px; /* Right of collapsed sidebar */
+  right: 0;
+  z-index: 10;
+  transition: left 0.3s ease;
+}
+
+.krishi-farmer-chat.sidebar-expanded .krishi-farmer-header {
+  left: 250px; /* Right of expanded sidebar */
+}
+
+/* Messages container adjustments */
+.krishi-messages-container {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  background-color: var(--krishi-chat-bg);
+  scroll-behavior: smooth;
+  padding-top: 220px; /* Account for header height */
+  padding-bottom: 180px; /* Account for controls height */
+  margin-left: 80px; /* Collapsed sidebar width */
+  margin-top: 70px; /* Navbar height */
+  transition: margin-left 0.3s ease;
+}
+
+.krishi-farmer-chat.sidebar-expanded .krishi-messages-container {
+  margin-left: 250px; /* Expanded sidebar width */
+}
+
+/* Chat controls adjustments */
+.krishi-chat-controls {
+  padding: 1rem;
+  background-color: var(--krishi-white);
+  border-top: 1px solid var(--krishi-light-gray);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+  position: fixed;
+  bottom: 0;
+  left: 80px; /* Right of collapsed sidebar */
+  right: 0;
+  z-index: 10;
+  transition: left 0.3s ease;
+}
+
+.krishi-farmer-chat.sidebar-expanded .krishi-chat-controls {
+  left: 250px; /* Right of expanded sidebar */
+}
+.krishi-chat-controls-container {
+
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .krishi-farmer-chat,
+  .krishi-farmer-header,
+  .krishi-messages-container,
+  .krishi-chat-controls {
+    margin-left: 0;
+    left: 0;
+  }
+  
+  .krishi-farmer-chat.sidebar-expanded .krishi-farmer-header,
+  .krishi-farmer-chat.sidebar-expanded .krishi-messages-container,
+  .krishi-farmer-chat.sidebar-expanded .krishi-chat-controls {
+    margin-left: 0;
+    left: 0;
+  }
+}
+
+/* Rest of your existing CSS remains the same */

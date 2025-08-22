@@ -1,0 +1,477 @@
+/* Farmer Dashboard Styles */
+:root {
+  --primary-green: #2e7d32;
+  --primary-dark-green: #1b5e20;
+  --primary-light-green: #e8f5e9;
+  --secondary-orange: #ff6d00;
+  --accent-yellow: #ffab00;
+  --white: #ffffff;
+  --light-gray: #f5f5f5;
+  --medium-gray: #e0e0e0;
+  --dark-gray: #616161;
+  --text-dark: #212121;
+  --text-medium: #424242;
+  --text-light: #757575;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 20px rgba(0,0,0,0.15);
+  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Main Dashboard Container - Adjusted for navbar */
+.ks-farmer-dashboard {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--light-gray);
+  padding-top: 80px; /* Adjusted for fixed navbar height */
+  padding-bottom: 40px;
+  box-sizing: border-box;
+}
+
+.ks-dashboard-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Welcome Section */
+.ks-welcome-section {
+  margin-bottom: 40px;
+}
+
+.ks-welcome-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.ks-welcome-title {
+  font-size: 2rem;
+  color: var(--primary-dark-green);
+  margin: 0;
+  font-weight: 700;
+}
+
+.ks-farmer-name {
+  color: var(--secondary-orange);
+}
+
+.ks-welcome-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-medium);
+  margin: 0;
+}
+
+.ks-language-switcher-container {
+  margin-left: 20px;
+}
+
+/* Section Styles */
+.ks-section {
+  background-color: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  padding: 25px;
+  margin-bottom: 30px;
+  border: 1px solid var(--medium-gray);
+  transition: var(--transition);
+}
+
+.ks-section:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.ks-section-header {
+  margin-bottom: 25px;
+}
+
+.ks-section-title {
+  font-size: 1.5rem;
+  color: var(--primary-dark-green);
+  margin: 0 0 5px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ks-section-icon {
+  color: var(--primary-green);
+  font-size: 1.3rem;
+}
+
+.ks-section-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-light);
+  margin: 0;
+}
+
+/* Weather Section */
+.ks-weather-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.ks-weather-card {
+  background-color: var(--white);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--medium-gray);
+  transition: var(--transition);
+}
+
+.ks-weather-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-green);
+}
+
+.ks-weather-card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--medium-gray);
+}
+
+.ks-weather-icon {
+  font-size: 2.5rem;
+  margin-right: 15px;
+}
+
+.ks-weather-day {
+  font-size: 1.2rem;
+  color: var(--text-dark);
+  margin: 0 0 5px 0;
+}
+
+.ks-weather-date {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  margin: 0;
+}
+
+.ks-weather-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.ks-weather-detail {
+  display: flex;
+  flex-direction: column;
+}
+
+.ks-weather-label {
+  font-size: 0.8rem;
+  color: var(--text-light);
+  margin-bottom: 3px;
+}
+
+.ks-weather-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+/* Orders Section */
+.ks-orders-table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--medium-gray);
+}
+
+.ks-orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.ks-orders-table th {
+  background-color: var(--primary-dark-green);
+  color: var(--white);
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 500;
+}
+
+.ks-orders-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--medium-gray);
+  color: var(--text-dark);
+}
+
+.ks-orders-table tr:last-child td {
+  border-bottom: none;
+}
+
+.ks-orders-table tr:hover {
+  background-color: var(--primary-light-green);
+}
+
+/* Status Badges */
+.ks-status-badge,
+.ks-payment-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.ks-status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.ks-status-completed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.ks-status-cancelled {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.ks-status-processing {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.ks-payment-paid {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.ks-payment-unpaid {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Tutorial Section */
+.ks-tutorial-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 30px;
+}
+
+.ks-video-container {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+}
+
+.ks-tutorial-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.ks-tips-container {
+  background-color: var(--primary-light-green);
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid var(--medium-gray);
+}
+
+.ks-tips-title {
+  font-size: 1.2rem;
+  color: var(--primary-dark-green);
+  margin-top: 0;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--medium-gray);
+}
+
+.ks-tips-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ks-tip-item {
+  padding: 8px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.4;
+}
+
+.ks-tip-icon {
+  color: var(--primary-green);
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+/* Button Styles */
+.ks-primary-btn {
+  background: linear-gradient(135deg, var(--primary-green), var(--primary-dark-green));
+  color: var(--white);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ks-primary-btn:hover {
+  background: linear-gradient(135deg, var(--primary-dark-green), var(--primary-green));
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+
+.ks-retry-btn {
+  background-color: var(--secondary-orange);
+  color: var(--white);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: 10px;
+}
+
+.ks-retry-btn:hover {
+  background-color: #e65100;
+}
+
+/* Loading and Empty States */
+.ks-loading-state,
+.ks-error-state,
+.ks-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.ks-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(46, 125, 50, 0.2);
+  border-radius: 50%;
+  border-top-color: var(--primary-green);
+  animation: ks-spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes ks-spin {
+  to { transform: rotate(360deg); }
+}
+
+.ks-error-icon {
+  font-size: 2rem;
+  color: #d32f2f;
+  margin-bottom: 15px;
+}
+
+.ks-empty-icon {
+  font-size: 2rem;
+  color: var(--medium-gray);
+  margin-bottom: 15px;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .ks-tutorial-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .ks-tips-container {
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .ks-farmer-dashboard {
+    padding-top: 70px;
+  }
+  
+  .ks-welcome-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .ks-language-switcher-container {
+    margin-left: 0;
+  }
+  
+  .ks-weather-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .ks-orders-table {
+    font-size: 0.85rem;
+  }
+  
+  .ks-orders-table th,
+  .ks-orders-table td {
+    padding: 8px 10px;
+  }
+}
+
+@media (max-width: 576px) {
+  .ks-weather-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .ks-section {
+    padding: 20px 15px;
+  }
+  
+  .ks-dashboard-content {
+    padding: 0 15px;
+  }
+  
+  .ks-welcome-title {
+    font-size: 1.5rem;
+  }
+  
+  .ks-orders-table {
+    display: block;
+  }
+  
+  .ks-orders-table thead {
+    display: none;
+  }
+  
+  .ks-orders-table tr {
+    display: block;
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--medium-gray);
+  }
+  
+  .ks-orders-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    text-align: right;
+  }
+  
+  .ks-orders-table td::before {
+    content: attr(data-label);
+    font-weight: 500;
+    color: var(--text-light);
+    margin-right: 15px;
+  }
+}
