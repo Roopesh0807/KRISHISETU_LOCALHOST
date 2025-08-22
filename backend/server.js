@@ -354,47 +354,41 @@ app.post("/api/farmerregister", async (req, res) => {
 });
 
 //farmerlogin before profile....
+// Farmer Login
 app.post("/api/farmerlogin", async (req, res) => {
   const { emailOrPhone, password } = req.body;
 
   try {
+    // 1. Find farmer by email or phone
     const results = await queryDatabase(
-      "SELECT farmer_id, first_name, last_name,email, phone_number,  password FROM farmerregistration WHERE email = ? OR phone_number = ?",
+      "SELECT farmer_id, first_name, last_name, email, phone_number, password FROM farmerregistration WHERE email = ? OR phone_number = ?",
       [emailOrPhone, emailOrPhone]
     );
-
-    console.log("Login Query Results:", results);
 
     if (results.length === 0) {
       return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 
     const user = results[0];
-    console.log("User Retrieved:", user);
 
-    // Debug password
-    console.log("Entered Password:", password);
-    console.log("Stored Password:", user.password);
-
-    // Password check
-    if (!user.password || password !== user.password) {
+    // 2. Compare hashed password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
       return res.status(401).json({ success: false, message: "Invalid password" });
     }
 
-    // ✅ Generate JWT Token
-  // When a FARMER logs in:
-const token = jwt.sign(
-  {
-    farmer_id: user.farmer_id,  // Different ID field
-    userType: "farmer", 
-    email: user.email,        // Explicit type
-                            // Other claims
-  },
-  process.env.JWT_SECRET,
-  { expiresIn: "8760h" }
-);
+    // 3. Generate JWT token
+    const token = jwt.sign(
+      {
+        farmer_id: user.farmer_id,
+        userType: "farmer",
+        email: user.email,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "8760h" }
+    );
 
-    // ✅ Send response with token
+    // 4. Send response
     res.json({
       success: true,
       token,
@@ -405,13 +399,16 @@ const token = jwt.sign(
       first_name: user.first_name,
       last_name: user.last_name,
     });
-    
+
   } catch (err) {
-    console.error("❌ Farmer Login Database Error:", err);
-    res.status(500).json({ success: false, message: "Database error", error: err.message });
+    console.error("Farmer Login Error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: err.message,
+    });
   }
 });
-
 
 
 
