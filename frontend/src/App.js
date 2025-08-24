@@ -66,6 +66,7 @@ import GoogleTranslate from "./components/GoogleTranslate";
 
 import MyOrders from './components/MyOrders';
 import Transactions from './components/Transactions';
+import FlashDealPage from './components/FlashDealPage';
 
 function App() {
   return (
@@ -239,6 +240,7 @@ const Main = () => {
           <Route path="/cart" element={<Cart />} />
           <Route path="/farmer/:farmer_id/profile" element={<Profile />} />
           <Route path="/consumerprofile/:consumer_id" element={<ConsumerProfile />} />
+          <Route path="/flash-deal-page" element={<FlashDealPage />} />
 
           <Route path="/HelpFarmers" element={<HelpFarmers />} />
           <Route path="/farmers/my-reviews" element={<FarmerReviews />} />
@@ -257,6 +259,7 @@ const Main = () => {
           <Route path="/order/:communityId" element={<OrderPageC />} />
           <Route path="/community/:communityId/member/:memberId" element={<MemberOrderPage />} />
           <Route path="/community/:communityId/order/:orderId" 
+          
                element={<CommunityOrderPage />} />
 
           // Add these to your routes
@@ -299,6 +302,7 @@ const Main = () => {
 
           <Route path="/my-orders" element={<MyOrders />} />
       <Route path="/transactions" element={<Transactions />} />
+     
         </Routes>
 
         {showChatbot() && <Chatbot />}

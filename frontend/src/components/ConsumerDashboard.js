@@ -14,9 +14,10 @@ import {
     faChevronRight,
     faSpinner,
     faTimes, // Added for close button in subscription popup
-    faCheckCircle // Added for success message in subscription popup
+    faCheckCircle, // Added for success message in subscription popup
+    faTag
 } from '@fortawesome/free-solid-svg-icons';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../components/ConsumerDashboard.css";
 import { fetchProducts } from '../utils/api';
@@ -59,6 +60,9 @@ const ConsumerDashboard = () => {
         const savedCache = localStorage.getItem('productImageCache');
         return savedCache ? JSON.parse(savedCache) : {};
     });
+    const [showFlashDealBanner, setShowFlashDealBanner] = useState(false);
+
+    // No need for flashDealBannerRef or its JS useEffect for animation now, as we'll use CSS for marquee.
 
     // Function to get the initial default date based on cutoff time
     const getInitialSubscriptionDate = () => {
@@ -151,6 +155,8 @@ const ConsumerDashboard = () => {
         }
     };
 
+    
+
     // Function to fetch user's current location
     const fetchUserLocation = () => {
         setIsLoading(true);
@@ -179,14 +185,46 @@ const ConsumerDashboard = () => {
             setIsLoading(false);
         }
     };
-    
-    // Initial data fetching on component mount
-    useEffect(() => {
-        fetchUserLocation(); // Fetch user location first
 
+    // --- All useEffect hooks moved to the top level ---
+
+    // 1. Initial Data Fetching and Authentication Check
+    useEffect(() => {
+        const storedConsumer = localStorage.getItem("consumer");
+        if (!storedConsumer) {
+            console.error("❌ No consumer session found!");
+            navigate("/consumer-login");
+            return;
+        }
+
+        try {
+            const consumerData = JSON.parse(storedConsumer);
+            const token = consumerData.token;
+            if (!token) {
+                console.error("❌ No token found in consumer data!");
+                navigate("/consumer-login");
+                return;
+            }
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            if (payload.farmer_id) {
+                alert("Farmers cannot initiate bargains");
+                localStorage.removeItem("consumer");
+                navigate("/consumer-login");
+            }
+        } catch (e) {
+            console.error("❌ Error parsing token:", e);
+            localStorage.removeItem("consumer");
+            navigate("/consumer-login");
+        }
+        
+        // This is a good place to fetch initial data
+        fetchUserLocation();
+    }, [navigate]);
+
+    // 2. Data Fetching based on Consumer and Coords
+    useEffect(() => {
         const fetchAllData = async () => {
             if (!consumer?.token) {
-                console.warn("Authentication token is not yet available. Skipping protected API calls.");
                 return;
             }
 
@@ -213,7 +251,7 @@ const ConsumerDashboard = () => {
                 if (!response.ok) {
                     console.error("Failed to fetch past orders:", response.status, response.statusText);
                     if (response.status === 404) {
-                        setPastOrders([]); // No past orders found
+                        setPastOrders([]);
                     }
                     return;
                 }
@@ -222,19 +260,14 @@ const ConsumerDashboard = () => {
             } catch (error) {
                 console.error("Error fetching past orders:", error);
             }
+            
+            // Fetch farmers after consumerCoords are available
+            if (consumerCoords) {
+                fetchFarmers();
+            }
         };
 
-        // Fetch all data once consumer token is available
-        if (consumer?.token) {
-            fetchAllData();
-        }
-    }, [consumer, navigate]);
-
-    // Fetch farmers based on consumer location
-    useEffect(() => {
         const fetchFarmers = async () => {
-            if (!consumer?.token || !consumerCoords) return; // Ensure token and coords are available
-
             try {
                 const response = await fetch('http://localhost:5000/api/farmers', {
                     method: "GET",
@@ -275,15 +308,15 @@ const ConsumerDashboard = () => {
                                 { headers: { "Authorization": `Bearer ${consumer?.token}` } }
                             );
                             const productsData = await productsResponse.json();
-                            
+
                             const farmResponse = await fetch(
                                 `http://localhost:5000/api/farmerprofile/${farmer.farmer_id}/farm`,
                                 { headers: { "Authorization": `Bearer ${consumer?.token}` } }
                             );
                             const farmData = await farmResponse.json();
-                            
+
                             const farmerCoords = farmData.farm_address ? await geocodeAddress(farmData.farm_address) : null;
-                            
+
                             let distance = null;
                             if (consumerCoords && farmerCoords) {
                                 distance = calculateDistance(consumerCoords.lat, consumerCoords.lon, farmerCoords.lat, farmerCoords.lon);
@@ -310,12 +343,10 @@ const ConsumerDashboard = () => {
                         }
                     })
                 );
-
-                // Filter farmers based on distance (within 20km or unknown distance)
+                
                 const filteredByDistance = farmersWithData.filter(farmer =>
                     farmer.distance_km === null || farmer.distance_km <= 20
                 );
-                
                 setFarmers(filteredByDistance);
             } catch (error) {
                 console.error("Error fetching farmers:", error);
@@ -323,10 +354,87 @@ const ConsumerDashboard = () => {
             }
         };
 
-        if (consumer?.token && consumerCoords) {
-            fetchFarmers();
+        if (consumer?.token) {
+            fetchAllData();
         }
-    }, [consumer?.token, consumerCoords]);
+    }, [consumer, consumerCoords, navigate]);
+
+    // 3. Image Fetching
+    useEffect(() => {
+        const loadProductImages = async () => {
+            const images = {};
+            for (const product of products) {
+                images[product.product_id] = await fetchProductImage(product.product_name);
+            }
+            setProductImages(images);
+        };
+        if (products.length > 0) {
+            loadProductImages();
+        }
+    }, [products]);
+
+    // 4. Recommendation Generation
+    useEffect(() => {
+        if (pastOrders.length > 0 && products.length > 0) {
+            const categoryCounts = {};
+            pastOrders.forEach(order => {
+                const category = order.category || 'vegetables';
+                categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+            });
+            const sortedCategories = Object.keys(categoryCounts).sort((a, b) => categoryCounts[b] - categoryCounts[a]);
+            const topCategories = sortedCategories.slice(0, 2);
+            const recommended = products.filter(product =>
+                topCategories.includes(product.category.toLowerCase())
+            ).slice(0, 8);
+            setRecommendedProducts(recommended);
+        } else {
+            const popular = [...products].sort((a, b) => b.ratings - a.ratings).slice(0, 8);
+            setRecommendedProducts(popular);
+        }
+    }, [pastOrders, products]);
+    
+    // 5. Flash Deals Banner Logic
+    useEffect(() => {
+        const checkFlashDeals = async () => {
+            if (!consumer?.token || !consumer?.consumer_id) return;
+
+            try {
+                const profileResponse = await fetch(`http://localhost:5000/api/consumer/${consumer.consumer_id}`, {
+                    headers: {
+                        "Authorization": `Bearer ${consumer.token}`,
+                    }
+                });
+                const profileData = await profileResponse.json();
+                const consumerPincode = profileData.pincode;
+
+                if (!consumerPincode) {
+                    setShowFlashDealBanner(false);
+                    return;
+                }
+
+                const flashDealResponse = await fetch(`http://localhost:5000/api/check-community-flash-deals/${consumerPincode}`, {
+                    headers: {
+                        "Authorization": `Bearer ${consumer.token}`,
+                    }
+                });
+                const flashDealData = await flashDealResponse.json();
+
+                if (flashDealData.showFlashDeal) {
+                    setShowFlashDealBanner(true);
+                } else {
+                    setShowFlashDealBanner(false);
+                }
+            } catch (error) {
+                console.error("Error checking flash deals:", error);
+                setShowFlashDealBanner(false);
+            }
+        };
+
+        checkFlashDeals();
+    }, [consumer]);
+
+    // Removed the JS animation useEffect for the flash deal banner. CSS will handle the marquee.
+
 
     // Search handler for the main search bar
     const handleSearch = () => {
@@ -419,26 +527,6 @@ const ConsumerDashboard = () => {
         );
     }
 
-    // Generate recommendations based on past orders or popular products
-    useEffect(() => {
-        if (pastOrders.length > 0 && products.length > 0) {
-            const categoryCounts = {};
-            pastOrders.forEach(order => {
-                const category = order.category || 'vegetables';
-                categoryCounts[category] = (categoryCounts[category] || 0) + 1;
-            });
-            const sortedCategories = Object.keys(categoryCounts).sort((a, b) => categoryCounts[b] - categoryCounts[a]);
-            const topCategories = sortedCategories.slice(0, 2);
-            const recommended = products.filter(product =>
-                topCategories.includes(product.category.toLowerCase())
-            ).slice(0, 8);
-            setRecommendedProducts(recommended);
-        } else {
-            const popular = [...products].sort((a, b) => b.ratings - a.ratings).slice(0, 8);
-            setRecommendedProducts(popular);
-        }
-    }, [pastOrders, products]);
-
     // Fetch product images from Pexels API and cache them
     const fetchProductImage = async (productName) => {
         if (imageCache[productName]) {
@@ -465,20 +553,6 @@ const ConsumerDashboard = () => {
         }
     };
     
-    // Load product images for displayed products
-    useEffect(() => {
-        const loadProductImages = async () => {
-            const images = {};
-            for (const product of products) {
-                images[product.product_id] = await fetchProductImage(product.product_name);
-            }
-            setProductImages(images);
-        };
-        if (products.length > 0) {
-            loadProductImages();
-        }
-    }, [products]);
-
     // Handle bargain initiation
     const handleBargainClick = async (farmer, product, e) => {
         if (e) e.stopPropagation();
@@ -540,35 +614,6 @@ const ConsumerDashboard = () => {
             setIsLoading(false);
         }
     };
-
-    // Authentication check for consumer
-    useEffect(() => {
-        const storedConsumer = localStorage.getItem("consumer");
-        if (!storedConsumer) {
-            console.error("❌ No consumer session found!");
-            navigate("/consumer-login");
-            return;
-        }
-        try {
-            const consumerData = JSON.parse(storedConsumer);
-            const token = consumerData.token;
-            if (!token) {
-                console.error("❌ No token found in consumer data!");
-                navigate("/consumer-login");
-                return;
-            }
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            if (payload.farmer_id) {
-                alert("Farmers cannot initiate bargains");
-                localStorage.removeItem("consumer");
-                navigate("/consumer-login");
-            }
-        } catch (e) {
-            console.error("❌ Error parsing token:", e);
-            localStorage.removeItem("consumer");
-            navigate("/consumer-login");
-        }
-    }, [navigate]);
 
     // Handle quantity change for products
     const handleQuantityChange = (productId, event) => {
@@ -640,24 +685,24 @@ const ConsumerDashboard = () => {
         const now = new Date();
         const cutoffHour = 22; // 10 PM
         const cutoffMinute = 30; // 30 minutes
-        return now.getHours() > cutoffHour || 
+        return now.getHours() > cutoffHour ||
                 (now.getHours() === cutoffHour && now.getMinutes() >= cutoffMinute);
     };
 
     const confirmSubscriptionDate = () => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
+
         const selectedDay = new Date(selectedDate);
         selectedDay.setHours(0, 0, 0, 0);
-        
+
         // This check ensures that the selected date is not in the past relative to the minimum allowed date.
         // The getMinDate() function already handles the "today blocked" and "tomorrow blocked after cutoff" logic.
         if (selectedDay < getMinDate()) {
             setDateSelectionError("Please select a valid start date.");
             return;
         }
-        
+
         setShowCalendar(false);
         setSubscriptionConfirmed(true);
         setDateSelectionError("");
@@ -676,7 +721,7 @@ const ConsumerDashboard = () => {
                 navigate("/consumer-login");
                 return;
             }
-        
+
             const getBackendSubscriptionType = (frequency) => {
                 switch(frequency) {
                     case 'daily': return 'Daily';
@@ -686,13 +731,13 @@ const ConsumerDashboard = () => {
                     default: return frequency;
                 }
             };
-            
+
             const quantity = selectedQuantities[selectedProductForSubscription.product_id] || 1;
             const originalPrice = selectedProductForSubscription.price_1kg * quantity;
             const discountedPrice = calculateDiscountedPrice(originalPrice);
 
             const subscriptionType = getBackendSubscriptionType(selectedFrequency);
-            
+
             // --- FIX APPLIED HERE ---
             // Manually construct the date string to avoid timezone issues.
             const date = new Date(selectedDate);
@@ -712,7 +757,7 @@ const ConsumerDashboard = () => {
                 start_date: startDateString, // Use the manually formatted date string
                 discount_applied: 5
             };
-        
+
             const response = await fetch("http://localhost:5000/api/subscriptions", {
                 method: "POST",
                 headers: {
@@ -721,15 +766,15 @@ const ConsumerDashboard = () => {
                 },
                 body: JSON.stringify(subscriptionData)
             });
-        
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || "Failed to save subscription");
             }
-        
+
             const data = await response.json();
             console.log("Subscription created:", data);
-        
+
             setShowSuccessMessage(true);
             setShowSubscriptionPopup(false);
             setSubscriptionConfirmed(false);
@@ -1000,6 +1045,7 @@ const ConsumerDashboard = () => {
                     </button>
                 </div>
             </div>
+
             {/* Recommendation Carousel Section - Always visible */}
             {recommendedProducts.length > 0 && (
                 <div className="ks-recommendation-section">
@@ -1050,6 +1096,28 @@ const ConsumerDashboard = () => {
                     </div>
                 </div>
             )}
+            
+            {/* Flash Deal Banner (Conditional Rendering) - Placed after recommendation */}
+            {showFlashDealBanner && (
+                <div className="ks-flash-deal-banner">
+                    <div className="ks-flash-content-area">
+                        <FontAwesomeIcon icon={faTag} className="ks-flash-icon" />
+                        <div className="ks-marquee-container">
+                            <div className="ks-marquee-content">
+                                Flash deals are open for your location! Grab them before they vanish! 
+                            </div>
+                        </div>
+                    </div>
+                    <button className="ks-participate-btn" onClick={() => navigate('/FlashDealPage')}>
+                        <FontAwesomeIcon icon={faBolt} /> Participate Now!
+                    </button>
+                    <button className="ks-close-flash-banner" onClick={() => setShowFlashDealBanner(false)}>
+                        <FontAwesomeIcon icon={faTimes} />
+                    </button>
+                </div>
+            )}
+
+
             <div className="ks-main-content">
                 <div className="ks-market-section">
                     <h2 className="ks-section-title">KrishiSetu Marketplace</h2>
@@ -1165,7 +1233,7 @@ const ConsumerDashboard = () => {
                                                 onClick={(e) => handleSubscribeClick(product, e)}
                                                 className="ks-action-btn ks-subscribe-btn"
                                             >
-                                                <FontAwesomeIcon icon={faCalendarAlt} /> Subscribe 
+                                                <FontAwesomeIcon icon={faCalendarAlt} /> Subscribe
                                             </button>
                                         </div>
                                     </div>
@@ -1244,7 +1312,7 @@ const ConsumerDashboard = () => {
                                             )}
                                         </div>
                                     </div>
-                                    
+
                                     <div className="ks-products-table-container">
                                         <table className="ks-products-table">
                                             <thead>
@@ -1267,7 +1335,7 @@ const ConsumerDashboard = () => {
                                             </tbody>
                                         </table>
                                     </div>
-                                    
+
                                     <div className="ks-farmer-actions">
                                         <button
                                             onClick={(e) => handleBargainClick(farmer, farmer.products[0], e)}

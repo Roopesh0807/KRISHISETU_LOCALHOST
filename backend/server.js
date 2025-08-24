@@ -6115,7 +6115,31 @@ app.post("/api/wallet/verify-payment", authenticateToken, async (req, res) => {
 
 
 
+// New Endpoint: /api/check-community-flash-deals
+app.get('/api/check-community-flash-deals/:pincode', async (req, res) => {
+  const { pincode } = req.params;
 
+  try {
+    // Query to count the number of consumers with the same pincode
+    const [countResult] = await queryDatabase(
+      "SELECT COUNT(*) as consumer_count FROM consumerprofile WHERE pincode = ?",
+      [pincode]
+    );
+
+    const consumerCount = countResult.consumer_count;
+
+    // A simple logic: if more than 1 consumer shares the same pincode, a potential community exists.
+    const showFlashDeal = consumerCount > 1;
+
+    res.json({ showFlashDeal });
+  } catch (error) {
+    console.error("Error checking for flash deals:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to check flash deals status"
+    });
+  }
+});
 
 
 
