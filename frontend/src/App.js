@@ -66,6 +66,7 @@ import GoogleTranslate from "./components/GoogleTranslate";
 
 import MyOrders from './components/MyOrders';
 import Transactions from './components/Transactions';
+import CommunityFlashDeals from "./components/CommunityFlashDeals";
 
 function App() {
   return (
@@ -73,8 +74,9 @@ function App() {
       <AuthProvider>
         <CartProvider>
           <Router>
-            <GoogleTranslate />
             <Main />
+            <GoogleTranslate />
+            
           </Router>
         </CartProvider>
       </AuthProvider>
@@ -258,7 +260,7 @@ const Main = () => {
           <Route path="/community/:communityId/member/:memberId" element={<MemberOrderPage />} />
           <Route path="/community/:communityId/order/:orderId" 
                element={<CommunityOrderPage />} />
-
+<Route path="/community-flash-deals" element={<CommunityFlashDeals />} />
           // Add these to your routes
 <Route path="/payment-success" element={<PaymentSuccess />} />
 <Route path="/payment-failed" element={<PaymentFailed />} />
