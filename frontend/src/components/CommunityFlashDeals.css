@@ -1,0 +1,104 @@
+/* src/components/CommunityFlashDeals.css */
+
+/*
+  Ensure Inter font is loaded and applied globally.
+  If you have a global CSS file, place it there.
+  Otherwise, you can import it here or via your public/index.html.
+*/
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+.font-inter {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Base styles for the container */
+.community-flash-deals-container {
+  /* Tailwind classes handle most layout, this is for overall background */
+  background-color: #f9fafb; /* Light gray background, soft and clean */
+}
+
+/* Animations for flash deal elements */
+
+/* Pulse animation for "Order Now" button to draw attention */
+.pulse-animation {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); /* green-500, with transparency */
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); /* green-500, fading out */
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); /* green-500, fully faded */
+  }
+}
+
+/* Subtle animation for the countdown timer text to add dynamism */
+.flash-deal-countdown {
+  animation: scale-up-down 1s infinite alternate;
+}
+
+@keyframes scale-up-down {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.05); /* Slightly scale up */
+    opacity: 0.95; /* Slight fade */
+  }
+}
+
+/* Initial animation for deal cards to make them appear smoothly */
+.flash-deal-card {
+  position: relative;
+  animation: slideInUp 0.6s ease-out forwards; /* Smooth slide-up animation */
+  opacity: 0; /* Start hidden */
+}
+
+/* Staggered animation delay for successive cards for a more dynamic look */
+.flash-deal-card:nth-child(1) { animation-delay: 0s; } /* First card appears immediately */
+.flash-deal-card:nth-child(2) { animation-delay: 0.1s; }
+.flash-deal-card:nth-child(3) { animation-delay: 0.2s; }
+.flash-deal-card:nth-child(4) { animation-delay: 0.3s; }
+.flash-deal-card:nth-child(5) { animation-delay: 0.4s; }
+.flash-deal-card:nth-child(6) { animation-delay: 0.5s; }
+
+
+@keyframes slideInUp {
+  0% {
+    transform: translateY(20px); /* Start slightly below final position */
+    opacity: 0; /* Start fully transparent */
+  }
+  100% {
+    transform: translateY(0); /* End at final position */
+    opacity: 1; /* End fully opaque */
+  }
+}
+
+/* Ensure images fill their container correctly without distortion */
+.flash-deal-card img {
+  display: block;
+}
+
+/* General responsive adjustments for smaller screens */
+@media (max-width: 640px) {
+  .community-flash-deals-container {
+    padding: 1rem; /* Adjust padding for mobile */
+  }
+  .text-4xl {
+    font-size: 2.5rem; /* Reduce main header size */
+  }
+  .text-3xl {
+    font-size: 2rem; /* Reduce sub-header size */
+  }
+  .text-lg {
+    font-size: 1rem; /* Adjust paragraph text size */
+  }
+  .flash-deal-card {
+    margin-bottom: 1.5rem; /* Add margin between cards on mobile */
+  }
+}

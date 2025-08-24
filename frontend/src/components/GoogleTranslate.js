@@ -4,6 +4,41 @@ import "./GoogleTranslator.css";
 
 const GoogleTranslate = () => {
   const translateElementRef = useRef(null);
+  const hideIntervalRef = useRef(null); // Ref to store the interval ID
+
+  // Function to aggressively hide the Google Translate banner iframe
+  const aggressivelyHideGoogleTranslateBar = () => {
+    // These are common selectors for the banner iframe.
+    // We try to cover different potential Google-injected elements.
+    const selectors = [
+      '.goog-te-banner-frame', // Main banner iframe class
+      'iframe[src*="translate.google.com/translate_static/css/"]', // Iframe based on source
+      'body > .skiptranslate.goog-te-spinner-pos', // Main div for the banner
+      '#goog-gt-vt', // Another possible ID for the top bar
+      '.VIpgJd-yAWLgf' // Another class Google uses for the top bar
+    ];
+
+    let hiddenCount = 0;
+    selectors.forEach(selector => {
+      const element = document.querySelector(selector);
+      if (element) {
+        // Apply inline styles directly and forcefully
+        element.style.setProperty('display', 'none', 'important');
+        element.style.setProperty('visibility', 'hidden', 'important');
+        element.style.setProperty('height', '0px', 'important');
+        element.style.setProperty('min-height', '0px', 'important');
+        element.style.setProperty('overflow', 'hidden', 'important');
+        element.style.setProperty('border', 'none', 'important');
+        element.style.setProperty('margin', '0px', 'important');
+        element.style.setProperty('padding', '0px', 'important');
+        hiddenCount++;
+      }
+    });
+
+    if (hiddenCount > 0) {
+      console.log(`Google Translate banner hidden. Elements found: ${hiddenCount}`);
+    }
+  };
 
   useEffect(() => {
     // --- Google Translate Widget Initialization Logic ---
@@ -11,41 +46,6 @@ const GoogleTranslate = () => {
       'script[src*="translate.google.com/translate_a/element.js"]'
     );
 
-    // This function will hide the banner iframe
-    const hideGoogleTranslateBar = (node) => {
-      if (node && node.nodeType === 1 && node.classList.contains('goog-te-banner-frame')) {
-        node.style.display = 'none';
-        node.style.visibility = 'hidden';
-        node.style.height = '0';
-        node.style.minHeight = '0';
-        node.style.overflow = 'hidden';
-        node.style.border = 'none';
-        node.style.margin = '0';
-        node.style.padding = '0';
-        console.log("Google Translate banner iframe hidden by MutationObserver.");
-        return true;
-      }
-      return false;
-    };
-
-    // The MutationObserver watches the <body> for new children
-    const observer = new MutationObserver((mutations, obs) => {
-      for (const mutation of mutations) {
-        if (mutation.type === 'childList') {
-          for (const node of mutation.addedNodes) {
-            if (hideGoogleTranslateBar(node)) {
-              // Optionally disconnect the observer once the element is found
-              // obs.disconnect(); 
-            }
-          }
-        }
-      }
-    });
-
-    // Start observing the <body> for new children
-    observer.observe(document.body, { childList: true });
-
-    // The rest of your script for initializing the dropdown
     const tryInitialize = () => {
       if (
         window.google?.translate?.TranslateElement &&
@@ -60,23 +60,26 @@ const GoogleTranslate = () => {
                   pageLanguage: "en",
                   includedLanguages: "en,hi,kn",
                   layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
-                  autoDisplay: false,
+                  autoDisplay: false, // Prevents the full translation banner from appearing initially
                 },
                 "google_translate_element"
               );
-              console.log("Google Translate dropdown initialized.");
+              console.log("Google Translate dropdown initialized successfully.");
             } catch (e) {
               console.error("Google Translate initialization error:", e);
             }
           }
         } else {
+          console.warn("Target element #google_translate_element not found. Retrying initialization...");
           setTimeout(tryInitialize, 500);
         }
       } else {
+        console.log("Google Translate API not ready. Retrying...");
         setTimeout(tryInitialize, 500);
       }
     };
 
+    // Assign the initialization function to the global window object.
     window.googleTranslateElementInit = tryInitialize;
 
     if (!existingScript) {
@@ -88,8 +91,15 @@ const GoogleTranslate = () => {
     } else {
       tryInitialize();
     }
-    
-    // --- Draggable Functionality Logic ---
+
+    // Start the continuous hiding interval
+    // This interval will run periodically to ensure the banner is hidden
+    if (hideIntervalRef.current) {
+      clearInterval(hideIntervalRef.current); // Clear any existing interval
+    }
+    hideIntervalRef.current = setInterval(aggressivelyHideGoogleTranslateBar, 200); // Check and hide every 200ms
+
+    // --- Draggable Functionality Logic (from previous versions) ---
     const element = translateElementRef.current;
     if (!element) return;
 
@@ -106,6 +116,7 @@ const GoogleTranslate = () => {
     }
 
     const onMouseDown = (e) => {
+      // Prevent dragging if clicking directly on the dropdown or its arrow
       if (e.target.closest('.goog-te-combo') || e.target.closest('.VIpgJd-ZVi9od-xl07Ob-LgbsSe-Bz112c')) {
         return;
       }
@@ -149,15 +160,17 @@ const GoogleTranslate = () => {
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
 
-    // Cleanup function for useEffect
+    // Cleanup function: runs when the component unmounts
     return () => {
-      observer.disconnect(); // Disconnect the observer on unmount
-      delete window.googleTranslateElementInit;
-      element.removeEventListener('mousedown', onMouseDown);
+      clearInterval(hideIntervalRef.current); // Stop the hiding interval
+      delete window.googleTranslateElementInit; // Clean up global callback
+      if (element) { // Ensure element exists before removing listeners
+        element.removeEventListener('mousedown', onMouseDown);
+      }
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
     };
-  }, []);
+  }, []); // Empty dependency array means this effect runs once on mount and cleans up on unmount
 
   return <div id="google_translate_element" ref={translateElementRef} />;
 };
