@@ -1,104 +1,131 @@
-/* src/components/CommunityFlashDeals.css */
+/* FlashDealPage.css - Additional styles for the new page */
 
-/*
-  Ensure Inter font is loaded and applied globally.
-  If you have a global CSS file, place it there.
-  Otherwise, you can import it here or via your public/index.html.
-*/
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
-.font-inter {
-  font-family: 'Inter', sans-serif;
+.flash-deal-page-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    min-height: 100vh;
 }
 
-/* Base styles for the container */
-.community-flash-deals-container {
-  /* Tailwind classes handle most layout, this is for overall background */
-  background-color: #f9fafb; /* Light gray background, soft and clean */
+.flash-deal-main {
+    text-align: center;
+    margin-top: 20px;
 }
 
-/* Animations for flash deal elements */
-
-/* Pulse animation for "Order Now" button to draw attention */
-.pulse-animation {
-  animation: pulse 1.5s infinite;
+.flash-deal-main h2 {
+    color: #ff5722;
+    font-size: 2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 }
 
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); /* green-500, with transparency */
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); /* green-500, fading out */
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); /* green-500, fully faded */
-  }
+.page-description {
+    color: #666;
+    max-width: 600px;
+    margin: 0 auto 40px;
 }
 
-/* Subtle animation for the countdown timer text to add dynamism */
-.flash-deal-countdown {
-  animation: scale-up-down 1s infinite alternate;
+.deal-card-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    justify-content: center;
 }
 
-@keyframes scale-up-down {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1.05); /* Slightly scale up */
-    opacity: 0.95; /* Slight fade */
-  }
+.deal-card {
+    background-color: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
 }
 
-/* Initial animation for deal cards to make them appear smoothly */
-.flash-deal-card {
-  position: relative;
-  animation: slideInUp 0.6s ease-out forwards; /* Smooth slide-up animation */
-  opacity: 0; /* Start hidden */
+.deal-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* Staggered animation delay for successive cards for a more dynamic look */
-.flash-deal-card:nth-child(1) { animation-delay: 0s; } /* First card appears immediately */
-.flash-deal-card:nth-child(2) { animation-delay: 0.1s; }
-.flash-deal-card:nth-child(3) { animation-delay: 0.2s; }
-.flash-deal-card:nth-child(4) { animation-delay: 0.3s; }
-.flash-deal-card:nth-child(5) { animation-delay: 0.4s; }
-.flash-deal-card:nth-child(6) { animation-delay: 0.5s; }
-
-
-@keyframes slideInUp {
-  0% {
-    transform: translateY(20px); /* Start slightly below final position */
-    opacity: 0; /* Start fully transparent */
-  }
-  100% {
-    transform: translateY(0); /* End at final position */
-    opacity: 1; /* End fully opaque */
-  }
+.deal-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
 }
 
-/* Ensure images fill their container correctly without distortion */
-.flash-deal-card img {
-  display: block;
+.deal-content {
+    padding: 20px;
+    text-align: left;
 }
 
-/* General responsive adjustments for smaller screens */
-@media (max-width: 640px) {
-  .community-flash-deals-container {
-    padding: 1rem; /* Adjust padding for mobile */
-  }
-  .text-4xl {
-    font-size: 2.5rem; /* Reduce main header size */
-  }
-  .text-3xl {
-    font-size: 2rem; /* Reduce sub-header size */
-  }
-  .text-lg {
-    font-size: 1rem; /* Adjust paragraph text size */
-  }
-  .flash-deal-card {
-    margin-bottom: 1.5rem; /* Add margin between cards on mobile */
-  }
+.deal-content h3 {
+    margin: 0 0 10px;
+    color: #333;
+}
+
+.deal-price {
+    margin: 0 0 15px;
+    font-size: 1.2em;
+}
+
+.original-price {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 0.9em;
+    margin-right: 10px;
+}
+
+.flash-price {
+    color: #d32f2f;
+    font-weight: bold;
+}
+
+.deal-timer {
+    color: #ff5722;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.deal-action-btn {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+.deal-action-btn:hover {
+    background-color: #388e3c;
+}
+
+.back-button {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 25px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+.back-button:hover {
+    background-color: #5a6268;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }

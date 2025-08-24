@@ -139,7 +139,7 @@ const Main = () => {
       path.startsWith("/add-produce") ||
       path.startsWith("/profile") ||
       path.startsWith("/help") ||
-      path.startsWith("/community") ||
+     
       path.startsWith("/view-profile") ||
       path.startsWith("/order-review") ||
       path.startsWith("/notifications") ||
@@ -173,6 +173,7 @@ const Main = () => {
       path.startsWith("/consumer-orders") ||
       path.startsWith("/my-orders") ||
       path.startsWith("/transactions") ||
+       path.startsWith("/community-flash-deals") ||
       path === "/subscribe"
     ) {
       return (

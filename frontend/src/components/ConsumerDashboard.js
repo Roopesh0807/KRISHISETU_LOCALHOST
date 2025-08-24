@@ -1108,7 +1108,7 @@ const ConsumerDashboard = () => {
                             </div>
                         </div>
                     </div>
-                    <button className="ks-participate-btn" onClick={() => navigate('/FlashDealPage')}>
+                    <button className="ks-participate-btn" onClick={() => navigate('/community-flash-deals')}>
                         <FontAwesomeIcon icon={faBolt} /> Participate Now!
                     </button>
                     <button className="ks-close-flash-banner" onClick={() => setShowFlashDealBanner(false)}>
