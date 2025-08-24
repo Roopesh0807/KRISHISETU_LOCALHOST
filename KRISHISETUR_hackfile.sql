@@ -1703,3 +1703,5 @@ DELIMITER ;
 
 ALTER TABLE add_produce
 ADD COLUMN minimum_price DECIMAL(10,2) NULL CHECK (minimum_price >= 0);
+
+ALTER TABLE wallet_transactions ADD razorpay_payment_id VARCHAR(255) NULL;
