@@ -137,7 +137,7 @@ const Subscribe = () => {
         const currentHour = now.getHours();
         const currentMinutes = now.getMinutes();
         // Freeze modifications from 10:30 PM to 6:59 AM (inclusive of 10:30 PM)
-        const isFrozen = (currentHour === 22 && currentMinutes >= 30) || currentHour >= 23 || currentHour < 7;
+        const isFrozen = (currentHour === 23 && currentMinutes >= 30) || currentHour >= 23 || currentHour < 7;
         setCanModify(!isFrozen);
 
         const deadline = new Date();
