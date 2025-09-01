@@ -70,7 +70,7 @@ import Transactions from './components/Transactions';
 import FlashDealPage from './components/FlashDealPage';
 
 import CommunityFlashDeals from "./components/CommunityFlashDeals";
-
+import CombinedOrderPage from './components/CombinedOrderPage';
 
 function App() {
   return (
@@ -272,7 +272,7 @@ const Main = () => {
 <Route path="/payment-success" element={<PaymentSuccess />} />
 <Route path="/payment-failed" element={<PaymentFailed />} />
 
-
+<Route path="/combined-checkout" element={<CombinedOrderPage />} />
 
 
         <Route path="/bargain" element={<ConsumerChatList />} />
