@@ -30,6 +30,7 @@ import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
 import Calendar from 'react-calendar'; // Import Calendar
 import 'react-calendar/dist/Calendar.css'; // Import Calendar CSS
+import FlashDealBanner from './FlashDealBanner'; // Import the new component
 
 const ConsumerDashboard = () => {
     const [searchQuery, setSearchQuery] = useState("");
@@ -60,9 +61,8 @@ const ConsumerDashboard = () => {
         const savedCache = localStorage.getItem('productImageCache');
         return savedCache ? JSON.parse(savedCache) : {};
     });
-    const [showFlashDealBanner, setShowFlashDealBanner] = useState(false);
 
-    // No need for flashDealBannerRef or its JS useEffect for animation now, as we'll use CSS for marquee.
+    // No need for flash deal states here now.
 
     // Function to get the initial default date based on cutoff time
     const getInitialSubscriptionDate = () => {
@@ -393,48 +393,7 @@ const ConsumerDashboard = () => {
         }
     }, [pastOrders, products]);
     
-    // 5. Flash Deals Banner Logic
-    useEffect(() => {
-        const checkFlashDeals = async () => {
-            if (!consumer?.token || !consumer?.consumer_id) return;
-
-            try {
-                const profileResponse = await fetch(`http://localhost:5000/api/consumer/${consumer.consumer_id}`, {
-                    headers: {
-                        "Authorization": `Bearer ${consumer.token}`,
-                    }
-                });
-                const profileData = await profileResponse.json();
-                const consumerPincode = profileData.pincode;
-
-                if (!consumerPincode) {
-                    setShowFlashDealBanner(false);
-                    return;
-                }
-
-                const flashDealResponse = await fetch(`http://localhost:5000/api/check-community-flash-deals/${consumerPincode}`, {
-                    headers: {
-                        "Authorization": `Bearer ${consumer.token}`,
-                    }
-                });
-                const flashDealData = await flashDealResponse.json();
-
-                if (flashDealData.showFlashDeal) {
-                    setShowFlashDealBanner(true);
-                } else {
-                    setShowFlashDealBanner(false);
-                }
-            } catch (error) {
-                console.error("Error checking flash deals:", error);
-                setShowFlashDealBanner(false);
-            }
-        };
-
-        checkFlashDeals();
-    }, [consumer]);
-
-    // Removed the JS animation useEffect for the flash deal banner. CSS will handle the marquee.
-
+    // The flash deal useEffect is now moved to the FlashDealBanner.js component.
 
     // Search handler for the main search bar
     const handleSearch = () => {
@@ -1097,26 +1056,8 @@ const ConsumerDashboard = () => {
                 </div>
             )}
             
-            {/* Flash Deal Banner (Conditional Rendering) - Placed after recommendation */}
-            {showFlashDealBanner && (
-                <div className="ks-flash-deal-banner">
-                    <div className="ks-flash-content-area">
-                        <FontAwesomeIcon icon={faTag} className="ks-flash-icon" />
-                        <div className="ks-marquee-container">
-                            <div className="ks-marquee-content">
-                                Flash deals are open for your location! Grab them before they vanish! 
-                            </div>
-                        </div>
-                    </div>
-                    <button className="ks-participate-btn" onClick={() => navigate('/community-flash-deals')}>
-                        <FontAwesomeIcon icon={faBolt} /> Participate Now!
-                    </button>
-                    <button className="ks-close-flash-banner" onClick={() => setShowFlashDealBanner(false)}>
-                        <FontAwesomeIcon icon={faTimes} />
-                    </button>
-                </div>
-            )}
-
+            {/* Flash Deal Banner (Conditional Rendering) - Now a separate component */}
+            <FlashDealBanner />
 
             <div className="ks-main-content">
                 <div className="ks-market-section">

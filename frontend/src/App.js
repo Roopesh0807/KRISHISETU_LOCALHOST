@@ -67,7 +67,6 @@ import GoogleTranslate from "./components/GoogleTranslate";
 import MyOrders from './components/MyOrders';
 import Transactions from './components/Transactions';
 
-import FlashDealPage from './components/FlashDealPage';
 
 import CommunityFlashDeals from "./components/CommunityFlashDeals";
 import CombinedOrderPage from './components/CombinedOrderPage';
@@ -246,7 +245,7 @@ const Main = () => {
           <Route path="/cart" element={<Cart />} />
           <Route path="/farmer/:farmer_id/profile" element={<Profile />} />
           <Route path="/consumerprofile/:consumer_id" element={<ConsumerProfile />} />
-          <Route path="/flash-deal-page" element={<FlashDealPage />} />
+          
 
           <Route path="/HelpFarmers" element={<HelpFarmers />} />
           <Route path="/farmers/my-reviews" element={<FarmerReviews />} />

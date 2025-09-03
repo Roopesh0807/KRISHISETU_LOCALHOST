@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faBolt, faShoppingCart, faTimesCircle, faFire, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
-import './FlashDealPage.css';
+import './CommunityFlashDeals.css';
 
 // Import apple image with local path
 import apple from '../assets/apple.jpg';
