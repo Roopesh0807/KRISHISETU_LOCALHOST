@@ -695,7 +695,7 @@ app.use((req, res, next) => {
     "/api/farmerregister",
     "/api/farmerlogin",
     "api/community/consumer/:consumerId/communities",
-    "api/community/:communityId/update-details",
+    "api/community/:communityId/update-details", 
     // "/uploads/reviews",
     "/api/geocode/reverse",
     "/api/geocode/forward",
@@ -703,6 +703,8 @@ app.use((req, res, next) => {
 "/api/farmers",
 "/api/products",
 "/api/agmarknet-prices",
+"/api/community-flashdeals",
+
     // Add more public routes if needed
   ];
 
@@ -817,6 +819,42 @@ app.get('/api/agmarknet-prices', async (req, res) => {
         res.status(500).json({ message: 'Failed to fetch data from the live API.', details: error.response ? error.response.data : error.message });
     }
 });
+
+
+// Add before app.use(authMiddleware) // flash deals
+app.get("/api/community-flashdeals", async (req, res) => {
+  try {
+    const products = await queryDatabase(`
+      SELECT 
+        product_id,
+        produce_name,
+        price_per_kg,
+        minimum_price,
+        availability
+      FROM add_produce
+      WHERE market_type = 'Bargaining Market'
+    `);
+
+    res.json(products || []);
+  } catch (err) {
+    console.error("Error fetching flash deals:", err);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching flash deals",
+      error: err.message,
+    });
+  }
+});
+
+
+
+
+
+
+
+
+
+
 
 
 // ⬇️ Must go before routes
@@ -6139,7 +6177,7 @@ app.get('/api/check-community-flash-deals/:pincode', async (req, res) => {
       error: "Failed to check flash deals status"
     });
   }
-});
+})
 
 
 
