@@ -1705,3 +1705,33 @@ ALTER TABLE add_produce
 ADD COLUMN minimum_price DECIMAL(10,2) NULL CHECK (minimum_price >= 0);
 
 ALTER TABLE wallet_transactions ADD razorpay_payment_id VARCHAR(255) NULL;
+
+
+
+-- Ruchita's products
+UPDATE add_produce SET minimum_quantity = 10, minimum_price = 18.00 WHERE produce_name = 'Potatoes';
+UPDATE add_produce SET minimum_quantity = 5,  minimum_price = 110.00 WHERE produce_name = 'Apples';
+UPDATE add_produce SET minimum_quantity = 10, minimum_price = 12.00 WHERE produce_name = 'Cabbage';
+UPDATE add_produce SET minimum_quantity = 5,  minimum_price = 85.00 WHERE produce_name = 'Grapes';
+UPDATE add_produce SET minimum_quantity = 5,  minimum_price = 70.00 WHERE produce_name = 'Garlic';
+
+-- Arush's products
+UPDATE add_produce SET minimum_quantity = 5,  minimum_price = 20.00 WHERE produce_name = 'Spinach';
+UPDATE add_produce SET minimum_quantity = 3,  minimum_price = 15.00 WHERE produce_name = 'Pumpkin';
+UPDATE add_produce SET minimum_quantity = 10, minimum_price = 35.00 WHERE produce_name = 'Bananas';
+UPDATE add_produce SET minimum_quantity = 8,  minimum_price = 55.00 WHERE produce_name = 'Peanuts';
+UPDATE add_produce SET minimum_quantity = 9,  minimum_price = 50.00 WHERE produce_name = 'Green Peas';
+
+-- Pavan's products
+UPDATE add_produce SET minimum_quantity = 6,  minimum_price = 20.00 WHERE produce_name = 'Cucumber';
+UPDATE add_produce SET minimum_quantity = 5,  minimum_price = 70.00 WHERE produce_name = 'Peppers';
+UPDATE add_produce SET minimum_quantity = 7,  minimum_price = 100.00 WHERE produce_name = 'Mangoes';
+UPDATE add_produce SET minimum_quantity = 3,  minimum_price = 15.00 WHERE produce_name = 'Radish';
+UPDATE add_produce SET minimum_quantity = 12, minimum_price = 12.00 WHERE produce_name = 'Sugarcane';
+
+-- Teju's products
+UPDATE add_produce SET minimum_quantity = 15, minimum_price = 45.00 WHERE produce_name = 'Milk';
+UPDATE add_produce SET minimum_quantity = 8,  minimum_price = 400.00 WHERE produce_name = 'Butter';
+UPDATE add_produce SET minimum_quantity = 20, minimum_price = 30.00 WHERE produce_name = 'Corn';
+UPDATE add_produce SET minimum_quantity = 9,  minimum_price = 25.00 WHERE produce_name = 'Tomatoes';
+UPDATE add_produce SET minimum_quantity = 11, minimum_price = 90.00 WHERE produce_name = 'Lentils';
