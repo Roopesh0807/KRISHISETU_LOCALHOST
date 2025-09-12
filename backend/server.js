@@ -6181,6 +6181,50 @@ app.get('/api/check-community-flash-deals/:pincode', async (req, res) => {
 
 
 
+// This function should be added to your server.js file.
+// Make sure to import `queryDatabase` from your database config.
+
+/**
+ * Checks if a community exists in a given pincode and generates a shareable link.
+ * @param {object} req - The Express request object.
+ * @param {object} res - The Express response object.
+ */
+app.get('/api/community-flash-deals-status/:pincode', async (req, res) => {
+  const { pincode } = req.params;
+  const baseUrl = `${req.protocol}://${req.get('host')}`; // Get dynamic base URL
+
+  try {
+    // Query to count the number of consumers with the same pincode
+    const [countResult] = await queryDatabase(
+      "SELECT COUNT(*) as consumer_count FROM consumerprofile WHERE pincode = ?",
+      [pincode]
+    );
+
+    const consumerCount = countResult.consumer_count;
+
+    // A simple logic: if more than 1 consumer shares the same pincode, a community exists.
+    const showFlashDeal = consumerCount > 1;
+
+    // Generate the unique, shareable link for this pincode
+    const flashDealsUrl = `${baseUrl}/community-flash-deals?pincode=${pincode}`;
+    const shareableMessage = encodeURIComponent(
+      `Join me for exclusive flash deals in our community! Click the link to participate: ${flashDealsUrl}`
+    );
+    const whatsappLink = `https://wa.me/?text=${shareableMessage}`;
+
+    res.json({
+      showFlashDeal,
+      shareableLink: flashDealsUrl,
+      whatsappLink,
+    });
+  } catch (error) {
+    console.error("Error checking for flash deals status:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to check flash deals status",
+    });
+  }
+});
 
 
 
