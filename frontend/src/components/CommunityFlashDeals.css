@@ -78,6 +78,7 @@ body {
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    z-index: 12;
 }
 
 .header-decoration {
@@ -437,8 +438,8 @@ body {
     padding: 10px 20px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     margin-bottom: 30px;
-    position: relative; /* Positioned relative to main */
-    z-index: 11; /* Above the overlay */
+    position: relative;
+    z-index: 11;
 }
 
 .short-url {
@@ -448,7 +449,7 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding-right: 15px; /* Add some spacing for the share buttons */
+    padding-right: 15px;
     flex-grow: 1;
     text-align: left;
 }
@@ -593,17 +594,16 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(240, 242, 245, 0.4);
-    backdrop-filter: blur(5px);
+    background-color: rgba(240, 242, 245, 0.0);
+    backdrop-filter: blur(0px);
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     flex-direction: column;
     z-index: 10;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.5s ease;
-    
 }
 
 .page-status-overlay.show {
@@ -612,24 +612,57 @@ body {
 }
 
 .status-message-box {
-    background-color: white;
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    position: relative;
+    width: 100%;
+    height: auto;
     text-align: center;
-    max-width: 500px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 12;
+    padding-top: 50px;
+    margin-bottom: 20px;
 }
 
-.lock-icon {
-    font-size: 4rem;
-    color: #ff5252;
-    margin-bottom: 20px;
+.overlay-lock-icon {
+    font-size: 30vw;
+    color: rgba(255, 82, 82, 0.418);
     animation: shake 1s infinite;
+    position: relative;
+    transform: none;
+    z-index: -1;
+    margin-top: 550px;
+    
+}
+
+.overlay-text {
+    position: absolute;
+    
+    top: 550px;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+}
+
+.status-reason {
+    font-size: 1.5rem;
+    margin: 0;
+    font-weight: bold;
+    color: #f9f6f6;
+    padding: 5px 10px;
+    background-color: rgba(255, 82, 82, 0.2);
+    border-radius: 5px;
+}
+
+.status-instruction {
+    font-size: 1.1rem;
+    margin-top: 10px;
+    font-weight: bold;
+    color: #f6f3f3;
+    padding: 5px 10px;
+    background-color: rgba(255, 82, 82, 0.2);
+    border-radius: 5px;
 }
 
 @keyframes shake {
@@ -674,6 +707,18 @@ body {
     .short-url {
         font-size: 0.9rem;
     }
+
+    .overlay-lock-icon {
+        font-size: 20rem;
+    }
+
+    .status-reason {
+        font-size: 1.2rem;
+    }
+
+    .status-instruction {
+        font-size: 1.0rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -701,8 +746,128 @@ body {
     .heading-line-2 {
         font-size: 1.2rem;
     }
-    
+
     .page-description {
         font-size: 0.9rem;
     }
+}
+/* New CSS for Quantity Pop-up */
+
+/* Full-screen overlay to dim the background */
+.quantity-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000; /* Ensure it's on top of all other content */
+}
+
+/* The actual pop-up box */
+.quantity-popup-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.quantity-popup-content h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.popup-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.quantity-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.quantity-controls button {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.quantity-controls button:hover {
+    background-color: #2e7d32;
+    transform: scale(1.1);
+}
+
+.quantity-controls input {
+    width: 60px;
+    text-align: center;
+    font-size: 1.2rem;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.price-details {
+    margin-top: 10px;
+    font-size: 1.1rem;
+    color: #555;
+}
+
+.price-details p {
+    margin: 5px 0;
+}
+
+.popup-actions {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+}
+
+.cancel-btn, .add-to-cart-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cancel-btn {
+    background-color: #e0e0e0;
+    color: #555;
+}
+
+.cancel-btn:hover {
+    background-color: #c0c0c0;
+}
+
+.add-to-cart-btn {
+    background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+    color: white;
+}
+
+.add-to-cart-btn:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
 }

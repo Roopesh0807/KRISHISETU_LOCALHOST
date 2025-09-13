@@ -23,7 +23,17 @@ const CommunityFlashDeals = () => {
     const [imagesCache, setImagesCache] = useState({});
     const [showSharePopup, setShowSharePopup] = useState(false);
 
-    // Fetch product images from Pexels API and cache them
+    // Function to generate a unique community ID
+    const getOrCreateCommunityId = () => {
+        let communityId = localStorage.getItem('userCommunityId');
+        if (!communityId) {
+            // Generate a simple unique ID
+            communityId = `COMM-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+            localStorage.setItem('userCommunityId', communityId);
+        }
+        return communityId;
+    };
+
     const fetchProductImage = async (productName) => {
         if (imagesCache[productName]) {
             return imagesCache[productName];
@@ -49,18 +59,66 @@ const CommunityFlashDeals = () => {
 
     const handleCopyLink = (event) => {
         event.stopPropagation();
-        // The link to be shared is always the base flash deals page, as requested
-        navigator.clipboard.writeText('http://localhost:3000/community-flash-deals');
+        const communityId = getOrCreateCommunityId();
+        const shareUrl = `http://localhost:3000/community-flash-deals?communityId=${communityId}`;
+        navigator.clipboard.writeText(shareUrl);
         setToastMessage('Link copied to clipboard!');
         setShowToast(true);
         setTimeout(() => setShowToast(false), 3000);
+    };
+
+    const handleAddToCart = async () => {
+        if (!selectedProduct || !consumer?.consumer_id) {
+            setToastMessage("User or product data is missing.");
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 3000);
+            return;
+        }
+        
+        const communityId = getOrCreateCommunityId();
+        
+        setLoading(true);
+        setShowQuantityPopup(false);
+    
+        try {
+            const response = await fetch("http://localhost:5000/api/community-cart", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${consumer.token}`
+                },
+                body: JSON.stringify({
+                    community_id: communityId,
+                    product_id: selectedProduct.product_id,
+                    consumer_id: consumer.consumer_id,
+                    quantity: quantity,
+                    price: selectedProduct.minimum_price
+                })
+            });
+    
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to add to cart');
+            }
+    
+            setToastMessage(`${selectedProduct.produce_name} added to community cart successfully!`);
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 3000);
+        } catch (err) {
+            setError(err.message);
+            setToastMessage(`Error: ${err.message}`);
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 5000);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const DealCard = ({ deal, isAvailable }) => {
         const { produce_name, price_per_kg, minimum_price, availability } = deal;
         const [timeLeft, setTimeLeft] = useState(Math.floor(Math.random() * (3600 * 4 - 60 * 10 + 1)) + 60 * 10);
         const [imageSrc, setImageSrc] = useState('https://via.placeholder.com/300?text=Loading...');
-
+    
         useEffect(() => {
             fetchProductImage(produce_name).then(url => setImageSrc(url));
         }, [produce_name]);
@@ -71,17 +129,17 @@ const CommunityFlashDeals = () => {
             }, 1000);
             return () => clearInterval(timer);
         }, []);
-
+    
         const formatTime = (seconds) => {
             const h = Math.floor(seconds / 3600);
             const m = Math.floor((seconds % 3600) / 60);
             const s = seconds % 60;
             return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         };
-
+    
         const discount = price_per_kg > 0 ? (((price_per_kg - minimum_price) / price_per_kg) * 100).toFixed(0) : 0;
         const buttonClass = `deal-action-btn ${!isAvailable ? 'deal-unavailable' : ''}`;
-
+    
         const openQuantityPopup = (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -91,7 +149,7 @@ const CommunityFlashDeals = () => {
                 setShowQuantityPopup(true);
             }
         };
-
+    
         return (
             <div className="deal-card">
                 <div className="deal-image-container">
@@ -155,45 +213,6 @@ const CommunityFlashDeals = () => {
             </div>
         );
     };
-
-    const handleAddToCart = async () => {
-        if (!selectedProduct) return;
-        setLoading(true);
-        setShowQuantityPopup(false);
-
-        try {
-            const response = await fetch("http://localhost:5000/api/community-cart", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${consumer.token}`
-                },
-                body: JSON.stringify({
-                    community_id: location.state?.communityId,
-                    product_id: selectedProduct.product_id,
-                    consumer_id: consumer.consumer_id,
-                    quantity: quantity,
-                    price: selectedProduct.minimum_price
-                })
-            });
-
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.error || 'Failed to add to cart');
-            }
-
-            setToastMessage(`${selectedProduct.produce_name} added to cart successfully!`);
-            setShowToast(true);
-            setTimeout(() => setShowToast(false), 3000);
-        } catch (err) {
-            setError(err.message);
-            setToastMessage(`Error: ${err.message}`);
-            setShowToast(true);
-            setTimeout(() => setShowToast(false), 5000);
-        } finally {
-            setLoading(false);
-        }
-    };
     
     useEffect(() => {
         const fetchDealsAndStatus = async () => {
@@ -205,16 +224,15 @@ const CommunityFlashDeals = () => {
             const token = consumer.token;
 
             try {
-                // Fetch consumer's pincode
                 const profileResponse = await fetch(`http://localhost:5000/api/consumer/${consumer.consumer_id}`, {
                     headers: { "Authorization": `Bearer ${token}` }
                 });
                 const profileData = await profileResponse.json();
                 const consumerPincode = profileData.pincode;
                 
-                const baseShareLink = 'http://localhost:3000/community-flash-deals';
+                const communityId = getOrCreateCommunityId();
+                const baseShareLink = `http://localhost:3000/community-flash-deals?communityId=${communityId}`;
                 
-                // Set shareable links based on the base URL
                 setShareableLink(baseShareLink);
                 setWhatsappLink(`https://wa.me/?text=${encodeURIComponent("Join me for exclusive flash deals! " + baseShareLink)}`);
                 
@@ -222,7 +240,6 @@ const CommunityFlashDeals = () => {
                 if (!consumerPincode || consumerPincode === '000000' || isNaN(consumerPincode)) {
                     setIsFlashDealActive(false);
                 } else {
-                    // Check flash deal status for the pincode
                     const statusResponse = await fetch(`http://localhost:5000/api/community-flash-deals-status/${consumerPincode}`, {
                         headers: { "Authorization": `Bearer ${token}` }
                     });
@@ -230,7 +247,6 @@ const CommunityFlashDeals = () => {
                     setIsFlashDealActive(statusData.showFlashDeal);
                 }
 
-                // Fetch the deals regardless of status
                 const dealsResponse = await fetch("http://localhost:5000/api/community-flashdeals", {
                     headers: { "Authorization": `Bearer ${token}` }
                 });
@@ -258,7 +274,6 @@ const CommunityFlashDeals = () => {
         navigate(-1);
     };
     
-    // Social media links
     const facebookLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareableLink)}`;
     const instagramLink = `https://www.instagram.com/?url=${encodeURIComponent(shareableLink)}`;
     const smsLink = `sms:?&body=${encodeURIComponent("Join me for exclusive flash deals in our community! Click the link to participate: " + shareableLink)}`;
@@ -308,6 +323,16 @@ const CommunityFlashDeals = () => {
                     </p>
                 </div>
                 
+                <div className={`page-status-overlay ${!isFlashDealActive ? 'show' : ''}`}>
+                    <div className="status-message-box">
+                        <FontAwesomeIcon icon={faLock} className="overlay-lock-icon" />
+                        <div className="overlay-text">
+                            <p className="status-reason">Your location is not yet eligible for Flash Deals.</p>
+                            <p className="status-instruction">Share this link with friends and neighbors in your area to activate flash deals for your community!</p>
+                        </div>
+                    </div>
+                </div>
+                
                 <div className="shareable-link-container">
                     <div className="short-url">
                         {shareableLink ? shareableLink : 'Fetching link...'}
@@ -322,14 +347,6 @@ const CommunityFlashDeals = () => {
                     </div>
                 </div>
 
-                <div className={`page-status-overlay ${!isFlashDealActive ? 'show' : ''}`}>
-                    <div className="status-message-box">
-                        <FontAwesomeIcon icon={faLock} className="lock-icon" />
-                        <p>Your location is not yet eligible for Flash Deals.</p>
-                        <p>Share this link with friends and neighbors in your area to unlock flash deals for your community!</p>
-                    </div>
-                </div>
-                
                 {loading && (
                     <div className="loading-container">
                         <FontAwesomeIcon icon={faSpinner} spin size="2x" />
@@ -390,7 +407,6 @@ const CommunityFlashDeals = () => {
                             <FontAwesomeIcon icon={faTimesCircle} />
                         </button>
                         <h3>Share in a post</h3>
-                        <p className="share-link-label">Flash deal page link</p>
                         <div className="share-link-input-container">
                            <input type="text" readOnly value={shareableLink} className="share-link-input" />
                            <button onClick={handleCopyLink} className="share-link-copy-btn">Copy</button>

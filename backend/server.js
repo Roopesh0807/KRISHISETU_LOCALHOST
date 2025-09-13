@@ -4304,7 +4304,15 @@ app.get('/api/check-community-flash-deals/:pincode', authenticateToken, async (r
       });
   }
 });
+// ... (rest of server.js)
+// ... (rest of server.js)
+// ... (rest of server.js)
 
+// ... (rest of server.js)
+
+// ... (rest of server.js)
+
+// Add this new route to your server.js file
 app.post("/api/community-cart", async (req, res) => {
   console.log("Received community cart request with body:", req.body);
   const { community_id, product_id, consumer_id, quantity, price } = req.body;
@@ -4315,9 +4323,7 @@ app.post("/api/community-cart", async (req, res) => {
   }
 
   try {
-    console.log(`Checking consumer with ID: ${consumer_id}`);
-    
-    // First verify the consumer exists
+    // 1. Verify the consumer exists
     const [consumer] = await queryDatabase(
       "SELECT consumer_id, CONCAT(first_name, ' ', last_name) AS name FROM consumerregistration WHERE consumer_id = ?",
       [consumer_id]
@@ -4332,9 +4338,9 @@ app.post("/api/community-cart", async (req, res) => {
       });
     }
 
-    // Get product details including name, buy_type, and category
+    // 2. Get product details
     const [product] = await queryDatabase(
-      "SELECT product_id, product_name, buy_type, category FROM products WHERE product_id = ?",
+      "SELECT product_id, produce_name FROM add_produce WHERE product_id = ?",
       [product_id]
     );
   
@@ -4342,69 +4348,80 @@ app.post("/api/community-cart", async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    // Then verify the community exists and check freeze status
-    const [community] = await queryDatabase(
-      `SELECT 
-        community_id, 
-        community_name,
-        TIMESTAMPDIFF(SECOND, NOW(), CONCAT(delivery_date, ' ', delivery_time)) AS seconds_until_delivery
-       FROM communities 
-       WHERE community_id = ?`,
-      [community_id]
+    // 3. Get consumer's pincode
+    const [consumerProfile] = await queryDatabase(
+      "SELECT pincode, address FROM consumerprofile WHERE consumer_id = ?",
+      [consumer_id]
     );
+    const consumerPincode = consumerProfile?.pincode;
     
+    // 4. Check if a community with this pincode already exists
+    let [community] = await queryDatabase(
+      "SELECT community_id, community_name FROM communities WHERE community_name = ?",
+      [`Community-${consumerPincode}`]
+    );
+
     if (!community) {
-      return res.status(404).json({ error: "Community not found" });
-    }
+      console.log(`No community found for pincode ${consumerPincode}. Creating a new community.`);
+      const newCommunityName = `Community-${consumerPincode || community_id}`;
+      // Note: You need to hash the password before inserting. Assuming 'defaultpass' for now.
+      const newCommunityPassword = 'your_hashed_default_password_here'; 
+      
+      const communityInsertResult = await queryDatabase(
+        `INSERT INTO communities (community_id, community_name, password, admin_id, address, delivery_date, delivery_time)
+         VALUES (?, ?, ?, ?, ?, CURDATE() + INTERVAL 2 DAY, '10:00:00')`,
+        [community_id, newCommunityName, newCommunityPassword, consumer_id, consumerProfile?.address || 'Address not provided']
+      );
 
-    // Check if community is frozen (within 24 hours of delivery)
-    if (community.seconds_until_delivery <= 86400) {
-      return res.status(403).json({ 
-        error: "Community is frozen",
-        message: "No new orders can be placed within 24 hours of delivery",
-        delivery_time: community.delivery_time,
-        delivery_date: community.delivery_date
-      });
+      // Re-fetch the newly created community to ensure data is correct
+      [community] = await queryDatabase(
+        "SELECT community_id, community_name FROM communities WHERE community_id = ?",
+        [community_id]
+      );
     }
-
-    // Get member info (including verification that consumer belongs to community)
-    const [member] = await queryDatabase(
-      `SELECT m.member_id, m.consumer_id, m.community_id
-       FROM members m
-       WHERE m.consumer_id = ? 
-       AND m.community_id = ?`,
-      [consumer_id, community_id]
+    
+    // 5. Check if member exists in the determined community. If not, create a new one.
+    let [member] = await queryDatabase(
+      `SELECT member_id FROM members WHERE consumer_id = ? AND community_id = ?`,
+      [consumer_id, community.community_id]
     );
     
     if (!member) {
-      return res.status(403).json({ 
-        error: "Membership not found",
-        details: `Consumer ${consumer.consumer_id} is not a member of community ${community_id}`
-      });
-    }
+      console.log(`Member not found. Adding consumer ${consumer_id} to community ${community.community_id}`);
+      const memberInsertResult = await queryDatabase(
+        `INSERT INTO members (community_id, consumer_id) VALUES (?, ?)`,
+        [community.community_id, consumer_id]
+      );
+      
+      const newMemberId = memberInsertResult.insertId;
+      [member] = await queryDatabase(
+        `SELECT member_id FROM members WHERE member_id = ?`,
+        [`MEM${String(newMemberId).padStart(3, '0')}`]
+      );
 
-    // Insert the order with all product details
+      if (!member) {
+          throw new Error('Failed to retrieve new member record.');
+      }
+    }
+    
+    // 6. Insert the order with the status column
     const result = await queryDatabase(
       `INSERT INTO orders (
         community_id, 
         product_id, 
         product_name, 
-        buy_type, 
-        category,
         quantity, 
         price, 
-        member_id, 
+        member_id,
         payment_method
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pending')`,
+      ) VALUES (?, ?, ?, ?, ?, ?, 'Pending')`,
       [
-        community_id, 
+        community.community_id, 
         product_id, 
-        product.product_name,
-        product.buy_type,
-        product.category,
+        product.produce_name,
         quantity, 
         price, 
-        member.member_id
+        member.member_id,
       ]
     );
     
@@ -4423,6 +4440,92 @@ app.post("/api/community-cart", async (req, res) => {
     });
   }
 });
+
+// ... (rest of server.js)
+// ... (rest of server.js)
+// ... (rest of the server.js file) ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ✅ New: Endpoint to fetch community cart items for a consumer
+app.get('/api/community-cart/:consumerId', async (req, res) => {
+  try {
+    const { consumerId } = req.params;
+
+    // Validate consumerId
+    if (!consumerId) {
+      return res.status(400).json({ success: false, error: "Consumer ID is required" });
+    }
+
+    // Query to get all orders from the 'orders' table for the given consumer
+    // You may need to adjust the table and column names to match your schema
+    const query = `
+      SELECT
+        o.order_id,
+        o.product_id,
+        o.product_name,
+        o.buy_type,
+        o.category,
+        o.quantity,
+        o.price,
+        o.community_id,
+        o.member_id,
+        c.community_name
+      FROM orders o
+      JOIN members m ON o.member_id = m.member_id
+      JOIN communities c ON m.community_id = c.community_id
+      WHERE m.consumer_id = ? AND o.payment_method = 'Pending'
+    `;
+
+    const result = await queryDatabase(query, [consumerId]);
+
+    // Format the response for the client
+    const cartItems = result.map(item => ({
+      order_id: item.order_id,
+      product_id: item.product_id,
+      product_name: item.product_name,
+      buy_type: item.buy_type,
+      category: item.category,
+      quantity: item.quantity,
+      price: item.price,
+      community_id: item.community_id,
+      community_name: item.community_name,
+    }));
+
+    res.json({
+      success: true,
+      data: cartItems,
+      count: cartItems.length,
+    });
+  } catch (error) {
+    console.error('Error fetching community cart:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch community cart',
+      details: error.message,
+    });
+  }
+});
+
+// ... (rest of server.js)
+
+
 
 // GET /api/consumers - Fetch consumers from the database
 app.get('/consumers', async (req, res) => {
