@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { faArrowLeft, faBolt, faShoppingCart, faTimesCircle, faFire, faCheckCircle, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faBolt, faShoppingCart, faTimesCircle, faFire, faCheckCircle, faSpinner, faShareAlt, faCopy } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './CommunityFlashDeals.css';
 
@@ -14,45 +14,55 @@ const CommunityFlashDeals = () => {
     const [error, setError] = useState(null);
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
-    const [isFrozen, setIsFrozen] = useState(false);
-    const [showPopup, setShowPopup] = useState(false);
+    const [isFlashDealActive, setIsFlashDealActive] = useState(false);
     const [shareableLink, setShareableLink] = useState('');
     const [whatsappLink, setWhatsappLink] = useState('');
+    const [showQuantityPopup, setShowQuantityPopup] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [quantity, setQuantity] = useState(1);
+    const [imageURL, setImageURL] = useState('');
+    const [imagesCache, setImagesCache] = useState({});
 
-    const Popup = () => (
-        <div className="popup-overlay">
-            <div className="popup-content">
-                <button className="popup-close" onClick={() => setShowPopup(false)}>
-                    &times;
-                </button>
-                <h3>Do you like to participate in the flash deals?</h3>
-                <p>Share this link to invite more people in your area to unlock exclusive flash deals!</p>
-                <div className="popup-links">
-                    <div className="share-link-container">
-                        <input type="text" value={shareableLink} readOnly />
-                        <button onClick={() => {
-                            navigator.clipboard.writeText(shareableLink);
-                            setToastMessage('Link copied to clipboard!');
-                            setShowToast(true);
-                            setTimeout(() => setShowToast(false), 3000);
-                        }}>
-                            <FontAwesomeIcon icon={faCheckCircle} /> Copy Link
-                        </button>
-                    </div>
-                    <a href={whatsappLink} className="whatsapp-share-btn" target="_blank" rel="noopener noreferrer">
-                        <FontAwesomeIcon icon={faShoppingCart} /> Share via WhatsApp
-                    </a>
-                </div>
-            </div>
-        </div>
-    );
+    // Fetch product images from Pexels API and cache them
+    const fetchProductImage = async (productName) => {
+        if (imagesCache[productName]) {
+            return imagesCache[productName];
+        }
+        try {
+            const response = await fetch(
+                `https://api.pexels.com/v1/search?query=${encodeURIComponent(productName)}&per_page=1`,
+                {
+                    headers: {
+                        Authorization: 'uONxxczjZM1uaDw2jsGQPV70vtBfQbuyHcKeJ0aaCwsK0xxbo5HDpamR'
+                    }
+                }
+            );
+            const data = await response.json();
+            const imageUrl = data.photos[0]?.src.medium || 'https://via.placeholder.com/300?text=No+Image';
+            setImagesCache(prev => ({ ...prev, [productName]: imageUrl }));
+            return imageUrl;
+        } catch (error) {
+            console.error('Error fetching image:', error);
+            return 'https://via.placeholder.com/300?text=No+Image';
+        }
+    };
 
-    const DealCard = ({ deal }) => {
-        const { produce_name, original_price, flash_price, discount, availability, image_url } = deal;
+    const handleCopyLink = () => {
+        navigator.clipboard.writeText(shareableLink);
+        setToastMessage('Link copied to clipboard!');
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+    };
+
+    const DealCard = ({ deal, isAvailable }) => {
+        const { produce_name, price_per_kg, minimum_price, availability } = deal;
         const [timeLeft, setTimeLeft] = useState(Math.floor(Math.random() * (3600 * 4 - 60 * 10 + 1)) + 60 * 10);
-        const [isAdding, setIsAdding] = useState(false);
-        const [showAdded, setShowAdded] = useState(false);
+        const [imageSrc, setImageSrc] = useState('https://via.placeholder.com/300?text=Loading...');
 
+        useEffect(() => {
+            fetchProductImage(produce_name).then(url => setImageSrc(url));
+        }, [produce_name]);
+        
         useEffect(() => {
             const timer = setInterval(() => {
                 setTimeLeft(prevTime => (prevTime > 0 ? prevTime - 1 : 0));
@@ -67,33 +77,30 @@ const CommunityFlashDeals = () => {
             return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         };
 
-        const handleAddToCart = () => {
-            if (isFrozen) {
-                setShowPopup(true);
-                return;
+        const discount = price_per_kg > 0 ? (((price_per_kg - minimum_price) / price_per_kg) * 100).toFixed(0) : 0;
+        const buttonClass = `deal-action-btn ${!isAvailable ? 'deal-unavailable' : ''}`;
+
+        const openQuantityPopup = () => {
+            if (isAvailable) {
+                setSelectedProduct(deal);
+                setQuantity(1);
+                setShowQuantityPopup(true);
             }
-            if (!isAvailable) return;
-
-            setIsAdding(true);
-            setTimeout(() => {
-                setToastMessage(`${produce_name} added to cart successfully!`);
-                setShowToast(true);
-                setTimeout(() => setShowToast(false), 3000);
-                setIsAdding(false);
-                setShowAdded(true);
-                setTimeout(() => setShowAdded(false), 2000);
-            }, 800);
         };
-
-        const isAvailable = availability > 0 && timeLeft > 0;
-        const buttonClass = `deal-action-btn ${isFrozen ? 'frozen' : ''} ${!isAvailable ? 'deal-unavailable' : ''} ${isAdding ? 'adding' : ''} ${showAdded ? 'added' : ''}`;
 
         return (
             <div className="deal-card">
                 <div className="deal-image-container">
-                    <img src={image_url} alt={produce_name} className="deal-image" onError={(e) => {
-                        e.target.src = `https://source.unsplash.com/300x200/?${encodeURIComponent(produce_name)}`;
-                    }} />
+                    {/* Updated image tag to handle errors more gracefully */}
+                    <img 
+                      src={imagesCache[produce_name] || 'https://source.unsplash.com/300x200/?vegetables,fruits'} 
+                      alt={produce_name} 
+                      className="deal-image" 
+                      onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = `https://source.unsplash.com/300x200/?${encodeURIComponent(produce_name)}`;
+                      }} 
+                    />
                     <div className="deal-overlay"></div>
                     <div className="hot-deal-tag">
                         <FontAwesomeIcon icon={faFire} /> HOT DEAL
@@ -103,8 +110,8 @@ const CommunityFlashDeals = () => {
                 <div className="deal-content">
                     <h3>{produce_name}</h3>
                     <p className="deal-price">
-                        <span className="original-price">₹{original_price}/kg</span>
-                        <span className="flash-price">₹{flash_price}/kg</span>
+                        <span className="original-price">₹{price_per_kg}/kg</span>
+                        <span className="flash-price">₹{minimum_price}/kg</span>
                     </p>
                     <div className="availability-bar">
                         <div className="availability-fill" style={{ width: `${(availability / 50) * 100}%` }}></div>
@@ -113,19 +120,10 @@ const CommunityFlashDeals = () => {
                     {isAvailable ? (
                         <>
                             <p className="deal-timer">
-                                <span className="timer-icon">⏰</span>
-                                Time Left: {formatTime(timeLeft)}
+                                ⏰ Time Left: {formatTime(timeLeft)}
                             </p>
-                            <button className={buttonClass} onClick={handleAddToCart} disabled={!isAvailable || isAdding || isFrozen}>
-                                {isFrozen ? "Participate to Unlock" : (
-                                    showAdded ? (
-                                        <><FontAwesomeIcon icon={faCheckCircle} /> Added!</>
-                                    ) : isAdding ? (
-                                        <><FontAwesomeIcon icon={faSpinner} spin /> Adding...</>
-                                    ) : (
-                                        <><FontAwesomeIcon icon={faShoppingCart} /> Add to Cart</>
-                                    )
-                                )}
+                            <button className={buttonClass} onClick={openQuantityPopup}>
+                                <FontAwesomeIcon icon={faShoppingCart} /> Add to Cart
                             </button>
                         </>
                     ) : (
@@ -148,94 +146,111 @@ const CommunityFlashDeals = () => {
                     <FontAwesomeIcon icon={faCheckCircle} className="toast-icon" />
                     <span>{message}</span>
                 </div>
-                <button className="toast-close" onClick={onClose}>&times;</button>
+                <button className="toast-close" onClick={onClose}>×</button>
             </div>
         );
     };
 
-    const fetchCommunityData = async (pincode) => {
+    const handleAddToCart = async () => {
+        if (!selectedProduct) return;
+        setLoading(true);
+        setShowQuantityPopup(false);
+
         try {
-            const statusResponse = await fetch(`http://localhost:5000/api/community-flash-deals-status/${pincode}`);
-            if (!statusResponse.ok) {
-                throw new Error('Failed to fetch community status');
+            const response = await fetch("http://localhost:5000/api/community-cart", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${consumer.token}`
+                },
+                body: JSON.stringify({
+                    community_id: location.state?.communityId,
+                    product_id: selectedProduct.product_id,
+                    consumer_id: consumer.consumer_id,
+                    quantity: quantity,
+                    price: selectedProduct.minimum_price
+                })
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to add to cart');
             }
-            const statusData = await statusResponse.json();
+
+            setToastMessage(`${selectedProduct.produce_name} added to cart successfully!`);
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 3000);
+        } catch (err) {
+            setError(err.message);
+            setToastMessage(`Error: ${err.message}`);
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 5000);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+// CommunityFlashDeals.js
+
+// ... (existing imports)
+
+useEffect(() => {
+    const fetchDealsAndStatus = async () => {
+        if (!consumer?.consumer_id || !consumer?.token) {
+            setLoading(false);
+            return;
+        }
+        
+        const token = consumer.token;
+
+        try {
+            // Fetch consumer's pincode
+            const profileResponse = await fetch(`http://localhost:5000/api/consumer/${consumer.consumer_id}`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            const profileData = await profileResponse.json();
+            const consumerPincode = profileData.pincode;
+
+            if (!consumerPincode || consumerPincode === '000000' || isNaN(consumerPincode)) {
+                setIsFlashDealActive(false);
+                setLoading(false);
+                return;
+            }
             
-            setIsFrozen(!statusData.showFlashDeal);
+            // ✅ Updated Fetch: Send Authorization header for the protected status route
+            const statusResponse = await fetch(`http://localhost:5000/api/community-flash-deals-status/${consumerPincode}`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            const statusData = await statusResponse.json();
+            setIsFlashDealActive(statusData.showFlashDeal);
             setShareableLink(statusData.shareableLink);
             setWhatsappLink(statusData.whatsappLink);
 
-            if (statusData.showFlashDeal) {
-                const dealsResponse = await fetch("http://localhost:5000/api/community-flashdeals");
-                if (!dealsResponse.ok) {
-                    if (dealsResponse.status === 401) {
-                        throw new Error('Unauthorized: Authentication failed. Please log in.');
-                    } else {
-                        throw new Error('Failed to fetch bargaining products');
-                    }
-                }
-                const dealsData = await dealsResponse.json();
-                
-                const formattedDeals = dealsData.map(product => {
-                    const original_price = parseFloat(product.price_per_kg);
-                    const flash_price = parseFloat(product.minimum_price);
-                    const discount = original_price > 0 ? (((original_price - flash_price) / original_price) * 100).toFixed(0) : 0;
-                    
-                    return {
-                        product_id: product.product_id,
-                        produce_name: product.produce_name,
-                        original_price: original_price,
-                        flash_price: flash_price,
-                        discount: discount,
-                        availability: product.availability,
-                        image_url: `https://source.unsplash.com/300x200/?${encodeURIComponent(product.produce_name)}`
-                    };
-                });
-                setDeals(formattedDeals);
-            } else {
-                setDeals([]);
-                setShowPopup(true);
+            // ✅ Updated Fetch: Send Authorization header for the protected deals route
+            const dealsResponse = await fetch("http://localhost:5000/api/community-flashdeals", {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (!dealsResponse.ok) {
+                throw new Error('Failed to fetch bargaining products');
             }
-
+            const dealsData = await dealsResponse.json();
+            setDeals(dealsData);
         } catch (err) {
             setError(err.message);
             console.error("Error fetching data:", err);
+            // Handle 401 specifically
+            if (err.message.includes('401')) {
+                alert('Session expired. Please log in again.');
+                // Redirect to login page on unauthorized access
+                navigate('/consumer-login');
+            }
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => {
-        const query = new URLSearchParams(location.search);
-        const pincodeFromUrl = query.get('pincode');
-        
-        if (pincodeFromUrl) {
-            fetchCommunityData(pincodeFromUrl);
-        } else if (consumer && consumer.consumer_id) {
-            const fetchConsumerProfile = async () => {
-                try {
-                    const profileResponse = await fetch(`http://localhost:5000/api/consumer/${consumer.consumer_id}`, {
-                        headers: {
-                            'Authorization': `Bearer ${consumer.token}`,
-                        },
-                    });
-                    const profileData = await profileResponse.json();
-                    if (profileResponse.ok && profileData.pincode) {
-                        fetchCommunityData(profileData.pincode);
-                    } else {
-                        setLoading(false);
-                        setError("Pincode not available. Please complete your profile to view flash deals.");
-                    }
-                } catch (err) {
-                    setLoading(false);
-                    setError("Failed to fetch consumer profile. Please try again later.");
-                }
-            };
-            fetchConsumerProfile();
-        } else {
-            setLoading(false);
-        }
-    }, [consumer, location.search]);
+    fetchDealsAndStatus();
+}, [consumer, navigate]);
 
     const handleGoBack = () => {
         navigate(-1);
@@ -243,7 +258,7 @@ const CommunityFlashDeals = () => {
 
     if (!consumer) {
         return (
-            <div className="community-flash-deals-container">
+            <div className="flash-deal-page-container">
                 <div className="auth-required">
                     <h2>Please log in to view flash deals</h2>
                     <Link to="/consumer-login" className="login-link">Login Now</Link>
@@ -253,14 +268,19 @@ const CommunityFlashDeals = () => {
     }
     
     return (
-        <div className={`community-flash-deals-container ${isFrozen ? 'frozen-page' : ''}`}>
-            {showPopup && <Popup />}
-            <ToastNotification 
-                message={toastMessage} 
-                show={showToast} 
-                onClose={() => setShowToast(false)} 
-            />
+        <div className="flash-deal-page-container">
+            <ToastNotification message={toastMessage} show={showToast} onClose={() => setShowToast(false)} />
             
+            <header className="dashboard-header">
+                <div className="header-top">
+                    <h1 className="logo-text">KrishiBazaar</h1>
+                    <div className="nav-actions">
+                        <button onClick={handleGoBack} className="back-button">
+                            <FontAwesomeIcon icon={faArrowLeft} /> Back
+                        </button>
+                    </div>
+                </div>
+            </header>
 
             <main className="flash-deal-main">
                 <div className="page-header">
@@ -281,6 +301,21 @@ const CommunityFlashDeals = () => {
                     </p>
                 </div>
 
+                {!isFlashDealActive && (
+                    <div className="flash-deal-frozen">
+                        <p>Your location is not yet eligible for Flash Deals.</p>
+                        <p>Share this link with friends and neighbors in your area to unlock flash deals for your community!</p>
+                        <div className="share-links">
+                            <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="share-btn whatsapp">
+                                <i className="fab fa-whatsapp"></i> Share on WhatsApp
+                            </a>
+                            <button onClick={handleCopyLink} className="share-btn copy">
+                                <FontAwesomeIcon icon={faCopy} /> Copy Link
+                            </button>
+                        </div>
+                    </div>
+                )}
+                
                 {loading && (
                     <div className="loading-container">
                         <FontAwesomeIcon icon={faSpinner} spin size="2x" />
@@ -299,7 +334,7 @@ const CommunityFlashDeals = () => {
                     <div className="deal-card-list">
                         {deals.length > 0 ? (
                             deals.map(deal => (
-                                <DealCard key={deal.product_id} deal={deal} />
+                                <DealCard key={deal.product_id} deal={deal} isAvailable={isFlashDealActive && deal.availability > 0} />
                             ))
                         ) : (
                             <p className="no-deals-message">No flash deals are available at the moment. Please check back later!</p>
@@ -307,6 +342,32 @@ const CommunityFlashDeals = () => {
                     </div>
                 )}
             </main>
+            
+            {showQuantityPopup && selectedProduct && (
+                <div className="quantity-popup">
+                    <div className="quantity-popup-content">
+                        <h3>Select Quantity for {selectedProduct.produce_name}</h3>
+                        <img 
+                            src={imagesCache[selectedProduct.produce_name] || 'https://source.unsplash.com/300x200/?vegetables,fruits'} 
+                            alt={selectedProduct.produce_name} 
+                            className="popup-image" 
+                        />
+                        <div className="quantity-controls">
+                            <button onClick={() => setQuantity(prev => Math.max(1, prev - 1))}>-</button>
+                            <input type="number" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} min="1" />
+                            <button onClick={() => setQuantity(prev => prev + 1)}>+</button>
+                        </div>
+                        <div className="price-details">
+                            <p>Price per kg: ₹{selectedProduct.minimum_price}</p>
+                            <p>Total Price: ₹{(selectedProduct.minimum_price * quantity).toFixed(2)}</p>
+                        </div>
+                        <div className="popup-actions">
+                            <button onClick={() => setShowQuantityPopup(false)} className="cancel-btn">Cancel</button>
+                            <button onClick={handleAddToCart} className="add-to-cart-btn">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
