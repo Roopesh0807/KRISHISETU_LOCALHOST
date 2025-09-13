@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { faArrowLeft, faBolt, faShoppingCart, faTimesCircle, faFire, faCheckCircle, faSpinner, faShareAlt, faCopy } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faBolt, faShoppingCart, faTimesCircle, faFire, faCheckCircle, faSpinner, faShareAlt, faCopy, faLock } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './CommunityFlashDeals.css';
 
@@ -20,8 +20,8 @@ const CommunityFlashDeals = () => {
     const [showQuantityPopup, setShowQuantityPopup] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [quantity, setQuantity] = useState(1);
-    const [imageURL, setImageURL] = useState('');
     const [imagesCache, setImagesCache] = useState({});
+    const [showSharePopup, setShowSharePopup] = useState(false);
 
     // Fetch product images from Pexels API and cache them
     const fetchProductImage = async (productName) => {
@@ -47,8 +47,10 @@ const CommunityFlashDeals = () => {
         }
     };
 
-    const handleCopyLink = () => {
-        navigator.clipboard.writeText(shareableLink);
+    const handleCopyLink = (event) => {
+        event.stopPropagation();
+        // The link to be shared is always the base flash deals page, as requested
+        navigator.clipboard.writeText('http://localhost:3000/community-flash-deals');
         setToastMessage('Link copied to clipboard!');
         setShowToast(true);
         setTimeout(() => setShowToast(false), 3000);
@@ -80,7 +82,9 @@ const CommunityFlashDeals = () => {
         const discount = price_per_kg > 0 ? (((price_per_kg - minimum_price) / price_per_kg) * 100).toFixed(0) : 0;
         const buttonClass = `deal-action-btn ${!isAvailable ? 'deal-unavailable' : ''}`;
 
-        const openQuantityPopup = () => {
+        const openQuantityPopup = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             if (isAvailable) {
                 setSelectedProduct(deal);
                 setQuantity(1);
@@ -91,7 +95,6 @@ const CommunityFlashDeals = () => {
         return (
             <div className="deal-card">
                 <div className="deal-image-container">
-                    {/* Updated image tag to handle errors more gracefully */}
                     <img 
                       src={imagesCache[produce_name] || 'https://source.unsplash.com/300x200/?vegetables,fruits'} 
                       alt={produce_name} 
@@ -128,9 +131,11 @@ const CommunityFlashDeals = () => {
                         </>
                     ) : (
                         <>
-                            <p className="deal-timer" style={{ color: 'red' }}>Sold Out!</p>
+                            <p className="deal-timer">
+                                <FontAwesomeIcon icon={faLock} /> Deals are locked for your location
+                            </p>
                             <button className={buttonClass} disabled>
-                                <FontAwesomeIcon icon={faTimesCircle} /> Sold Out
+                                <FontAwesomeIcon icon={faShoppingCart} /> Add to Cart
                             </button>
                         </>
                     )}
@@ -190,71 +195,73 @@ const CommunityFlashDeals = () => {
         }
     };
     
-// CommunityFlashDeals.js
-
-// ... (existing imports)
-
-useEffect(() => {
-    const fetchDealsAndStatus = async () => {
-        if (!consumer?.consumer_id || !consumer?.token) {
-            setLoading(false);
-            return;
-        }
-        
-        const token = consumer.token;
-
-        try {
-            // Fetch consumer's pincode
-            const profileResponse = await fetch(`http://localhost:5000/api/consumer/${consumer.consumer_id}`, {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-            const profileData = await profileResponse.json();
-            const consumerPincode = profileData.pincode;
-
-            if (!consumerPincode || consumerPincode === '000000' || isNaN(consumerPincode)) {
-                setIsFlashDealActive(false);
+    useEffect(() => {
+        const fetchDealsAndStatus = async () => {
+            if (!consumer?.consumer_id || !consumer?.token) {
                 setLoading(false);
                 return;
             }
             
-            // ✅ Updated Fetch: Send Authorization header for the protected status route
-            const statusResponse = await fetch(`http://localhost:5000/api/community-flash-deals-status/${consumerPincode}`, {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-            const statusData = await statusResponse.json();
-            setIsFlashDealActive(statusData.showFlashDeal);
-            setShareableLink(statusData.shareableLink);
-            setWhatsappLink(statusData.whatsappLink);
+            const token = consumer.token;
 
-            // ✅ Updated Fetch: Send Authorization header for the protected deals route
-            const dealsResponse = await fetch("http://localhost:5000/api/community-flashdeals", {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-            if (!dealsResponse.ok) {
-                throw new Error('Failed to fetch bargaining products');
-            }
-            const dealsData = await dealsResponse.json();
-            setDeals(dealsData);
-        } catch (err) {
-            setError(err.message);
-            console.error("Error fetching data:", err);
-            // Handle 401 specifically
-            if (err.message.includes('401')) {
-                alert('Session expired. Please log in again.');
-                // Redirect to login page on unauthorized access
-                navigate('/consumer-login');
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
+            try {
+                // Fetch consumer's pincode
+                const profileResponse = await fetch(`http://localhost:5000/api/consumer/${consumer.consumer_id}`, {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+                const profileData = await profileResponse.json();
+                const consumerPincode = profileData.pincode;
+                
+                const baseShareLink = 'http://localhost:3000/community-flash-deals';
+                
+                // Set shareable links based on the base URL
+                setShareableLink(baseShareLink);
+                setWhatsappLink(`https://wa.me/?text=${encodeURIComponent("Join me for exclusive flash deals! " + baseShareLink)}`);
+                
 
-    fetchDealsAndStatus();
-}, [consumer, navigate]);
+                if (!consumerPincode || consumerPincode === '000000' || isNaN(consumerPincode)) {
+                    setIsFlashDealActive(false);
+                } else {
+                    // Check flash deal status for the pincode
+                    const statusResponse = await fetch(`http://localhost:5000/api/community-flash-deals-status/${consumerPincode}`, {
+                        headers: { "Authorization": `Bearer ${token}` }
+                    });
+                    const statusData = await statusResponse.json();
+                    setIsFlashDealActive(statusData.showFlashDeal);
+                }
+
+                // Fetch the deals regardless of status
+                const dealsResponse = await fetch("http://localhost:5000/api/community-flashdeals", {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+                if (!dealsResponse.ok) {
+                    throw new Error('Failed to fetch bargaining products');
+                }
+                const dealsData = await dealsResponse.json();
+                setDeals(dealsData);
+            } catch (err) {
+                setError(err.message);
+                console.error("Error fetching data:", err);
+                if (err.message.includes('401')) {
+                    alert('Session expired. Please log in again.');
+                    navigate('/consumer-login');
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDealsAndStatus();
+    }, [consumer, navigate]);
 
     const handleGoBack = () => {
         navigate(-1);
     };
+    
+    // Social media links
+    const facebookLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareableLink)}`;
+    const instagramLink = `https://www.instagram.com/?url=${encodeURIComponent(shareableLink)}`;
+    const smsLink = `sms:?&body=${encodeURIComponent("Join me for exclusive flash deals in our community! Click the link to participate: " + shareableLink)}`;
 
     if (!consumer) {
         return (
@@ -300,21 +307,28 @@ useEffect(() => {
                         Welcome to the Flash Deal page! Here you can find exclusive, time-sensitive offers on a variety of fresh produce directly from our farmers.
                     </p>
                 </div>
+                
+                <div className="shareable-link-container">
+                    <div className="short-url">
+                        {shareableLink ? shareableLink : 'Fetching link...'}
+                    </div>
+                    <div className="share-buttons">
+                        <button onClick={() => setShowSharePopup(true)} className="share-btn">
+                            <FontAwesomeIcon icon={faShareAlt} /> Share
+                        </button>
+                        <button onClick={handleCopyLink} className="share-btn copy">
+                            <FontAwesomeIcon icon={faCopy} /> Copy
+                        </button>
+                    </div>
+                </div>
 
-                {!isFlashDealActive && (
-                    <div className="flash-deal-frozen">
+                <div className={`page-status-overlay ${!isFlashDealActive ? 'show' : ''}`}>
+                    <div className="status-message-box">
+                        <FontAwesomeIcon icon={faLock} className="lock-icon" />
                         <p>Your location is not yet eligible for Flash Deals.</p>
                         <p>Share this link with friends and neighbors in your area to unlock flash deals for your community!</p>
-                        <div className="share-links">
-                            <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="share-btn whatsapp">
-                                <i className="fab fa-whatsapp"></i> Share on WhatsApp
-                            </a>
-                            <button onClick={handleCopyLink} className="share-btn copy">
-                                <FontAwesomeIcon icon={faCopy} /> Copy Link
-                            </button>
-                        </div>
                     </div>
-                )}
+                </div>
                 
                 {loading && (
                     <div className="loading-container">
@@ -364,6 +378,40 @@ useEffect(() => {
                         <div className="popup-actions">
                             <button onClick={() => setShowQuantityPopup(false)} className="cancel-btn">Cancel</button>
                             <button onClick={handleAddToCart} className="add-to-cart-btn">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showSharePopup && (
+                <div className="share-popup show">
+                    <div className="share-popup-content">
+                        <button onClick={() => setShowSharePopup(false)} className="share-popup-close-btn">
+                            <FontAwesomeIcon icon={faTimesCircle} />
+                        </button>
+                        <h3>Share in a post</h3>
+                        <p className="share-link-label">Flash deal page link</p>
+                        <div className="share-link-input-container">
+                           <input type="text" readOnly value={shareableLink} className="share-link-input" />
+                           <button onClick={handleCopyLink} className="share-link-copy-btn">Copy</button>
+                        </div>
+                        <div className="share-app-icons-container">
+                            <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="share-app-btn whatsapp">
+                                <i className="fab fa-whatsapp"></i>
+                                <span>WhatsApp</span>
+                            </a>
+                            <a href={facebookLink} target="_blank" rel="noopener noreferrer" className="share-app-btn facebook">
+                                <i className="fab fa-facebook-f"></i>
+                                <span>Facebook</span>
+                            </a>
+                             <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="share-app-btn instagram">
+                                <i className="fab fa-instagram"></i>
+                                <span>Instagram</span>
+                            </a>
+                             <a href={smsLink} className="share-app-btn sms">
+                                <FontAwesomeIcon icon={faShareAlt} />
+                                <span>Message</span>
+                            </a>
                         </div>
                     </div>
                 </div>

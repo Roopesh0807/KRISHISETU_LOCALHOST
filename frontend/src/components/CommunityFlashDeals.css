@@ -1,4 +1,6 @@
 /* FlashDealPage.css - Enhanced Styles for the Flash Deals page */
+/* Replaced from provided CSS to include new elements and fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
 body {
     background-color: #f0f2f5;
@@ -65,6 +67,7 @@ body {
 .flash-deal-main {
     text-align: center;
     margin-top: 20px;
+    position: relative;
 }
 
 .page-header {
@@ -357,22 +360,7 @@ body {
     box-shadow: 0 7px 15px rgba(0, 0, 0, 0.1);
 }
 
-.deal-action-btn.adding {
-    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
-}
-
-.deal-action-btn.added {
-    background: linear-gradient(135deg, #00c853 0%, #009624 100%);
-    animation: celebrate 0.5s ease;
-}
-
-@keyframes celebrate {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-
-.deal-unavailable {
+.deal-action-btn.deal-unavailable {
     background: linear-gradient(135deg, #b0b0b0 0%, #9e9e9e 100%);
     cursor: not-allowed;
 }
@@ -439,6 +427,222 @@ body {
     margin-left: 15px;
 }
 
+/* New Styles for Shareable Link Container */
+.shareable-link-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffffff;
+    border-radius: 15px;
+    padding: 10px 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 30px;
+    position: relative; /* Positioned relative to main */
+    z-index: 11; /* Above the overlay */
+}
+
+.short-url {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #555;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 15px; /* Add some spacing for the share buttons */
+    flex-grow: 1;
+    text-align: left;
+}
+
+.share-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.share-btn {
+    background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.share-btn:hover {
+    background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.share-btn.copy {
+    background: #f0f2f5;
+    color: #555;
+}
+
+.share-btn.copy:hover {
+    background-color: #e0e0e0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Share Pop-up Styles */
+.share-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.share-popup.show {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.share-popup-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.share-popup.show .share-popup-content {
+    transform: scale(1);
+}
+
+.share-popup-content h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.share-app-icons-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.share-app-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #555;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.share-app-btn i, .share-app-btn .fa-icon {
+    font-size: 2.5rem;
+    margin-bottom: 5px;
+    color: #555;
+    transition: all 0.3s ease;
+}
+
+.share-app-btn.whatsapp i { color: #25D366; }
+.share-app-btn.facebook i { color: #1877F2; }
+.share-app-btn.instagram i { color: #E4405F; }
+.share-app-btn.sms .fa-icon { color: #ff5722; }
+.share-app-btn.copy .fa-icon { color: #333; }
+
+.share-app-btn:hover {
+    transform: translateY(-5px);
+}
+
+.share-popup-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #999;
+    cursor: pointer;
+}
+
+/* New Styles for Locked/Frozen Page */
+.page-status-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(240, 242, 245, 0.4);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    
+}
+
+.page-status-overlay.show {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.status-message-box {
+    background-color: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 500px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 12;
+}
+
+.lock-icon {
+    font-size: 4rem;
+    color: #ff5252;
+    margin-bottom: 20px;
+    animation: shake 1s infinite;
+}
+
+@keyframes shake {
+    0% { transform: rotate(0deg); }
+    15% { transform: rotate(-5deg); }
+    30% { transform: rotate(5deg); }
+    45% { transform: rotate(-5deg); }
+    60% { transform: rotate(5deg); }
+    75% { transform: rotate(-3deg); }
+    90% { transform: rotate(3deg); }
+    100% { transform: rotate(0deg); }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .deal-card-list {
@@ -460,6 +664,15 @@ body {
     
     .heading-line-2 {
         font-size: 1.4rem;
+    }
+
+    .shareable-link-container {
+        flex-direction: column;
+        gap: 10px;
+        padding: 15px;
+    }
+    .short-url {
+        font-size: 0.9rem;
     }
 }
 
