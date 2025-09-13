@@ -13,6 +13,7 @@ import {
     faChevronLeft,
     faChevronRight,
     faSpinner,
+    faPercentage,
     faTimes, // Added for close button in subscription popup
     faCheckCircle, // Added for success message in subscription popup
     faTag
@@ -33,6 +34,7 @@ import 'react-calendar/dist/Calendar.css'; // Import Calendar CSS
 
 const ConsumerDashboard = () => {
     const [searchQuery, setSearchQuery] = useState("");
+    const [minMaxDiscount, setMinMaxDiscount] = useState({ min: 0, max: 0 }); // New state for min/max discount
     const [selectedCategory, setSelectedCategory] = useState("All Categories");
     const [deliveryLocation, setDeliveryLocation] = useState("Fetching location...");
     const [searchResults, setSearchResults] = useState([]);
@@ -52,6 +54,7 @@ const ConsumerDashboard = () => {
     const [selectedQuantities, setSelectedQuantities] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [flashDealBannerProducts, setFlashDealBannerProducts] = useState([]); // New state for banner products
     const [imagesLoading, setImagesLoading] = useState(false);
     const [consumerCoords, setConsumerCoords] = useState(null);
     const [recommendedProducts, setRecommendedProducts] = useState([]);
@@ -393,7 +396,7 @@ const ConsumerDashboard = () => {
         }
     }, [pastOrders, products]);
     
-    // 5. Flash Deals Banner Logic
+       // 5. Flash Deals Banner Logic
     useEffect(() => {
         const checkFlashDeals = async () => {
             if (!consumer?.token || !consumer?.consumer_id) return;
@@ -412,7 +415,7 @@ const ConsumerDashboard = () => {
                     return;
                 }
 
-                const flashDealResponse = await fetch(`http://localhost:5000/api/check-community-flash-deals/${consumerPincode}`, {
+                const flashDealResponse = await fetch(`http://localhost:5000/api/community-flash-deals-status/${consumerPincode}`, {
                     headers: {
                         "Authorization": `Bearer ${consumer.token}`,
                     }
@@ -421,6 +424,29 @@ const ConsumerDashboard = () => {
 
                 if (flashDealData.showFlashDeal) {
                     setShowFlashDealBanner(true);
+                    // Fetch products for the banner
+                    const bannerProductsResponse = await fetch(`http://localhost:5000/api/community-flashdeals/banner-data`, {
+                        headers: {
+                            "Authorization": `Bearer ${consumer.token}`,
+                        }
+                    });
+                    const bannerProductsData = await bannerProductsResponse.json();
+
+                    // Calculate min/max discount
+                    const discounts = bannerProductsData.map(product => {
+                        const discount = (product.price_per_kg - product.minimum_price) / product.price_per_kg;
+                        return Math.round(discount * 100);
+                    }).filter(d => !isNaN(d));
+
+                    if (discounts.length > 0) {
+                        setMinMaxDiscount({
+                            min: Math.min(...discounts),
+                            max: Math.max(...discounts)
+                        });
+                    }
+
+                    setFlashDealBannerProducts(bannerProductsData);
+
                 } else {
                     setShowFlashDealBanner(false);
                 }
@@ -448,6 +474,34 @@ const ConsumerDashboard = () => {
         setSearchResults(results);
         console.log("Search Results:", results);
     };
+   // Remove the existing `bannerCarouselSettings` object.
+// Add this updated version:
+const bannerCarouselSettings = {
+    dots: false,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 3, // Display 3 products at a time for a horizontal look
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    cssEase: "linear",
+    arrows: false,
+    responsive: [
+        {
+            breakpoint: 1024,
+            settings: {
+                slidesToShow: 2,
+            }
+        },
+        {
+            breakpoint: 600,
+            settings: {
+                slidesToShow: 1,
+            }
+        }
+    ]
+};
+
 
     // Carousel Settings for Recommended Products
     const carouselSettings = {
@@ -1046,6 +1100,44 @@ const ConsumerDashboard = () => {
                 </div>
             </div>
 
+{/* New Flash Deal Banner with Carousel */}
+            {showFlashDealBanner && flashDealBannerProducts.length > 0 && (
+                <div className="ks-flash-deal-banner-new">
+                    <div className="ks-banner-left">
+                        <div className="ks-discount-box">
+                            <span className="ks-discount-value">{minMaxDiscount.min}% - {minMaxDiscount.max}%</span>
+                            <FontAwesomeIcon icon={faPercentage} className="ks-percent-icon" />
+                        </div>
+                        <div className="ks-banner-title">
+                            <h3>COMMUNITY DEALS</h3>
+                            <p>Limited Time Offers</p>
+                        </div>
+                    </div>
+                    <div className="ks-banner-carousel-container">
+                        <Slider {...bannerCarouselSettings}>
+                            {flashDealBannerProducts.map((deal) => (
+                                <div key={deal.product_id} className="ks-banner-product-item">
+                                    <img
+                                        src={productImages[deal.product_id] || 'https://via.placeholder.com/100?text=No+Image'}
+                                        alt={deal.produce_name}
+                                        className="ks-banner-product-image"
+                                    />
+                                    <div className="ks-banner-product-details">
+                                        <h4>{deal.produce_name}</h4>
+                                        <p className="ks-banner-price">
+                                            <span className="ks-original-price">₹{deal.price_per_kg}/kg</span>
+                                            <span className="ks-flash-price">₹{deal.minimum_price}/kg</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </Slider>
+                    </div>
+                    <button className="ks-participate-btn" onClick={() => navigate('/community-flash-deals')}>
+                        <FontAwesomeIcon icon={faBolt} /> Shop Now
+                    </button>
+                </div>
+            )}
             {/* Recommendation Carousel Section - Always visible */}
             {recommendedProducts.length > 0 && (
                 <div className="ks-recommendation-section">
@@ -1097,7 +1189,7 @@ const ConsumerDashboard = () => {
                 </div>
             )}
             
-            {/* Flash Deal Banner (Conditional Rendering) - Placed after recommendation */}
+            {/* Flash Deal Banner (Conditional Rendering) - Placed after recommendation
             {showFlashDealBanner && (
                 <div className="ks-flash-deal-banner">
                     <div className="ks-flash-content-area">
@@ -1115,7 +1207,7 @@ const ConsumerDashboard = () => {
                         <FontAwesomeIcon icon={faTimes} />
                     </button>
                 </div>
-            )}
+            )} */}
 
 
             <div className="ks-main-content">

@@ -4243,7 +4243,67 @@ app.get("/api/consumer-communities/:consumer_id", async (req, res) => {
 //     });
 //   }
 // });
+// Add a new authenticated route to get a few products for the banner
+// Make sure this is placed before the catch-all error handlers
+app.get("/api/community-flashdeals/banner-data", authenticateToken, async (req, res) => {
+    try {
+      const products = await queryDatabase(`
+        SELECT 
+          product_id,
+          produce_name,
+          price_per_kg,
+          minimum_price,
+          availability
+        FROM add_produce
+        WHERE market_type = 'Bargaining Market'
+        ORDER BY RAND()
+        LIMIT 5
+      `);
 
+      res.json(products || []);
+    } catch (err) {
+      console.error("Error fetching banner deals:", err);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching banner deals",
+        error: err.message,
+      });
+    }
+});
+
+// New: Protected route for checking flash deals status
+app.get('/api/check-community-flash-deals/:pincode', authenticateToken, async (req, res) => {
+  const { pincode } = req.params;
+  const baseUrl = `${req.protocol}://${req.get('host')}`;
+
+  try {
+    const [countResult] = await queryDatabase(
+      "SELECT COUNT(*) as consumer_count FROM consumerprofile WHERE pincode = ?",
+      [pincode]
+    );
+
+    const consumerCount = countResult.consumer_count;
+    const showFlashDeal = consumerCount > 1;
+
+    const flashDealsUrl = `${baseUrl}/community-flash-deals?pincode=${pincode}`;
+    const shareableMessage = encodeURIComponent(
+      `Join me for exclusive flash deals in our community! Click the link to participate: ${flashDealsUrl}`
+    );
+    const whatsappLink = `https://wa.me/?text=${shareableMessage}`;
+
+    res.json({
+      showFlashDeal,
+      shareableLink: flashDealsUrl,
+      whatsappLink,
+    });
+  } catch (error) {
+      console.error("Error checking for flash deals status:", error);
+      res.status(500).json({
+          success: false,
+          error: "Failed to check flash deals status",
+      });
+  }
+});
 
 app.post("/api/community-cart", async (req, res) => {
   console.log("Received community cart request with body:", req.body);

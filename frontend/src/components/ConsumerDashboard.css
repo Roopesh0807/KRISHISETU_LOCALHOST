@@ -1332,6 +1332,360 @@ body {
     color: rgba(255, 255, 255, 0.8);
 }
 
+/* ============================================== */
+/* === FLASH DEALS BANNER: Zomato/Swiggy Style === */
+/* ============================================== */
+
+/* Main Banner Container */
+.ks-flash-deal-banner-new {
+  --banner-bg-start: #ff416c; /* Vibrant pink-red */
+    --banner-bg-end: #ff4b2b; /* Intense orange-red */
+    --primary-text-color: #ffffff;
+    --secondary-text-color: #ffeff1;
+    --accent-color: #ffd700; /* Gold for highlights */
+    --shadow-color: rgba(0, 0, 0, 0.4);
+    
+    position: relative;
+    width: 100%;
+    padding: 30px 40px;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+    background: linear-gradient(135deg, var(--banner-bg-start) 0%, var(--banner-bg-end) 100%);
+    border-radius: 20px;
+    box-shadow: 0 15px 45px var(--shadow-color);
+    overflow: hidden;
+    transform: perspective(1000px) rotateX(0deg);
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform, box-shadow;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.ks-flash-deal-banner-new:hover {
+    transform: perspective(1000px) rotateX(5deg) scale(1.02);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+}
+
+/* Background Animation Effect */
+.ks-flash-deal-banner-new::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 10% 20%, rgba(255,255,255,0.1) 0%, transparent 60%),
+                radial-gradient(circle at 90% 80%, rgba(255,255,255,0.1) 0%, transparent 60%);
+    animation: rotate 20s linear infinite;
+    z-index: 0;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Content Container */
+.ks-banner-content-wrapper {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 30px;
+}
+
+/* Left Section: Discounts and Title */
+.ks-banner-left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-shrink: 0;
+    gap: 15px;
+    animation: slideInLeft 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes slideInLeft {
+    from { transform: translateX(-100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* 3D Discount Badge */
+.ks-discount-box {
+    position: relative;
+    background: linear-gradient(45deg, #fff 0%, var(--accent-color) 100%);
+    color: var(--banner-bg-start);
+    padding: 12px 20px;
+    border-radius: 15px;
+    font-weight: 900;
+    font-size: 2.5rem;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    transform: skewX(-10deg) scale(1.1);
+    animation: popIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.ks-discount-box::before {
+    content: 'OFF';
+    position: absolute;
+    bottom: -10px;
+    right: 5px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary-text-color);
+    background: var(--banner-bg-start);
+    padding: 2px 8px;
+    border-radius: 5px;
+    transform: skewX(10deg);
+}
+
+@keyframes popIn {
+    from { transform: scale(0.5) skewX(-10deg); opacity: 0; }
+    to { transform: scale(1.1) skewX(-10deg); opacity: 1; }
+}
+
+.ks-discount-value {
+    font-size: 2.2rem;
+    line-height: 1;
+}
+
+.ks-percent-icon {
+    font-size: 1.2rem;
+    position: relative;
+    bottom: 2px;
+}
+
+/* Title and Subtitle */
+.ks-banner-title h3 {
+    margin: 0;
+    font-size: 2.8rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+    color: var(--primary-text-color);
+    animation: textFlicker 2s infinite alternate;
+}
+
+@keyframes textFlicker {
+    0%, 100% { text-shadow: 3px 3px 6px rgba(0,0,0,0.3); }
+    50% { text-shadow: 3px 3px 10px rgba(0,0,0,0.5); }
+}
+
+.ks-banner-title p {
+    margin: 0;
+    font-size: 1rem; /* Reduced font size */
+    font-weight: 500;
+    opacity: 0.95;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    color: var(--secondary-text-color);
+}
+
+/* Middle Section: Carousel */
+.ks-banner-carousel-container {
+    flex: 1;
+    min-width: 0;
+    max-width: 500px;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    margin: 0 20px;
+    animation: fadeIn 1.2s ease-out;
+}
+
+
+/* Individual Carousel Item */
+
+/* Individual Carousel Item */
+.ks-banner-product-item {
+    padding: 0 10px;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    transition: transform 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+
+.ks-banner-product-item:hover {
+    transform: scale(1.01);
+}
+
+.ks-banner-product-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+    border: 3px solid rgba(255, 255, 255, 0.6);
+    transition: all 0.3s ease;
+}
+
+.ks-banner-product-item:hover .ks-banner-product-image {
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+/* Product details text */
+.ks-banner-product-details {
+    color: var(--primary-text-color);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.ks-banner-product-details h4 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ks-banner-price {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--secondary-text-color);
+}
+
+.ks-banner-price .ks-original-price {
+    text-decoration: line-through;
+    opacity: 0.7;
+    font-size: 0.9rem;
+}
+
+.ks-banner-price .ks-flash-price {
+    font-weight: bold;
+    color: var(--accent-color);
+    font-size: 1.1rem;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+/* Right Section: Call-to-Action Button */
+.ks-participate-btn {
+    position: relative;
+    z-index: 1;
+    background: var(--accent-color);
+    color: var(--banner-bg-start);
+    border: none;
+    padding: 12px 25px; /* Reduced padding */
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 1rem; /* Reduced font size */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease-in-out;
+    flex-shrink: 0;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    text-transform: uppercase;
+    overflow: hidden;
+}
+
+
+.ks-participate-btn:hover {
+    background-color: #ffd966;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+/* Animations */
+@keyframes bounceIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    50% { transform: scale(1.1); opacity: 1; }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+    .ks-flash-deal-banner-new {
+        flex-direction: column;
+        text-align: center;
+        padding: 25px;
+    }
+    .ks-banner-content-wrapper {
+        flex-direction: column;
+        gap: 20px;
+    }
+    .ks-banner-left {
+        align-items: center;
+    }
+    .ks-banner-carousel-container {
+        max-width: 100%;
+        margin: 20px 0;
+    }
+    .ks-participate-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .ks-flash-deal-banner-new {
+        padding: 20px;
+    }
+    .ks-banner-title h3 {
+        font-size: 1.8rem;
+        letter-spacing: 1px;
+    }
+    .ks-discount-box {
+        font-size: 1.5rem;
+        padding: 10px 15px;
+    }
+    .ks-discount-value {
+        font-size: 1.2rem;
+    }
+    .ks-banner-title p {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .ks-flash-deal-banner-new {
+        padding: 15px;
+        border-radius: 15px;
+    }
+    .ks-banner-title h3 {
+        font-size: 1.5rem;
+    }
+    .ks-banner-title p {
+        font-size: 0.8rem;
+    }
+    .ks-banner-product-image {
+        width: 60px;
+        height: 60px;
+    }
+    .ks-banner-product-details h4 {
+        font-size: 0.9rem;
+    }
+    .ks-participate-btn {
+        font-size: 0.9rem;
+        padding: 10px 20px;
+    }
+}
+
+
+
+
+
+
 
 /* Keyframe Animations */
 @keyframes pulse {
