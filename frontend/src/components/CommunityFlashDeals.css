@@ -871,3 +871,171 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     transform: translateY(-2px);
 }
+
+/* --- New Container for Link and Instructions Button --- */
+.link-and-info-container {
+    display: flex;
+    justify-content: space-between; /* This spreads the items out */
+    align-items: center;
+    margin-bottom: 25px;
+    padding: 15px;
+    background: #f0f8ff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Ensure the shareable link container occupies its space */
+.shareable-link-container {
+    flex-grow: 1; /* Allows it to take up available space */
+    max-width: 60%; /* Prevents it from getting too wide */
+}
+
+/* Updated How it Works button style for better visual alignment */
+.how-it-works-btn {
+    background: linear-gradient(45deg, #FFC107, #FF9800); /* A bright, distinct color */
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: -30px;
+}
+
+.how-it-works-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.how-it-works-btn .fa-info-circle {
+    font-size: 18px;
+}
+
+/* No other changes needed for the JS file. */
+
+/* --- Instructions Popup Styles --- */
+
+/* Base Overlay */
+.instructions-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Main Content Container */
+.instructions-popup-content {
+    background: linear-gradient(135deg, #ffffff, #f0f0f5);
+    padding: 40px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+    transform: scale(0.9);
+    animation: zoomIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Close Button */
+.instructions-popup-content .close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #a0a0a0;
+    transition: all 0.3s ease;
+}
+
+.instructions-popup-content .close-btn:hover {
+    color: #555;
+    transform: rotate(90deg);
+}
+
+/* Header */
+.instructions-popup-content h3 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #3f51b5;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.instructions-popup-content h3 .fa-question-circle {
+    margin-right: 10px;
+    font-size: 24px;
+    color: #4CAF50;
+}
+
+/* Individual Instruction Item */
+.instruction-item {
+    margin-bottom: 25px;
+    padding: 20px;
+    border-radius: 12px;
+    background-color: #f9f9f9;
+    border-left: 5px solid #4CAF50;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.instruction-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.instruction-item h4 {
+    color: #3f51b5;
+    font-size: 20px;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.instruction-item p {
+    color: #666;
+    line-height: 1.7;
+    margin-top: 0;
+    font-size: 16px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
