@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { faArrowLeft, faBolt, faShoppingCart, faTimesCircle, faFire, faCheckCircle, faSpinner, faShareAlt, faCopy, faLock } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faBolt, faShoppingCart, faTimesCircle, faFire, faCheckCircle, faSpinner, faShareAlt, faCopy, faLock, faQuestionCircle, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './CommunityFlashDeals.css';
 
@@ -22,6 +22,15 @@ const CommunityFlashDeals = () => {
     const [quantity, setQuantity] = useState(1);
     const [imagesCache, setImagesCache] = useState({});
     const [showSharePopup, setShowSharePopup] = useState(false);
+    const [showInstructions, setShowInstructions] = useState(false);
+
+    useEffect(() => {
+        const hasSeenInstructions = localStorage.getItem('hasSeenFlashDealInstructions');
+        if (!hasSeenInstructions) {
+            setShowInstructions(true);
+            localStorage.setItem('hasSeenFlashDealInstructions', 'true');
+        }
+    }, []);
 
     // Function to generate a unique community ID
     const getOrCreateCommunityId = () => {
@@ -214,6 +223,37 @@ const CommunityFlashDeals = () => {
         );
     };
     
+    const InstructionsPopup = ({ onClose }) => (
+        <div className="instructions-popup-overlay">
+            <div className="instructions-popup-content">
+                <button className="close-btn" onClick={onClose}>
+                    <FontAwesomeIcon icon={faTimesCircle} />
+                </button>
+                <h3>📢 How Flash Deals Work</h3>
+                <div className="instruction-item">
+                    <h4>Group Ordering Benefit</h4>
+                    <p>Flash Deals are available when people in the same location order together. Once a group is formed, Flash Deals open for that area.</p>
+                </div>
+                <div className="instruction-item">
+                    <h4>Not Eligible Yet?</h4>
+                    <p>If you’re not eligible right now, simply share your community link with friends or neighbors. When they join, you’ll also unlock Flash Deals offers.</p>
+                </div>
+                <div className="instruction-item">
+                    <h4>Fresh from Farmers</h4>
+                    <p>All products come directly from farmers — ensuring quality and fair prices.</p>
+                </div>
+                <div className="instruction-item">
+                    <h4>Limited Time Offer ⏳</h4>
+                    <p>Each Flash Deal is open for 24 hours only, so make sure to place your order before it closes.</p>
+                </div>
+                <div className="instruction-item">
+                    <h4>More Savings, More Freshness</h4>
+                    <p>Enjoy extra discounts, lower delivery charges, and fresh produce with every Flash Deal.</p>
+                </div>
+            </div>
+        </div>
+    );
+
     useEffect(() => {
         const fetchDealsAndStatus = async () => {
             if (!consumer?.consumer_id || !consumer?.token) {
@@ -333,18 +373,23 @@ const CommunityFlashDeals = () => {
                     </div>
                 </div>
                 
-                <div className="shareable-link-container">
-                    <div className="short-url">
-                        {shareableLink ? shareableLink : 'Fetching link...'}
+                <div className="link-and-info-container">
+                    <div className="shareable-link-container">
+                        <div className="short-url">
+                            {shareableLink ? shareableLink : 'Fetching link...'}
+                        </div>
+                        <div className="share-buttons">
+                            <button onClick={() => setShowSharePopup(true)} className="share-btn">
+                                <FontAwesomeIcon icon={faShareAlt} /> Share
+                            </button>
+                            <button onClick={handleCopyLink} className="share-btn copy">
+                                <FontAwesomeIcon icon={faCopy} /> Copy
+                            </button>
+                        </div>
                     </div>
-                    <div className="share-buttons">
-                        <button onClick={() => setShowSharePopup(true)} className="share-btn">
-                            <FontAwesomeIcon icon={faShareAlt} /> Share
-                        </button>
-                        <button onClick={handleCopyLink} className="share-btn copy">
-                            <FontAwesomeIcon icon={faCopy} /> Copy
-                        </button>
-                    </div>
+                    <button className="how-it-works-btn" onClick={() => setShowInstructions(true)}>
+                        <FontAwesomeIcon icon={faInfoCircle} /> How it Works
+                    </button>
                 </div>
 
                 {loading && (
@@ -432,6 +477,7 @@ const CommunityFlashDeals = () => {
                     </div>
                 </div>
             )}
+            {showInstructions && <InstructionsPopup onClose={() => setShowInstructions(false)} />}
         </div>
     );
 };

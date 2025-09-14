@@ -65,7 +65,12 @@ const ConsumerDashboard = () => {
     });
     const [showFlashDealBanner, setShowFlashDealBanner] = useState(false);
 
-    // No need for flashDealBannerRef or its JS useEffect for animation now, as we'll use CSS for marquee.
+    // --- START: ADDED WALLET INSUFFICIENT LOGIC ---
+    // Wallet state for the popup
+    const [walletBalance, setWalletBalance] = useState(0);
+    const [showWalletRequiredPopup, setShowWalletRequiredPopup] = useState(false);
+    // --- END: ADDED WALLET INSUFFICIENT LOGIC ---
+
 
     // Function to get the initial default date based on cutoff time
     const getInitialSubscriptionDate = () => {
@@ -459,8 +464,26 @@ const ConsumerDashboard = () => {
         checkFlashDeals();
     }, [consumer]);
 
-    // Removed the JS animation useEffect for the flash deal banner. CSS will handle the marquee.
-
+    // --- START: ADDED WALLET INSUFFICIENT LOGIC ---
+    // New useEffect to fetch wallet balance on component load
+    useEffect(() => {
+      const fetchWalletBalance = async () => {
+          if (!consumer?.consumer_id || !consumer?.token) return;
+          try {
+              const response = await fetch(`http://localhost:5000/api/wallet/balance/${consumer.consumer_id}`, {
+                  headers: { "Authorization": `Bearer ${consumer.token}` }
+              });
+              const data = await response.json();
+              if (data.success) {
+                  setWalletBalance(data.balance);
+              }
+          } catch (error) {
+              console.error("Error fetching wallet balance:", error);
+          }
+      };
+      fetchWalletBalance();
+    }, [consumer]);
+    // --- END: ADDED WALLET INSUFFICIENT LOGIC ---
 
     // Search handler for the main search bar
     const handleSearch = () => {
@@ -707,23 +730,43 @@ const bannerCarouselSettings = {
         navigate(`/community-home`);
     };
 
-    // New subscription handlers
-    const handleSubscribeClick = (product, e) => {
-        e.stopPropagation();
-        if (!consumer) {
-            alert("Please login first");
-            navigate("/consumer-login");
-            return;
-        }
-        setSelectedProductForSubscription(product);
-        setShowSubscriptionPopup(true);
-        setShowCalendar(false); // Reset calendar view
-        setSubscriptionConfirmed(false); // Reset confirmation view
-        setSelectedFrequency(""); // Reset frequency
-        setSelectedDate(getInitialSubscriptionDate()); // Set initial default date here
-        setDateSelectionError(""); // Clear any previous errors
-    };
+    // --- START: ADDED WALLET INSUFFICIENT LOGIC ---
+    const handleSubscribeClick = async (product, e) => {
+      e.stopPropagation();
+      if (!consumer) {
+          alert("Please login first");
+          navigate("/consumer-login");
+          return;
+      }
+      
+      try {
+          const response = await fetch(`http://localhost:5000/api/wallet/balance/${consumer.consumer_id}`, {
+              headers: { "Authorization": `Bearer ${consumer.token}` }
+          });
+          const data = await response.json();
+          setWalletBalance(data.balance);
+          
+          if (data.balance < 5) { // Assuming a minimum balance of 5 is required to subscribe
+              setShowWalletRequiredPopup(true);
+              return;
+          }
+      } catch (error) {
+          console.error("Error fetching wallet balance:", error);
+          alert("Could not fetch wallet balance. Please ensure your wallet is funded.");
+      }
 
+      setSelectedProductForSubscription(product);
+      setShowSubscriptionPopup(true);
+      setShowCalendar(false);
+      setSubscriptionConfirmed(false);
+      setSelectedFrequency("");
+      setSelectedDate(getInitialSubscriptionDate());
+      setDateSelectionError("");
+    };
+    // --- END: ADDED WALLET INSUFFICIENT LOGIC ---
+
+
+    // New subscription handlers
     const handleFrequencySelect = (frequency) => {
         setSelectedFrequency(frequency);
         setShowCalendar(true);
@@ -953,6 +996,25 @@ const bannerCarouselSettings = {
 
     return (
         <div className="ks-consumer-dashboard">
+            {/* --- START: ADDED WALLET INSUFFICIENT POPUP --- */}
+             {showWalletRequiredPopup && (
+                <div className="popup-overlay">
+                    <div className="wallet-required-popup popup-content">
+                        <div className="popup-header">
+                            <h3>Wallet Balance Low</h3>
+                            <button className="close-popup" onClick={() => setShowWalletRequiredPopup(false)}>&times;</button>
+                        </div>
+                        <div className="popup-body">
+                            <p>You need to have a minimum balance to subscribe to a product.</p>
+                            <p>Your current balance is ₹{walletBalance.toFixed(2)}.</p>
+                            <button className="add-money-btn" onClick={() => navigate('/subscribe', { state: { scrollToWallet: true } })}>
+                                Add Money to Wallet
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* --- END: ADDED WALLET INSUFFICIENT POPUP --- */}
             {/* Success Message Overlay for Subscription */}
             {showSuccessMessage && (
                 <div className="ks-success-overlay">
