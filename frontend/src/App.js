@@ -56,7 +56,7 @@ import AdminCommunityPage from './pages/AdminCommunityPage';
 import MemberCommunityPage from './pages/MemberCommunityPage';
 import OrderPageC from './pages/OrderPage';
 import MemberOrderPage from "./pages/MemberOrderPage";
-import CommunityOrderPage from "./pages/CommunityOrderPage";
+import CommunityOrderPage from "./pages/CommunityFlashDealsOrderPage";
 
 // In your main App.js or routing file
 import PaymentSuccess from './components/PaymentSuccess';
@@ -67,7 +67,7 @@ import GoogleTranslate from "./components/GoogleTranslate";
 import MyOrders from './components/MyOrders';
 import Transactions from './components/Transactions';
 
-
+import CommunityFlashDealsOrderPage from "./components/CommunityFlashDealsOrderPage";
 import CommunityFlashDeals from "./components/CommunityFlashDeals";
 import CombinedOrderPage from './components/CombinedOrderPage';
 
@@ -263,9 +263,8 @@ const Main = () => {
           <Route path="/community-page/:communityId/member" element={<MemberCommunityPage />} />
           <Route path="/order/:communityId" element={<OrderPageC />} />
           <Route path="/community/:communityId/member/:memberId" element={<MemberOrderPage />} />
-          <Route path="/community/:communityId/order/:orderId" 
-          
-               element={<CommunityOrderPage />} />
+          {/* <Route path="/community/:communityId/order/:orderId" element={<CommunityOrderPage />} /> */}
+        <Route path="/community-flash-deals-orderpage" element={<CommunityFlashDealsOrderPage />} />  
 <Route path="/community-flash-deals" element={<CommunityFlashDeals />} />
           // Add these to your routes
 <Route path="/payment-success" element={<PaymentSuccess />} />

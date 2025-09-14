@@ -1735,3 +1735,34 @@ UPDATE add_produce SET minimum_quantity = 8,  minimum_price = 400.00 WHERE produ
 UPDATE add_produce SET minimum_quantity = 20, minimum_price = 30.00 WHERE produce_name = 'Corn';
 UPDATE add_produce SET minimum_quantity = 9,  minimum_price = 25.00 WHERE produce_name = 'Tomatoes';
 UPDATE add_produce SET minimum_quantity = 11, minimum_price = 90.00 WHERE produce_name = 'Lentils';
+
+
+CREATE TABLE community_flash_deals_orders (
+  order_id INT AUTO_INCREMENT PRIMARY KEY,
+  community_id VARCHAR(20) NOT NULL,
+  consumer_id VARCHAR(20) NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  mobile_number VARCHAR(15) NOT NULL,
+  email VARCHAR(100) NOT NULL,
+  address TEXT NOT NULL,
+  pincode VARCHAR(10) NOT NULL,
+  produce_name TEXT NOT NULL,
+  quantity INT,
+  amount DECIMAL(10,2) NOT NULL,
+  is_self_delivery BOOLEAN DEFAULT FALSE,
+  status VARCHAR(20) DEFAULT 'Pending',
+  payment_method VARCHAR(50) NOT NULL,
+  payment_status VARCHAR(20) DEFAULT 'Pending',
+  subtotal DECIMAL(10,2) NOT NULL,
+  discount_amount DECIMAL(10,2) DEFAULT 0.00,
+  total_amount DECIMAL(10,2) NOT NULL,
+  order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+  delivery_date DATE,
+  delivery_time VARCHAR(50),
+  discount_data JSON,
+  razorpay_order_id VARCHAR(50) DEFAULT NULL,
+  razorpay_payment_id VARCHAR(50) DEFAULT NULL,
+  razorpay_signature VARCHAR(255) DEFAULT NULL,
+  FOREIGN KEY (community_id) REFERENCES communities(community_id),
+  FOREIGN KEY (consumer_id) REFERENCES consumerregistration(consumer_id)
+);

@@ -4312,6 +4312,159 @@ app.get('/api/check-community-flash-deals/:pincode', authenticateToken, async (r
 
 // ... (rest of server.js)
 
+// New endpoint to handle community flash deals order placement
+app.post("/api/place-community-flash-deals-order", verifyToken, async (req, res) => {
+  try {
+    const {
+      consumer_id,
+      name,
+      mobile_number,
+      email,
+      produce_name,
+      quantity,
+      amount,
+      is_self_delivery,
+      payment_method,
+      payment_status,
+      address,
+      pincode,
+      recipient_name,
+      recipient_phone,
+      subtotal,
+      discount_amount,
+      total_amount,
+      community_id
+    } = req.body;
+
+    if (!community_id) {
+      return res.status(400).json({ success: false, error: "Community ID is required." });
+    }
+
+    const result = await queryDatabase(
+      `INSERT INTO community_flash_deals_orders (
+        community_id, consumer_id, name, mobile_number, email,
+        address, pincode, produce_name, quantity, amount,
+        is_self_delivery, status, payment_method, payment_status,
+        subtotal, discount_amount, total_amount
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        community_id,
+        consumer_id, name, mobile_number, email,
+        address, pincode, produce_name, quantity, amount,
+        is_self_delivery, 'Pending', payment_method, payment_status,
+        subtotal, discount_amount, total_amount
+      ]
+    );
+
+    const orderId = result.insertId;
+
+    if (payment_method === 'razorpay') {
+      const razorpayOrder = await razorpay.orders.create({
+        amount: total_amount * 100,
+        currency: "INR",
+        receipt: `community_flash_deals_order_${orderId}`,
+        payment_capture: 1
+      });
+
+      await queryDatabase(
+        `UPDATE community_flash_deals_orders SET razorpay_order_id = ? WHERE order_id = ?`,
+        [razorpayOrder.id, orderId]
+      );
+
+      return res.json({
+        success: true,
+        order_id: orderId,
+        razorpay_order: razorpayOrder,
+        message: "Community flash deals order created for payment."
+      });
+    }
+
+    res.json({
+      success: true,
+      order_id: orderId,
+      message: "Community flash deals order placed successfully.",
+    });
+
+  } catch (error) {
+    console.error("Community flash deals order placement error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to place community flash deals order",
+      details: error.message,
+    });
+  }
+});
+// In server.js, add a new Razorpay verification endpoint for community orders
+app.post('/api/razorpay/verify-community-flash-deals-order', authenticateToken, async (req, res) => {
+  try {
+    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, order_id, amount } = req.body;
+
+    const generatedSignature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest('hex');
+
+    if (generatedSignature !== razorpay_signature) {
+      return res.status(400).json({ error: "Invalid payment signature" });
+    }
+
+    // Update the community_flash_deals_orders table
+    const updateResult = await queryDatabase(
+      `UPDATE community_flash_deals_orders
+       SET payment_status = 'Paid',
+           razorpay_payment_id = ?,
+           razorpay_order_id = ?,
+           razorpay_signature = ?,
+           status = 'Processing'
+       WHERE order_id = ?`,
+      [razorpay_payment_id, razorpay_order_id, razorpay_signature, order_id]
+    );
+
+    if (updateResult.affectedRows === 0) {
+      throw new Error("No community flash deals order found to update");
+    }
+
+    res.json({
+      success: true,
+      message: "Payment verified and community flash deals order updated"
+    });
+
+  } catch (error) {
+    console.error("Community flash deals payment verification error:", error);
+    res.status(500).json({
+      error: "Payment verification failed",
+      details: error.message
+    });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Add this new route to your server.js file
 app.post("/api/community-cart", async (req, res) => {
   console.log("Received community cart request with body:", req.body);
