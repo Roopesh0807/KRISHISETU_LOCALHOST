@@ -1766,3 +1766,24 @@ CREATE TABLE community_flash_deals_orders (
   FOREIGN KEY (community_id) REFERENCES communities(community_id),
   FOREIGN KEY (consumer_id) REFERENCES consumerregistration(consumer_id)
 );
+
+
+
+CREATE TABLE farmer_notifications (
+  notification_id INT(11) NOT NULL AUTO_INCREMENT,
+  farmer_id INT(11) NOT NULL,
+  order_id VARCHAR(100),
+  consumer_name VARCHAR(255),
+  message TEXT NOT NULL,
+  is_read TINYINT(1) DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (notification_id),
+
+  -- Only order_id is a foreign key referencing placeorder
+  CONSTRAINT fk_notification_order
+    FOREIGN KEY (order_id)
+    REFERENCES placeorder(order_id)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+);
