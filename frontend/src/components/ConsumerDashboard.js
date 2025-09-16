@@ -1220,7 +1220,8 @@ const bannerCarouselSettings = {
                                     <div className="ks-banner-product-details">
                                         <h4>{deal.produce_name}</h4>
                                         <p className="ks-banner-price">
-                                            <span className="ks-original-price">₹{deal.price_per_kg}/kg</span>
+                                            <span className="ks-original-price">₹{deal.price_per_kg}/kg</span></p>
+                                            <p className="ks-banner-price">
                                             <span className="ks-flash-price">₹{deal.minimum_price}/kg</span>
                                         </p>
                                     </div>
