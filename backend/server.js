@@ -695,7 +695,7 @@ app.use((req, res, next) => {
     "/api/farmerregister",
     "/api/farmerlogin",
     "api/community/consumer/:consumerId/communities",
-    "api/community/:communityId/update-details",
+    "api/community/:communityId/update-details", 
     // "/uploads/reviews",
     "/api/geocode/reverse",
     "/api/geocode/forward",
@@ -703,6 +703,8 @@ app.use((req, res, next) => {
 "/api/farmers",
 "/api/products",
 "/api/agmarknet-prices",
+// "/api/community-flashdeals",
+
     // Add more public routes if needed
   ];
 
@@ -817,6 +819,165 @@ app.get('/api/agmarknet-prices', async (req, res) => {
         res.status(500).json({ message: 'Failed to fetch data from the live API.', details: error.response ? error.response.data : error.message });
     }
 });
+
+
+// // Add before app.use(authMiddleware) // flash deals
+// app.get("/api/community-flashdeals", async (req, res) => {
+//   try {
+//     const products = await queryDatabase(`
+//       SELECT 
+//         product_id,
+//         produce_name,
+//         price_per_kg,
+//         minimum_price,
+//         availability
+//       FROM add_produce
+//       WHERE market_type = 'Bargaining Market'
+//     `);
+
+//     res.json(products || []);
+//   } catch (err) {
+//     console.error("Error fetching flash deals:", err);
+//     res.status(500).json({
+//       success: false,
+//       message: "Error fetching flash deals",
+//       error: err.message,
+//     });
+//   }
+// });
+
+
+// server.js
+
+// ... other imports and middleware ...
+
+// Public contact form submission endpoint
+app.post('/api/contact', async (req, res) => {
+  //...
+});
+
+// ✅ New: Public route for checking flash deals status
+app.get('/api/community-flash-deals-status/:pincode', async (req, res) => {
+    const { pincode } = req.params;
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+
+    try {
+        const [countResult] = await queryDatabase(
+            "SELECT COUNT(*) as consumer_count FROM consumerprofile WHERE pincode = ?",
+            [pincode]
+        );
+
+        const consumerCount = countResult.consumer_count;
+        const requiredCount = 2; // Set your required user count here
+        let showFlashDeal = consumerCount >= requiredCount;
+
+        let timerData = null;
+
+        const [statusRecord] = await queryDatabase(
+            "SELECT start_time FROM flash_deals_status WHERE pincode = ?",
+            [pincode]
+        );
+
+        const now = new Date();
+        const activeDuration = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+        const frozenDuration = 72 * 60 * 60 * 1000; // 72 hours (2 days) in milliseconds
+
+        if (statusRecord) {
+            const startTime = new Date(statusRecord.start_time);
+            const elapsedTime = now.getTime() - startTime.getTime();
+            const totalCycleTime = activeDuration + frozenDuration;
+
+            if (elapsedTime < totalCycleTime) {
+                // If the current cycle is still ongoing
+                timerData = { start_time: statusRecord.start_time };
+                if (elapsedTime > activeDuration) {
+                    // It's in the frozen (cool-down) period
+                    showFlashDeal = false;
+                }
+            } else {
+                // The previous cycle has completed, start a new one
+                if (showFlashDeal) {
+                    const newStartTime = now.toISOString();
+                    await queryDatabase(
+                        "UPDATE flash_deals_status SET start_time = ? WHERE pincode = ?",
+                        [newStartTime, pincode]
+                    );
+                    timerData = { start_time: newStartTime };
+                } else {
+                    // Conditions for a new deal are not met yet
+                    timerData = { start_time: null }; 
+                }
+            }
+        } else {
+            // No record exists for this pincode, check if conditions are met to start a new deal
+            if (showFlashDeal) {
+                const newStartTime = now.toISOString();
+                await queryDatabase(
+                    "INSERT INTO flash_deals_status (pincode, start_time) VALUES (?, ?)",
+                    [pincode, newStartTime]
+                );
+                timerData = { start_time: newStartTime };
+            } else {
+                // Conditions not met, return no timer data
+                timerData = { start_time: null };
+            }
+        }
+
+        const flashDealsUrl = `${baseUrl}/community-flash-deals?pincode=${pincode}`;
+        const shareableMessage = encodeURIComponent(
+            `Join me for exclusive flash deals in our community! Click the link to participate: ${flashDealsUrl}`
+        );
+        const whatsappLink = `https://wa.me/?text=${shareableMessage}`;
+
+        res.json({
+            showFlashDeal,
+            shareableLink: flashDealsUrl,
+            whatsappLink,
+            timerData,
+        });
+
+    } catch (error) {
+        console.error("Error checking for flash deals status:", error);
+        res.status(500).json({
+            success: false,
+            error: "Failed to check flash deals status",
+        });
+    }
+});
+
+// // ✅ New: Public route for fetching the flash deal products
+// app.get("/api/community-flashdeals", async (req, res) => {
+//   try {
+//     const products = await queryDatabase(`
+//       SELECT 
+//         product_id,
+//         produce_name,
+//         price_per_kg,
+//         minimum_price,
+//         availability
+//       FROM add_produce
+//       WHERE market_type = 'Bargaining Market'
+//     `);
+
+//     res.json(products || []);
+//   } catch (err) {
+//     console.error("Error fetching flash deals:", err);
+//     res.status(500).json({
+//       success: false,
+//       message: "Error fetching flash deals",
+//       error: err.message,
+//     });
+//   }
+// });
+
+
+
+
+
+
+
+
+
 
 
 // ⬇️ Must go before routes
@@ -4197,8 +4358,287 @@ app.get("/api/consumer-communities/:consumer_id", async (req, res) => {
 //     });
 //   }
 // });
+// Add a new authenticated route to get a few products for the banner
+// Make sure this is placed before the catch-all error handlers
+app.get("/api/community-flashdeals/banner-data", authenticateToken, async (req, res) => {
+    try {
+      const products = await queryDatabase(`
+        SELECT 
+          product_id,
+          produce_name,
+          price_per_kg,
+          minimum_price,
+          availability
+        FROM add_produce
+        WHERE market_type = 'Bargaining Market'
+        ORDER BY RAND()
+        LIMIT 5
+      `);
+
+      res.json(products || []);
+    } catch (err) {
+      console.error("Error fetching banner deals:", err);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching banner deals",
+        error: err.message,
+      });
+    }
+});
+
+// New: Protected route for checking flash deals status
+app.get('/api/check-community-flash-deals/:pincode', authenticateToken, async (req, res) => {
+  const { pincode } = req.params;
+  const baseUrl = `${req.protocol}://${req.get('host')}`;
+
+  try {
+    const [countResult] = await queryDatabase(
+      "SELECT COUNT(*) as consumer_count FROM consumerprofile WHERE pincode = ?",
+      [pincode]
+    );
+
+    const consumerCount = countResult.consumer_count;
+    const showFlashDeal = consumerCount > 1;
+
+    const flashDealsUrl = `${baseUrl}/community-flash-deals?pincode=${pincode}`;
+    const shareableMessage = encodeURIComponent(
+      `Join me for exclusive flash deals in our community! Click the link to participate: ${flashDealsUrl}`
+    );
+    const whatsappLink = `https://wa.me/?text=${shareableMessage}`;
+
+    res.json({
+      showFlashDeal,
+      shareableLink: flashDealsUrl,
+      whatsappLink,
+    });
+  } catch (error) {
+      console.error("Error checking for flash deals status:", error);
+      res.status(500).json({
+          success: false,
+          error: "Failed to check flash deals status",
+      });
+  }
+});
+// ... (rest of server.js)
+// ... (rest of server.js)
+// ... (rest of server.js)
+
+// ... (rest of server.js)
+
+// ... (rest of server.js)
+
+// New endpoint to handle community flash deals order placement
+app.post("/api/place-community-flash-deals-order", verifyToken, async (req, res) => {
+  try {
+    const {
+      consumer_id,
+      name,
+      mobile_number,
+      email,
+      produce_name,
+      quantity,
+      amount,
+      is_self_delivery,
+      payment_method,
+      payment_status,
+      address,
+      pincode,
+      recipient_name,
+      recipient_phone,
+      subtotal,
+      discount_amount,
+      total_amount,
+      community_id
+    } = req.body;
+
+    if (!community_id) {
+      return res.status(400).json({ success: false, error: "Community ID is required." });
+    }
+
+    const result = await queryDatabase(
+      `INSERT INTO community_flash_deals_orders (
+        community_id, consumer_id, name, mobile_number, email,
+        address, pincode, produce_name, quantity, amount,
+        is_self_delivery, status, payment_method, payment_status,
+        subtotal, discount_amount, total_amount
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        community_id,
+        consumer_id, name, mobile_number, email,
+        address, pincode, produce_name, quantity, amount,
+        is_self_delivery, 'Pending', payment_method, payment_status,
+        subtotal, discount_amount, total_amount
+      ]
+    );
+
+    const orderId = result.insertId;
+
+    if (payment_method === 'razorpay') {
+      const razorpayOrder = await razorpay.orders.create({
+        amount: total_amount * 100,
+        currency: "INR",
+        receipt: `community_flash_deals_order_${orderId}`,
+        payment_capture: 1
+      });
+
+      await queryDatabase(
+        `UPDATE community_flash_deals_orders SET razorpay_order_id = ? WHERE order_id = ?`,
+        [razorpayOrder.id, orderId]
+      );
+
+      return res.json({
+        success: true,
+        order_id: orderId,
+        razorpay_order: razorpayOrder,
+        message: "Community flash deals order created for payment."
+      });
+    }
+
+    res.json({
+      success: true,
+      order_id: orderId,
+      message: "Community flash deals order placed successfully.",
+    });
+
+  } catch (error) {
+    console.error("Community flash deals order placement error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to place community flash deals order",
+      details: error.message,
+    });
+  }
+});
+// In server.js, add a new Razorpay verification endpoint for community orders
+app.post('/api/razorpay/verify-community-flash-deals-order', authenticateToken, async (req, res) => {
+  try {
+    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, order_id, amount } = req.body;
+
+    const generatedSignature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest('hex');
+
+    if (generatedSignature !== razorpay_signature) {
+      return res.status(400).json({ error: "Invalid payment signature" });
+    }
+
+    // Update the community_flash_deals_orders table
+    const updateResult = await queryDatabase(
+      `UPDATE community_flash_deals_orders
+       SET payment_status = 'Paid',
+           razorpay_payment_id = ?,
+           razorpay_order_id = ?,
+           razorpay_signature = ?,
+           status = 'Processing'
+       WHERE order_id = ?`,
+      [razorpay_payment_id, razorpay_order_id, razorpay_signature, order_id]
+    );
+
+    if (updateResult.affectedRows === 0) {
+      throw new Error("No community flash deals order found to update");
+    }
+
+    res.json({
+      success: true,
+      message: "Payment verified and community flash deals order updated"
+    });
+
+  } catch (error) {
+    console.error("Community flash deals payment verification error:", error);
+    res.status(500).json({
+      error: "Payment verification failed",
+      details: error.message
+    });
+  }
+});
+// ... other imports and middleware ...
+
+// ... other imports and middleware ...
+
+// ✅ New: Protected route for fetching the flash deal products with full details
+app.get("/api/community-flashdeals", authenticateToken, async (req, res) => {
+  try {
+    const products = await queryDatabase(`
+      SELECT
+        ap.*,
+        CONCAT('http://localhost:5000', pd.profile_photo) AS profile_photo,
+        fd.farm_address,
+        fd.farm_photographs,
+        COALESCE(AVG(r.rating), 0) AS average_rating,
+        GROUP_CONCAT(JSON_OBJECT('consumer_name', r.consumer_name, 'rating', r.rating, 'comment', r.comment, 'created_at', r.created_at) SEPARATOR '|||') AS reviews_json
+      FROM add_produce ap
+      LEFT JOIN personaldetails pd ON ap.farmer_id = pd.farmer_id
+      LEFT JOIN farmdetails fd ON ap.farmer_id = fd.farmer_id
+      LEFT JOIN reviews r ON ap.farmer_id = r.farmer_id
+      WHERE ap.market_type = 'Bargaining Market'
+      GROUP BY ap.product_id, ap.farmer_id, pd.profile_photo, fd.farm_address, fd.farm_photographs
+    `);
+
+    // Parse the JSON string from GROUP_CONCAT to an array of objects
+    const formattedProducts = products.map(product => {
+      // Parse reviews
+      if (product.reviews_json) {
+        product.reviews = product.reviews_json
+          .split('|||')
+          .map(jsonStr => JSON.parse(jsonStr));
+      } else {
+        product.reviews = [];
+      }
+      delete product.reviews_json;
+
+      // Handle farm photos
+      if (product.farm_photographs) {
+        // Assuming farm_photographs is a comma-separated string or single URL
+        product.farm_photographs = product.farm_photographs.split(',').map(path => path.trim()).filter(Boolean);
+      } else {
+        product.farm_photographs = [];
+      }
+      
+      return product;
+    });
+
+    res.json(formattedProducts || []);
+  } catch (err) {
+    console.error("Error fetching flash deals:", err);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching flash deals",
+      error: err.message,
+    });
+  }
+});
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Add this new route to your server.js file
 app.post("/api/community-cart", async (req, res) => {
   console.log("Received community cart request with body:", req.body);
   const { community_id, product_id, consumer_id, quantity, price } = req.body;
@@ -4209,9 +4649,7 @@ app.post("/api/community-cart", async (req, res) => {
   }
 
   try {
-    console.log(`Checking consumer with ID: ${consumer_id}`);
-    
-    // First verify the consumer exists
+    // 1. Verify the consumer exists
     const [consumer] = await queryDatabase(
       "SELECT consumer_id, CONCAT(first_name, ' ', last_name) AS name FROM consumerregistration WHERE consumer_id = ?",
       [consumer_id]
@@ -4226,9 +4664,9 @@ app.post("/api/community-cart", async (req, res) => {
       });
     }
 
-    // Get product details including name, buy_type, and category
+    // 2. Get product details
     const [product] = await queryDatabase(
-      "SELECT product_id, product_name, buy_type, category FROM products WHERE product_id = ?",
+      "SELECT product_id, produce_name FROM add_produce WHERE product_id = ?",
       [product_id]
     );
   
@@ -4236,69 +4674,80 @@ app.post("/api/community-cart", async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    // Then verify the community exists and check freeze status
-    const [community] = await queryDatabase(
-      `SELECT 
-        community_id, 
-        community_name,
-        TIMESTAMPDIFF(SECOND, NOW(), CONCAT(delivery_date, ' ', delivery_time)) AS seconds_until_delivery
-       FROM communities 
-       WHERE community_id = ?`,
-      [community_id]
+    // 3. Get consumer's pincode
+    const [consumerProfile] = await queryDatabase(
+      "SELECT pincode, address FROM consumerprofile WHERE consumer_id = ?",
+      [consumer_id]
     );
+    const consumerPincode = consumerProfile?.pincode;
     
+    // 4. Check if a community with this pincode already exists
+    let [community] = await queryDatabase(
+      "SELECT community_id, community_name FROM communities WHERE community_name = ?",
+      [`Community-${consumerPincode}`]
+    );
+
     if (!community) {
-      return res.status(404).json({ error: "Community not found" });
-    }
+      console.log(`No community found for pincode ${consumerPincode}. Creating a new community.`);
+      const newCommunityName = `Community-${consumerPincode || community_id}`;
+      // Note: You need to hash the password before inserting. Assuming 'defaultpass' for now.
+      const newCommunityPassword = 'your_hashed_default_password_here'; 
+      
+      const communityInsertResult = await queryDatabase(
+        `INSERT INTO communities (community_id, community_name, password, admin_id, address, delivery_date, delivery_time)
+         VALUES (?, ?, ?, ?, ?, CURDATE() + INTERVAL 2 DAY, '10:00:00')`,
+        [community_id, newCommunityName, newCommunityPassword, consumer_id, consumerProfile?.address || 'Address not provided']
+      );
 
-    // Check if community is frozen (within 24 hours of delivery)
-    if (community.seconds_until_delivery <= 86400) {
-      return res.status(403).json({ 
-        error: "Community is frozen",
-        message: "No new orders can be placed within 24 hours of delivery",
-        delivery_time: community.delivery_time,
-        delivery_date: community.delivery_date
-      });
+      // Re-fetch the newly created community to ensure data is correct
+      [community] = await queryDatabase(
+        "SELECT community_id, community_name FROM communities WHERE community_id = ?",
+        [community_id]
+      );
     }
-
-    // Get member info (including verification that consumer belongs to community)
-    const [member] = await queryDatabase(
-      `SELECT m.member_id, m.consumer_id, m.community_id
-       FROM members m
-       WHERE m.consumer_id = ? 
-       AND m.community_id = ?`,
-      [consumer_id, community_id]
+    
+    // 5. Check if member exists in the determined community. If not, create a new one.
+    let [member] = await queryDatabase(
+      `SELECT member_id FROM members WHERE consumer_id = ? AND community_id = ?`,
+      [consumer_id, community.community_id]
     );
     
     if (!member) {
-      return res.status(403).json({ 
-        error: "Membership not found",
-        details: `Consumer ${consumer.consumer_id} is not a member of community ${community_id}`
-      });
-    }
+      console.log(`Member not found. Adding consumer ${consumer_id} to community ${community.community_id}`);
+      const memberInsertResult = await queryDatabase(
+        `INSERT INTO members (community_id, consumer_id) VALUES (?, ?)`,
+        [community.community_id, consumer_id]
+      );
+      
+      const newMemberId = memberInsertResult.insertId;
+      [member] = await queryDatabase(
+        `SELECT member_id FROM members WHERE member_id = ?`,
+        [`MEM${String(newMemberId).padStart(3, '0')}`]
+      );
 
-    // Insert the order with all product details
+      if (!member) {
+          throw new Error('Failed to retrieve new member record.');
+      }
+    }
+    
+    // 6. Insert the order with the status column
     const result = await queryDatabase(
       `INSERT INTO orders (
         community_id, 
         product_id, 
         product_name, 
-        buy_type, 
-        category,
         quantity, 
         price, 
-        member_id, 
+        member_id,
         payment_method
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pending')`,
+      ) VALUES (?, ?, ?, ?, ?, ?, 'Pending')`,
       [
-        community_id, 
+        community.community_id, 
         product_id, 
-        product.product_name,
-        product.buy_type,
-        product.category,
+        product.produce_name,
         quantity, 
         price, 
-        member.member_id
+        member.member_id,
       ]
     );
     
@@ -4317,6 +4766,92 @@ app.post("/api/community-cart", async (req, res) => {
     });
   }
 });
+
+// ... (rest of server.js)
+// ... (rest of server.js)
+// ... (rest of the server.js file) ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ✅ New: Endpoint to fetch community cart items for a consumer
+app.get('/api/community-cart/:consumerId', async (req, res) => {
+  try {
+    const { consumerId } = req.params;
+
+    // Validate consumerId
+    if (!consumerId) {
+      return res.status(400).json({ success: false, error: "Consumer ID is required" });
+    }
+
+    // Query to get all orders from the 'orders' table for the given consumer
+    // You may need to adjust the table and column names to match your schema
+    const query = `
+      SELECT
+        o.order_id,
+        o.product_id,
+        o.product_name,
+        o.buy_type,
+        o.category,
+        o.quantity,
+        o.price,
+        o.community_id,
+        o.member_id,
+        c.community_name
+      FROM orders o
+      JOIN members m ON o.member_id = m.member_id
+      JOIN communities c ON m.community_id = c.community_id
+      WHERE m.consumer_id = ? AND o.payment_method = 'Pending'
+    `;
+
+    const result = await queryDatabase(query, [consumerId]);
+
+    // Format the response for the client
+    const cartItems = result.map(item => ({
+      order_id: item.order_id,
+      product_id: item.product_id,
+      product_name: item.product_name,
+      buy_type: item.buy_type,
+      category: item.category,
+      quantity: item.quantity,
+      price: item.price,
+      community_id: item.community_id,
+      community_name: item.community_name,
+    }));
+
+    res.json({
+      success: true,
+      data: cartItems,
+      count: cartItems.length,
+    });
+  } catch (error) {
+    console.error('Error fetching community cart:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch community cart',
+      details: error.message,
+    });
+  }
+});
+
+// ... (rest of server.js)
+
+
 
 // GET /api/consumers - Fetch consumers from the database
 app.get('/consumers', async (req, res) => {
@@ -6199,7 +6734,16 @@ app.get('/api/check-community-flash-deals/:pincode', async (req, res) => {
       error: "Failed to check flash deals status"
     });
   }
-});
+})
+
+
+
+
+
+
+
+
+
 
 
 

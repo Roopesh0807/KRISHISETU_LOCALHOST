@@ -59,7 +59,7 @@ import AdminCommunityPage from './pages/AdminCommunityPage';
 import MemberCommunityPage from './pages/MemberCommunityPage';
 import OrderPageC from './pages/OrderPage';
 import MemberOrderPage from "./pages/MemberOrderPage";
-import CommunityOrderPage from "./pages/CommunityOrderPage";
+import CommunityOrderPage from "./pages/CommunityFlashDealsOrderPage";
 
 // In your main App.js or routing file
 import PaymentSuccess from './components/PaymentSuccess';
@@ -70,10 +70,9 @@ import GoogleTranslate from "./components/GoogleTranslate";
 import MyOrders from './components/MyOrders';
 import Transactions from './components/Transactions';
 
-import FlashDealPage from './components/FlashDealPage';
-
+import CommunityFlashDealsOrderPage from "./components/CommunityFlashDealsOrderPage";
 import CommunityFlashDeals from "./components/CommunityFlashDeals";
-
+import CombinedOrderPage from './components/CombinedOrderPage';
 
 function App() {
   return (
@@ -249,7 +248,7 @@ const Main = () => {
           <Route path="/cart" element={<Cart />} />
           <Route path="/farmer/:farmer_id/profile" element={<Profile />} />
           <Route path="/consumerprofile/:consumer_id" element={<ConsumerProfile />} />
-          <Route path="/flash-deal-page" element={<FlashDealPage />} />
+          
 
           <Route path="/HelpFarmers" element={<HelpFarmers />} />
           <Route path="/farmers/my-reviews" element={<FarmerReviews />} />
@@ -267,15 +266,14 @@ const Main = () => {
           <Route path="/community-page/:communityId/member" element={<MemberCommunityPage />} />
           <Route path="/order/:communityId" element={<OrderPageC />} />
           <Route path="/community/:communityId/member/:memberId" element={<MemberOrderPage />} />
-          <Route path="/community/:communityId/order/:orderId" 
-          
-               element={<CommunityOrderPage />} />
+          {/* <Route path="/community/:communityId/order/:orderId" element={<CommunityOrderPage />} /> */}
+        <Route path="/community-flash-deals-orderpage" element={<CommunityFlashDealsOrderPage />} />  
 <Route path="/community-flash-deals" element={<CommunityFlashDeals />} />
           // Add these to your routes
 <Route path="/payment-success" element={<PaymentSuccess />} />
 <Route path="/payment-failed" element={<PaymentFailed />} />
 
-
+<Route path="/combined-checkout" element={<CombinedOrderPage />} />
 
 
         <Route path="/bargain" element={<ConsumerChatList />} />
