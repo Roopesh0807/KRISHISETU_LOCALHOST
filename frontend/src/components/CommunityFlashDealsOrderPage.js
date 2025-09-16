@@ -6,7 +6,7 @@ import { FaTractor, FaShoppingBasket, FaRupeeSign, FaMapMarkerAlt, FaCreditCard,
 import { GiFarmer } from "react-icons/gi";
 import { BsCheckCircleFill } from "react-icons/bs";
 import axios from 'axios';
-import "./OrderPage.css"; // Reuse the same CSS file for consistent styling
+import "./OrderPage.css";
 
 const CommunityFlashDealsOrderPage = () => {
     const navigate = useNavigate();
@@ -47,6 +47,7 @@ const CommunityFlashDealsOrderPage = () => {
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [razorpayOrderId, setRazorpayOrderId] = useState(null);
     const [razorpayPaymentId, setRazorpayPaymentId] = useState(null);
+    const [isPlacingOrder, setIsPlacingOrder] = useState(false); // New state to prevent duplicate orders
 
     const coupons = [
         { code: "COMMUNITY10", discount: 10 },
@@ -54,11 +55,9 @@ const CommunityFlashDealsOrderPage = () => {
         { code: "BULKBUY30", discount: 30 },
     ];
 
-    // Helper functions
     const fetchConsumerProfile = async () => {
         if (!consumer?.consumer_id) return;
         try {
-            // FIX: Reverted to the correct GET request for fetching consumer profile
             const response = await axios.get(`http://localhost:5000/api/consumerprofile/${consumer.consumer_id}`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
@@ -154,7 +153,7 @@ const CommunityFlashDealsOrderPage = () => {
     const calculateDeliveryCharge = () => {
         const subtotal = calculateSubtotal();
         if (subtotal > 200) {
-            return 0; // Free delivery for orders above ₹200
+            return 0;
         }
         const totalKg = cart.reduce((total, product) => total + product.quantity, 0);
         return 20 + (2 * totalKg);
@@ -166,40 +165,59 @@ const CommunityFlashDealsOrderPage = () => {
         return subtotal - discountAmount + deliveryCharge;
     };
 
-    const handlePlaceOrder = async (isPaid = false) => {
-        if (deliveryOption === "self" && !consumerProfile.address) {
-            alert("Please add an address.");
+    const getOrderDetails = (isPaid = false) => {
+        const communityId = cart.length > 0 ? cart[0].community_id : null;
+    
+        let orderAddress, orderPincode;
+        if (deliveryOption === "self") {
+            orderAddress = consumerProfile.address || `${newAddress.street}, ${newAddress.landmark ? newAddress.landmark + ', ' : ''}${newAddress.city}, ${newAddress.state} - ${newAddress.pincode}`;
+            orderPincode = consumerProfile.pincode || newAddress.pincode;
+        } else {
+            orderAddress = `${recipientDetails.street}, ${recipientDetails.landmark ? recipientDetails.landmark + ', ' : ''}${recipientDetails.city}, ${recipientDetails.state} - ${recipientDetails.pincode}`;
+            orderPincode = recipientDetails.pincode;
+        }
+    
+        return {
+            consumer_id: consumerProfile.consumer_id,
+            name: consumerProfile.name,
+            mobile_number: consumerProfile.mobile_number,
+            email: consumerProfile.email,
+            produce_name: cart.map(p => p.product_name).join(", "),
+            quantity: cart.reduce((total, p) => total + p.quantity, 0),
+            amount: calculateFinalPrice(),
+            is_self_delivery: deliveryOption === "self",
+            payment_status: isPaid ? 'Paid' : 'Pending',
+            payment_method: isPaid ? 'razorpay' : 'cash-on-delivery',
+            address: orderAddress,
+            pincode: orderPincode,
+            recipient_name: deliveryOption === "other" ? (selectedRecipientAddress ? savedRecipientAddresses.find(a => a.id === selectedRecipientAddress)?.name : recipientDetails.name) : null,
+            recipient_phone: deliveryOption === "other" ? (selectedRecipientAddress ? savedRecipientAddresses.find(a => a.id === selectedRecipientAddress)?.phone : recipientDetails.phone) : null,
+            community_id: communityId,
+            subtotal: calculateSubtotal(),
+            discount_amount: discountAmount,
+            total_amount: calculateFinalPrice(),
+        };
+    };
+
+    const handlePlaceOrder = async () => {
+        // Prevent duplicate submissions
+        if (isPlacingOrder) return;
+        setIsPlacingOrder(true);
+
+        const orderData = getOrderDetails();
+
+        if (deliveryOption === "self" && !consumerProfile.address && !newAddress.street) {
+            alert("Please add an address before placing your order.");
+            setIsPlacingOrder(false); // Reset the flag
             return;
         }
         if (deliveryOption === "other" && !selectedRecipientAddress && !recipientDetails.street) {
             alert("Please select or add a recipient address.");
+            setIsPlacingOrder(false); // Reset the flag
             return;
         }
 
         try {
-            const communityId = cart.length > 0 ? cart[0].community_id : null;
-
-            const orderData = {
-                consumer_id: consumerProfile.consumer_id,
-                name: consumerProfile.name,
-                mobile_number: consumerProfile.mobile_number,
-                email: consumerProfile.email,
-                produce_name: cart.map(p => p.product_name).join(", "),
-                quantity: cart.reduce((total, p) => total + p.quantity, 0),
-                amount: calculateFinalPrice(),
-                is_self_delivery: deliveryOption === "self",
-                payment_status: isPaid ? 'Paid' : 'Pending',
-                payment_method: isPaid ? 'razorpay' : 'cash-on-delivery',
-                delivery_address: deliveryOption === "self" ? consumerProfile.address :
-                    `${recipientDetails.street}, ${recipientDetails.city}, ${recipientDetails.state} - ${recipientDetails.pincode}`,
-                recipient_name: deliveryOption === "other" ? (selectedRecipientAddress ? savedRecipientAddresses.find(a => a.id === selectedRecipientAddress)?.name : recipientDetails.name) : null,
-                recipient_phone: deliveryOption === "other" ? (selectedRecipientAddress ? savedRecipientAddresses.find(a => a.id === selectedRecipientAddress)?.phone : recipientDetails.phone) : null,
-                community_id: communityId,
-                subtotal: calculateSubtotal(),
-                discount_amount: discountAmount,
-                total_amount: calculateFinalPrice(),
-            };
-            
             const response = await axios.post("http://localhost:5000/api/place-community-flash-deals-order", orderData, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
@@ -207,6 +225,7 @@ const CommunityFlashDealsOrderPage = () => {
             if (response.data.success) {
                 setShowSuccessPopup(true);
                 setTimeout(() => {
+                    setCart([]); // Clear the cart on successful order
                     navigate("/consumer-dashboard");
                 }, 3000);
             } else {
@@ -215,68 +234,60 @@ const CommunityFlashDealsOrderPage = () => {
         } catch (error) {
             console.error("Order placement error:", error);
             alert(`Error placing order: ${error.message}`);
+        } finally {
+            // Reset the flag regardless of success or failure
+            setIsPlacingOrder(false);
         }
     };
-
+    
     const handleRazorpayPayment = async () => {
+        // Prevent duplicate submissions
+        if (isPlacingOrder) return;
+        setIsPlacingOrder(true);
+        
         const finalAmount = calculateFinalPrice();
         if (finalAmount <= 0) {
+            setIsPlacingOrder(false); // Reset the flag
             alert("Invalid order amount.");
+            return;
+        }
+        
+        const orderData = getOrderDetails(true);
+
+        if (deliveryOption === "self" && !consumerProfile.address && !newAddress.street) {
+            alert("Please add an address before proceeding with payment.");
+            setIsPlacingOrder(false); // Reset the flag
+            return;
+        }
+        if (deliveryOption === "other" && !selectedRecipientAddress && !recipientDetails.street) {
+            alert("Please select or add a recipient address.");
+            setIsPlacingOrder(false); // Reset the flag
             return;
         }
 
         try {
-            const communityId = cart.length > 0 ? cart[0].community_id : null;
- // Start of the fix
-        // Construct the address and pincode based on the delivery option
-        const deliveryAddress = deliveryOption === "self" 
-            ? consumerProfile.address 
-            : `${recipientDetails.street}, ${recipientDetails.city}, ${recipientDetails.state} - ${recipientDetails.pincode}`;
-        
-        const deliveryPincode = deliveryOption === "self"
-            ? (consumerProfile.pincode || newAddress.pincode) // Use fallback if needed
-            : recipientDetails.pincode;
-            const orderData = {
-                consumer_id: consumerProfile.consumer_id,
-                name: consumerProfile.name,
-                mobile_number: consumerProfile.mobile_number,
-                email: consumerProfile.email,
-                produce_name: cart.map(p => p.product_name).join(", "),
-                quantity: cart.reduce((total, p) => total + p.quantity, 0),
-                amount: finalAmount,
-                is_self_delivery: deliveryOption === "self",
-                payment_method: 'razorpay',
-                payment_status: 'Pending',
-               // FIX: Add the correctly determined address and pincode
-            address: deliveryAddress,
-            pincode: deliveryPincode,
-
-            recipient_name: deliveryOption === "other" ? (selectedRecipientAddress ? savedRecipientAddresses.find(a => a.id === selectedRecipientAddress)?.name : recipientDetails.name) : null,
-            recipient_phone: deliveryOption === "other" ? (selectedRecipientAddress ? savedRecipientAddresses.find(a => a.id === selectedRecipientAddress)?.phone : recipientDetails.phone) : null,
-            community_id: communityId,
-            subtotal: calculateSubtotal(),
-            discount_amount: discountAmount,
-            total_amount: calculateFinalPrice(),
-            };
-
+            // First, create the order in your backend database
             const orderResponse = await axios.post("http://localhost:5000/api/place-community-flash-deals-order", orderData, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
 
             if (!orderResponse.data.success || !orderResponse.data.order_id) {
-                throw new Error(orderResponse.data.error || "Failed to create order");
+                throw new Error(orderResponse.data.error || "Failed to create order on server");
             }
 
+            const internalOrderId = orderResponse.data.order_id; // Store the ID for later use
+
+            // Next, create the Razorpay order
             const razorpayResponse = await axios.post('http://localhost:5000/api/razorpay/create-order', {
                 amount: finalAmount,
-                order_id: orderResponse.data.order_id,
-                notes: { internal_order_id: orderResponse.data.order_id, consumer_id: consumerProfile.consumer_id }
+                order_id: internalOrderId, // Pass your internal order ID
+                notes: { internal_order_id: internalOrderId, consumer_id: consumerProfile.consumer_id }
             }, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
 
             if (!razorpayResponse.data.order) {
-                throw new Error(razorpayResponse.data.error || "Payment gateway error");
+                throw new Error(razorpayResponse.data.error || "Payment gateway order creation failed");
             }
 
             const options = {
@@ -288,23 +299,27 @@ const CommunityFlashDealsOrderPage = () => {
                 description: 'Community Flash Deals',
                 image: '',
                 handler: async (response) => {
+                    // This handler is executed ONCE after successful payment
                     try {
-                         const verificationResponse = await axios.post(
-      'http://localhost:5000/api/razorpay/verify-community-flash-deals-order', // FIX: Use the new route
-       {
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_order_id: response.razorpay_order_id,
-                            razorpay_signature: response.razorpay_signature,
-                            order_id: orderResponse.data.order_id,
-                            amount: razorpayResponse.data.order.amount
-                        }, { headers: { "Authorization": `Bearer ${token}` } });
+                        const verificationResponse = await axios.post(
+                            'http://localhost:5000/api/razorpay/verify-community-flash-deals-order',
+                            {
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_signature: response.razorpay_signature,
+                                order_id: internalOrderId, // Use the stored internal order ID
+                                amount: razorpayResponse.data.order.amount
+                            }, { headers: { "Authorization": `Bearer ${token}` } });
 
                         if (!verificationResponse.data.success) {
                             throw new Error(verificationResponse.data.error || 'Payment verification failed');
                         }
 
                         setShowSuccessPopup(true);
-                        setTimeout(() => navigate("/consumer-dashboard"), 3000);
+                        setTimeout(() => {
+                            setCart([]); // Clear the cart on successful order
+                            navigate("/consumer-dashboard");
+                        }, 3000);
                     } catch (error) {
                         console.error('Payment verification failed:', error);
                         alert(`Payment verification failed: ${error.message}`);
@@ -322,13 +337,17 @@ const CommunityFlashDealsOrderPage = () => {
             rzp.on('payment.failed', (response) => {
                 console.error('Payment failed:', response.error);
                 alert(`Payment failed: ${response.error.description}`);
+                setIsPlacingOrder(false); // Reset the flag on failure
             });
             rzp.open();
 
         } catch (error) {
             console.error('Payment error:', error);
             alert(`Payment failed: ${error.message}`);
+            setIsPlacingOrder(false); // Reset the flag on error
         }
+        // NOTE: The flag is not reset in a finally block here because the Razorpay handler is asynchronous.
+        // It's handled by the rzp.on('payment.failed') or the successful handler's navigation.
     };
 
     const handlePincodeChange = (e, isRecipient = false) => {
@@ -480,7 +499,6 @@ const CommunityFlashDealsOrderPage = () => {
                     )}
                 </div>
 
-                {/* The rest of the Order Page UI is identical to KrishiOrderPage.js */}
                 <div className="krishi-summary-section">
                     <div className="krishi-coupon-card">
                         <h3 className="krishi-card-title">
@@ -581,7 +599,19 @@ const CommunityFlashDealsOrderPage = () => {
                         {discountAmount > 0 && (<div className="krishi-total-row"><span>Discount:</span><span className="krishi-discount">- <FaRupeeSign /> {discountAmount}</span></div>)}
                         <div className="krishi-total-row"><span>Delivery Charge:</span><span>{calculateDeliveryCharge() === 0 ? (<span className="krishi-free-delivery">FREE</span>) : (<span><FaRupeeSign /> {calculateDeliveryCharge()}</span>)}</span></div>
                         <div className="krishi-total-row krishi-grand-total"><span>Total:</span><span><FaRupeeSign /> {calculateFinalPrice()}</span></div>
-                        <button className="krishi-place-order-btn" onClick={() => { if (paymentMethod === 'razorpay') { handleRazorpayPayment(); } else { handlePlaceOrder(); } }}>{paymentMethod === 'razorpay' ? `Pay ₹${calculateFinalPrice()}` : 'Place Order (Cash on Delivery)'}</button>
+                        <button 
+                            className="krishi-place-order-btn" 
+                            onClick={() => { 
+                                if (paymentMethod === 'razorpay') { 
+                                    handleRazorpayPayment(); 
+                                } else { 
+                                    handlePlaceOrder(); 
+                                } 
+                            }}
+                            disabled={isPlacingOrder}
+                        >
+                            {isPlacingOrder ? 'Processing...' : (paymentMethod === 'razorpay' ? `Pay ₹${calculateFinalPrice()}` : 'Place Order (Cash on Delivery)')}
+                        </button>
                     </div>
                 </div>
             </div>

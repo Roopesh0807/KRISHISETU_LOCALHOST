@@ -13,6 +13,7 @@ import {
     faChevronLeft,
     faChevronRight,
     faSpinner,
+    faClock,
     faPercentage,
     faTimes, // Added for close button in subscription popup
     faCheckCircle, // Added for success message in subscription popup
@@ -64,7 +65,7 @@ const ConsumerDashboard = () => {
         return savedCache ? JSON.parse(savedCache) : {};
     });
     const [showFlashDealBanner, setShowFlashDealBanner] = useState(false);
-
+const [flashDealTimeLeft, setFlashDealTimeLeft] = useState(0);
     // --- START: ADDED WALLET INSUFFICIENT LOGIC ---
     // Wallet state for the popup
     const [walletBalance, setWalletBalance] = useState(0);
@@ -106,7 +107,13 @@ const ConsumerDashboard = () => {
     const [dateSelectionError, setDateSelectionError] = useState("");
     const [selectedFrequency, setSelectedFrequency] = useState("");
 
-
+// Add this function, it's a copy from CommunityFlashDeals.js
+const formatTime = (seconds) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+};
     // Haversine formula to calculate the distance between two lat/lon points
     const calculateDistance = (lat1, lon1, lat2, lon2) => {
         const R = 6371;
@@ -430,6 +437,20 @@ const ConsumerDashboard = () => {
                 if (flashDealData.showFlashDeal) {
                     setShowFlashDealBanner(true);
                     // Fetch products for the banner
+                    if (flashDealData.timerData) {
+                const startTime = new Date(flashDealData.timerData.start_time).getTime();
+                const now = new Date().getTime();
+                const activeDuration = 24 * 60 * 60 * 1000;
+                const frozenDuration = 72 * 60 * 60 * 1000;
+                const cycleDuration = activeDuration + frozenDuration;
+                const elapsedTimeInCycle = (now - startTime) % cycleDuration;
+                
+                if (elapsedTimeInCycle < activeDuration) {
+                    setFlashDealTimeLeft(Math.floor((activeDuration - elapsedTimeInCycle) / 1000));
+                } else {
+                    setFlashDealTimeLeft(Math.floor((cycleDuration - elapsedTimeInCycle) / 1000));
+                }
+            }
                     const bannerProductsResponse = await fetch(`http://localhost:5000/api/community-flashdeals/banner-data`, {
                         headers: {
                             "Authorization": `Bearer ${consumer.token}`,
@@ -454,6 +475,7 @@ const ConsumerDashboard = () => {
 
                 } else {
                     setShowFlashDealBanner(false);
+                     setFlashDealTimeLeft(0);
                 }
             } catch (error) {
                 console.error("Error checking flash deals:", error);
@@ -462,6 +484,13 @@ const ConsumerDashboard = () => {
         };
 
         checkFlashDeals();
+        // Add the interval to update the timer every second
+    const timer = setInterval(() => {
+        setFlashDealTimeLeft(prevTime => Math.max(0, prevTime - 1));
+    }, 1000);
+    
+    // Cleanup function for the timer
+    return () => clearInterval(timer);
     }, [consumer]);
 
     // --- START: ADDED WALLET INSUFFICIENT LOGIC ---
@@ -1174,6 +1203,10 @@ const bannerCarouselSettings = {
                             <h3>COMMUNITY DEALS</h3>
                             <p>Limited Time Offers</p>
                         </div>
+                         <div className="ks-banner-timer">
+        <FontAwesomeIcon icon={faClock} />
+        <span>{formatTime(flashDealTimeLeft)}</span>
+    </div>
                     </div>
                     <div className="ks-banner-carousel-container">
                         <Slider {...bannerCarouselSettings}>

@@ -1787,3 +1787,11 @@ CREATE TABLE farmer_notifications (
     ON DELETE SET NULL
     ON UPDATE CASCADE
 );
+
+
+CREATE TABLE flash_deals_status (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    pincode VARCHAR(10) UNIQUE NOT NULL,
+    start_time DATETIME NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

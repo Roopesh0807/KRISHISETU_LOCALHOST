@@ -703,7 +703,7 @@ app.use((req, res, next) => {
 "/api/farmers",
 "/api/products",
 "/api/agmarknet-prices",
-"/api/community-flashdeals",
+// "/api/community-flashdeals",
 
     // Add more public routes if needed
   ];
@@ -821,30 +821,30 @@ app.get('/api/agmarknet-prices', async (req, res) => {
 });
 
 
-// Add before app.use(authMiddleware) // flash deals
-app.get("/api/community-flashdeals", async (req, res) => {
-  try {
-    const products = await queryDatabase(`
-      SELECT 
-        product_id,
-        produce_name,
-        price_per_kg,
-        minimum_price,
-        availability
-      FROM add_produce
-      WHERE market_type = 'Bargaining Market'
-    `);
+// // Add before app.use(authMiddleware) // flash deals
+// app.get("/api/community-flashdeals", async (req, res) => {
+//   try {
+//     const products = await queryDatabase(`
+//       SELECT 
+//         product_id,
+//         produce_name,
+//         price_per_kg,
+//         minimum_price,
+//         availability
+//       FROM add_produce
+//       WHERE market_type = 'Bargaining Market'
+//     `);
 
-    res.json(products || []);
-  } catch (err) {
-    console.error("Error fetching flash deals:", err);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching flash deals",
-      error: err.message,
-    });
-  }
-});
+//     res.json(products || []);
+//   } catch (err) {
+//     console.error("Error fetching flash deals:", err);
+//     res.status(500).json({
+//       success: false,
+//       message: "Error fetching flash deals",
+//       error: err.message,
+//     });
+//   }
+// });
 
 
 // server.js
@@ -858,62 +858,117 @@ app.post('/api/contact', async (req, res) => {
 
 // ✅ New: Public route for checking flash deals status
 app.get('/api/community-flash-deals-status/:pincode', async (req, res) => {
-  const { pincode } = req.params;
-  const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const { pincode } = req.params;
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
 
-  try {
-    const [countResult] = await queryDatabase(
-      "SELECT COUNT(*) as consumer_count FROM consumerprofile WHERE pincode = ?",
-      [pincode]
-    );
+    try {
+        const [countResult] = await queryDatabase(
+            "SELECT COUNT(*) as consumer_count FROM consumerprofile WHERE pincode = ?",
+            [pincode]
+        );
 
-    const consumerCount = countResult.consumer_count;
-    const showFlashDeal = consumerCount > 1;
+        const consumerCount = countResult.consumer_count;
+        const requiredCount = 2; // Set your required user count here
+        let showFlashDeal = consumerCount >= requiredCount;
 
-    const flashDealsUrl = `${baseUrl}/community-flash-deals?pincode=${pincode}`;
-    const shareableMessage = encodeURIComponent(
-      `Join me for exclusive flash deals in our community! Click the link to participate: ${flashDealsUrl}`
-    );
-    const whatsappLink = `https://wa.me/?text=${shareableMessage}`;
+        let timerData = null;
 
-    res.json({
-      showFlashDeal,
-      shareableLink: flashDealsUrl,
-      whatsappLink,
-    });
-  } catch (error) {
-    console.error("Error checking for flash deals status:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to check flash deals status",
-    });
-  }
+        const [statusRecord] = await queryDatabase(
+            "SELECT start_time FROM flash_deals_status WHERE pincode = ?",
+            [pincode]
+        );
+
+        const now = new Date();
+        const activeDuration = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+        const frozenDuration = 72 * 60 * 60 * 1000; // 72 hours (2 days) in milliseconds
+
+        if (statusRecord) {
+            const startTime = new Date(statusRecord.start_time);
+            const elapsedTime = now.getTime() - startTime.getTime();
+            const totalCycleTime = activeDuration + frozenDuration;
+
+            if (elapsedTime < totalCycleTime) {
+                // If the current cycle is still ongoing
+                timerData = { start_time: statusRecord.start_time };
+                if (elapsedTime > activeDuration) {
+                    // It's in the frozen (cool-down) period
+                    showFlashDeal = false;
+                }
+            } else {
+                // The previous cycle has completed, start a new one
+                if (showFlashDeal) {
+                    const newStartTime = now.toISOString();
+                    await queryDatabase(
+                        "UPDATE flash_deals_status SET start_time = ? WHERE pincode = ?",
+                        [newStartTime, pincode]
+                    );
+                    timerData = { start_time: newStartTime };
+                } else {
+                    // Conditions for a new deal are not met yet
+                    timerData = { start_time: null }; 
+                }
+            }
+        } else {
+            // No record exists for this pincode, check if conditions are met to start a new deal
+            if (showFlashDeal) {
+                const newStartTime = now.toISOString();
+                await queryDatabase(
+                    "INSERT INTO flash_deals_status (pincode, start_time) VALUES (?, ?)",
+                    [pincode, newStartTime]
+                );
+                timerData = { start_time: newStartTime };
+            } else {
+                // Conditions not met, return no timer data
+                timerData = { start_time: null };
+            }
+        }
+
+        const flashDealsUrl = `${baseUrl}/community-flash-deals?pincode=${pincode}`;
+        const shareableMessage = encodeURIComponent(
+            `Join me for exclusive flash deals in our community! Click the link to participate: ${flashDealsUrl}`
+        );
+        const whatsappLink = `https://wa.me/?text=${shareableMessage}`;
+
+        res.json({
+            showFlashDeal,
+            shareableLink: flashDealsUrl,
+            whatsappLink,
+            timerData,
+        });
+
+    } catch (error) {
+        console.error("Error checking for flash deals status:", error);
+        res.status(500).json({
+            success: false,
+            error: "Failed to check flash deals status",
+        });
+    }
 });
 
-// ✅ New: Public route for fetching the flash deal products
-app.get("/api/community-flashdeals", async (req, res) => {
-  try {
-    const products = await queryDatabase(`
-      SELECT 
-        product_id,
-        produce_name,
-        price_per_kg,
-        minimum_price,
-        availability
-      FROM add_produce
-      WHERE market_type = 'Bargaining Market'
-    `);
+// // ✅ New: Public route for fetching the flash deal products
+// app.get("/api/community-flashdeals", async (req, res) => {
+//   try {
+//     const products = await queryDatabase(`
+//       SELECT 
+//         product_id,
+//         produce_name,
+//         price_per_kg,
+//         minimum_price,
+//         availability
+//       FROM add_produce
+//       WHERE market_type = 'Bargaining Market'
+//     `);
 
-    res.json(products || []);
-  } catch (err) {
-    console.error("Error fetching flash deals:", err);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching flash deals",
-      error: err.message,
-    });
-  }
-});
+//     res.json(products || []);
+//   } catch (err) {
+//     console.error("Error fetching flash deals:", err);
+//     res.status(500).json({
+//       success: false,
+//       message: "Error fetching flash deals",
+//       error: err.message,
+//     });
+//   }
+// });
 
 
 
@@ -4437,6 +4492,64 @@ app.post('/api/razorpay/verify-community-flash-deals-order', authenticateToken, 
     });
   }
 });
+// ... other imports and middleware ...
+
+// ... other imports and middleware ...
+
+// ✅ New: Protected route for fetching the flash deal products with full details
+app.get("/api/community-flashdeals", authenticateToken, async (req, res) => {
+  try {
+    const products = await queryDatabase(`
+      SELECT
+        ap.*,
+        CONCAT('http://localhost:5000', pd.profile_photo) AS profile_photo,
+        fd.farm_address,
+        fd.farm_photographs,
+        COALESCE(AVG(r.rating), 0) AS average_rating,
+        GROUP_CONCAT(JSON_OBJECT('consumer_name', r.consumer_name, 'rating', r.rating, 'comment', r.comment, 'created_at', r.created_at) SEPARATOR '|||') AS reviews_json
+      FROM add_produce ap
+      LEFT JOIN personaldetails pd ON ap.farmer_id = pd.farmer_id
+      LEFT JOIN farmdetails fd ON ap.farmer_id = fd.farmer_id
+      LEFT JOIN reviews r ON ap.farmer_id = r.farmer_id
+      WHERE ap.market_type = 'Bargaining Market'
+      GROUP BY ap.product_id, ap.farmer_id, pd.profile_photo, fd.farm_address, fd.farm_photographs
+    `);
+
+    // Parse the JSON string from GROUP_CONCAT to an array of objects
+    const formattedProducts = products.map(product => {
+      // Parse reviews
+      if (product.reviews_json) {
+        product.reviews = product.reviews_json
+          .split('|||')
+          .map(jsonStr => JSON.parse(jsonStr));
+      } else {
+        product.reviews = [];
+      }
+      delete product.reviews_json;
+
+      // Handle farm photos
+      if (product.farm_photographs) {
+        // Assuming farm_photographs is a comma-separated string or single URL
+        product.farm_photographs = product.farm_photographs.split(',').map(path => path.trim()).filter(Boolean);
+      } else {
+        product.farm_photographs = [];
+      }
+      
+      return product;
+    });
+
+    res.json(formattedProducts || []);
+  } catch (err) {
+    console.error("Error fetching flash deals:", err);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching flash deals",
+      error: err.message,
+    });
+  }
+});
+
+
 
 
 

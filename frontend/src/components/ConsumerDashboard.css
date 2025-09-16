@@ -1592,7 +1592,26 @@ body {
     text-transform: uppercase;
     overflow: hidden;
 }
+/* Add this new section at the end of the file */
+.ks-banner-timer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+  color: var(--primary-text-color);
+  background: rgba(255, 255, 255, 0.2);
+  padding: 8px 15px;
+  border-radius: 50px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
 
+.ks-banner-timer .fa-clock {
+  font-size: 1.4rem;
+  color: var(--accent-color);
+}
 
 .ks-participate-btn:hover {
     background-color: #ffd966;
