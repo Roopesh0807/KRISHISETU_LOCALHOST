@@ -973,116 +973,176 @@ io.use((socket, next) => {
 });
 
 
+// io.on("connection", (socket) => {
+//   const user = socket.user;
+//   const userType = user?.userType;
+//   const bargainId = socket.handshake.query?.bargainId;
+
+//   console.log("🎯 New connection from:", userType, socket.id);
+
+//   // 🔒 Authentication check
+//   if (!user || (userType !== "farmer" && userType !== "consumer")) {
+//     console.warn(`❌ Unauthorized connection: ${socket.id}`);
+//     socket.disconnect(true);
+//     return;
+//   }
+
+//   // 🏠 Join bargain room if ID exists (removed isValidBargainId check)
+//   if (bargainId) {
+//     socket.join(bargainId);
+//     console.log(`🏠 ${userType} joined room: ${bargainId}`);
+//   } else {
+//     console.warn("⚠️ No bargainId provided in connection query");
+//   }
+
+//   // 💬 Handle chat messages
+//   socket.on("bargainMessage", (data) => {
+//     try {
+//       if (!data?.bargain_id) {
+//         console.warn("⚠️ Missing bargain_id in message");
+//         return;
+//       }
+
+//       console.log(`💬 Message from ${userType} in bargain ${data.bargain_id}`);
+      
+//       socket.to(data.bargain_id).emit("bargainMessage", {
+//         ...data,
+//         senderId: user.id,
+//         senderType: user.userType,
+//       });
+//     } catch (error) {
+//       console.error("❌ Error handling bargainMessage:", error);
+//     }
+//   });
+
+
+//   // ⚡ Handle price updates
+//   socket.on("updateBargainStatus", async (data) => {
+//     try {
+//       const { bargainId, status, currentPrice, userId, userType } = data;
+      
+//       // Validate required fields
+//       if (!bargainId || !status || currentPrice === undefined || !userType) {
+//         throw new Error('Missing required fields in updateBargainStatus');
+//       }
+  
+//       // Use the userType from the emitting client
+//       const initiatedBy = userType; // This should be 'farmer' or 'consumer'
+      
+//       console.log(`Status update from ${initiatedBy}:`, { bargainId, status, currentPrice });
+  
+//       // Broadcast to all in the bargain room
+//       io.to(bargainId).emit("bargainStatusUpdate", {
+//         status,
+//         currentPrice,
+//         initiatedBy, // This is the critical fix
+//         timestamp: new Date().toISOString()
+//       });
+  
+//       // Update database if needed (make sure to import your Bargain model)
+//       // Remove this if you're not using MongoDB/Mongoose
+//       /*
+//       if (BargainModel) {
+//         await BargainModel.updateOne(
+//           { _id: bargainId },
+//           { 
+//             status,
+//             current_price: currentPrice,
+//             updated_at: new Date() 
+//           }
+//         );
+//       }
+//       */
+  
+//     } catch (error) {
+//       console.error('Error in updateBargainStatus:', error.message);
+//       socket.emit('bargainError', {
+//         message: 'Failed to update status',
+//         error: error.message
+//       });
+//     }
+//   });
+ 
+//   socket.on("priceUpdate", (data) => {
+//     if (!data?.bargainId) {
+//       console.warn("⚠️ Missing bargainId in price update");
+//       return;
+//     }
+    
+//     console.log(`💰 Price update in ${data.bargainId}: ₹${data.newPrice}`);
+    
+//     io.to(data.bargainId).emit("priceUpdate", {
+//       newPrice: data.newPrice,
+//       from: userType,
+//     });
+//   });
+
+//   // 🚪 Disconnect handler
+//   socket.on("disconnect", () => {
+//     console.log(`❌ ${userType} disconnected: ${socket.id}`);
+//   });
+// });
+
 io.on("connection", (socket) => {
-  const user = socket.user;
-  const userType = user?.userType;
-  const bargainId = socket.handshake.query?.bargainId;
+  const { bargainId, userType } = socket.handshake.query;
 
-  console.log("🎯 New connection from:", userType, socket.id);
+  console.log("🎯 New connection:", socket.id, "for bargain:", bargainId, "type:", userType);
 
-  // 🔒 Authentication check
-  if (!user || (userType !== "farmer" && userType !== "consumer")) {
-    console.warn(`❌ Unauthorized connection: ${socket.id}`);
+  // ✅ Basic check: only allow if bargainId + userType exist
+  if (!bargainId || !["farmer", "consumer"].includes(userType)) {
+    console.warn(`❌ Invalid connection params from ${socket.id}`);
     socket.disconnect(true);
     return;
   }
 
-  // 🏠 Join bargain room if ID exists (removed isValidBargainId check)
-  if (bargainId) {
-    socket.join(bargainId);
-    console.log(`🏠 ${userType} joined room: ${bargainId}`);
-  } else {
-    console.warn("⚠️ No bargainId provided in connection query");
-  }
+  // ✅ Use consistent room naming
+  const room = `bargain_${bargainId}`;
+  socket.join(room);
+  console.log(`🏠 ${userType} joined room: ${room}`);
 
-  // 💬 Handle chat messages
+  // 💬 Chat messages
   socket.on("bargainMessage", (data) => {
-    try {
-      if (!data?.bargain_id) {
-        console.warn("⚠️ Missing bargain_id in message");
-        return;
-      }
+    if (!data?.bargain_id) return;
 
-      console.log(`💬 Message from ${userType} in bargain ${data.bargain_id}`);
-      
-      socket.to(data.bargain_id).emit("bargainMessage", {
-        ...data,
-        senderId: user.id,
-        senderType: user.userType,
-      });
-    } catch (error) {
-      console.error("❌ Error handling bargainMessage:", error);
-    }
+    console.log(`💬 Message from ${userType} in ${room}`);
+    socket.to(room).emit("bargainMessage", {
+      ...data,
+      senderType: userType,
+      timestamp: new Date().toISOString(),
+    });
   });
 
+  // ⚡ Status updates
+  socket.on("updateBargainStatus", (data) => {
+    const { status, currentPrice } = data;
+    if (!status || currentPrice === undefined) return;
 
-  // ⚡ Handle price updates
-  socket.on("updateBargainStatus", async (data) => {
-    try {
-      const { bargainId, status, currentPrice, userId, userType } = data;
-      
-      // Validate required fields
-      if (!bargainId || !status || currentPrice === undefined || !userType) {
-        throw new Error('Missing required fields in updateBargainStatus');
-      }
-  
-      // Use the userType from the emitting client
-      const initiatedBy = userType; // This should be 'farmer' or 'consumer'
-      
-      console.log(`Status update from ${initiatedBy}:`, { bargainId, status, currentPrice });
-  
-      // Broadcast to all in the bargain room
-      io.to(bargainId).emit("bargainStatusUpdate", {
-        status,
-        currentPrice,
-        initiatedBy, // This is the critical fix
-        timestamp: new Date().toISOString()
-      });
-  
-      // Update database if needed (make sure to import your Bargain model)
-      // Remove this if you're not using MongoDB/Mongoose
-      /*
-      if (BargainModel) {
-        await BargainModel.updateOne(
-          { _id: bargainId },
-          { 
-            status,
-            current_price: currentPrice,
-            updated_at: new Date() 
-          }
-        );
-      }
-      */
-  
-    } catch (error) {
-      console.error('Error in updateBargainStatus:', error.message);
-      socket.emit('bargainError', {
-        message: 'Failed to update status',
-        error: error.message
-      });
-    }
+    console.log(`📢 Status update in ${room}: ${status} @ ₹${currentPrice}`);
+
+    io.to(room).emit("bargainStatusUpdate", {
+      status,
+      currentPrice,
+      initiatedBy: userType,
+      timestamp: new Date().toISOString(),
+    });
   });
- 
+
+  // 💰 Price updates
   socket.on("priceUpdate", (data) => {
-    if (!data?.bargainId) {
-      console.warn("⚠️ Missing bargainId in price update");
-      return;
-    }
-    
-    console.log(`💰 Price update in ${data.bargainId}: ₹${data.newPrice}`);
-    
-    io.to(data.bargainId).emit("priceUpdate", {
+    if (!data?.newPrice) return;
+
+    console.log(`💰 Price update in ${room}: ₹${data.newPrice}`);
+    io.to(room).emit("priceUpdate", {
       newPrice: data.newPrice,
       from: userType,
     });
   });
 
-  // 🚪 Disconnect handler
+  // 🚪 Disconnect
   socket.on("disconnect", () => {
     console.log(`❌ ${userType} disconnected: ${socket.id}`);
   });
 });
-
 
 
 const mysql = require("mysql");
