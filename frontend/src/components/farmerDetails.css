@@ -9,7 +9,9 @@
   background: linear-gradient(to bottom, #f9fbe7, #e8f5e9);
   min-height: 100vh;
 }
-
+.ks-dashboard-content {
+  margin-left: 90px; /* Adjust this to match your sidebar's width */
+}
 /* Farmer Profile Card */
 .farmer-profile-card {
   background-color: #fff;
