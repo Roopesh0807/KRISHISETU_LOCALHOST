@@ -345,7 +345,7 @@ const CommunityFlashDeals = () => {
                 const consumerPincode = profileData.pincode;
                 
                 const communityId = getOrCreateCommunityId();
-                const baseShareLink = `http://localhost:3000/community-flash-deals?communityId=${communityId}`;
+                const baseShareLink = `http://localhost:3000/community-flash-deals`;
                 setShareableLink(baseShareLink);
                 setWhatsappLink(`https://wa.me/?text=${encodeURIComponent("Join me for exclusive flash deals! " + baseShareLink)}`);
                 
@@ -428,12 +428,8 @@ const CommunityFlashDeals = () => {
             <ToastNotification message={toastMessage} show={showToast} onClose={() => setShowToast(false)} />
             
             <header className="dashboard-header">
-                <div className="header-top">
-                    <h1 className="logo-text">KrishiBazaar</h1>
+                <div className="header-top">  
                     <div className="nav-actions">
-                        <button onClick={handleGoBack} className="back-button">
-                            <FontAwesomeIcon icon={faArrowLeft} /> Back
-                        </button>
                     </div>
                 </div>
             </header>
