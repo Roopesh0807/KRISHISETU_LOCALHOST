@@ -346,7 +346,7 @@ const Subscribe = () => {
 
             <div className="subscribe-header">
                   <button className="instructions-btn" onClick={() => setShowInstructions(true)}>
-                    <FaInfoCircle />
+                    <FaInfoCircle />Instructions
                 </button>
                 <span className="modify-notice">
                     <FaClock /> {canModify ? `Modify before ${timeLeft}` : 'Modifications paused'}
