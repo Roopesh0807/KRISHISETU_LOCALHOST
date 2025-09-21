@@ -1,0 +1,187 @@
+/* Bargaining Tour Styles */
+.ks-tour-launcher {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 10000;
+}
+
+.ks-tour-button {
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 12px 20px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.ks-tour-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
+.ks-tour-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 10000;
+}
+
+.ks-tour-popover {
+  position: absolute;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  max-width: 320px;
+  z-index: 10001;
+  animation: tourFadeIn 0.3s ease;
+}
+
+@keyframes tourFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ks-tour-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ks-tour-header h3 {
+  margin: 0;
+  color: #2E7D32;
+  font-size: 18px;
+}
+
+.ks-tour-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #999;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.ks-tour-close:hover {
+  color: #666;
+}
+
+.ks-tour-content {
+  padding: 20px;
+}
+
+.ks-tour-content p {
+  margin: 0;
+  line-height: 1.5;
+  color: #333;
+}
+
+.ks-tour-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ks-tour-progress {
+  color: #666;
+  font-size: 14px;
+}
+
+.ks-tour-navigation {
+  display: flex;
+  gap: 10px;
+}
+
+.ks-tour-prev, .ks-tour-next {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.ks-tour-prev {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.ks-tour-prev:hover {
+  background: #e8e8e8;
+}
+
+.ks-tour-next {
+  background: #4CAF50;
+  color: white;
+}
+
+.ks-tour-next:hover {
+  background: #3d8b40;
+}
+
+.ks-tour-arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+.ks-arrow-top {
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 10px 10px 0 10px;
+  border-color: white transparent transparent transparent;
+}
+
+.ks-arrow-bottom {
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 10px 10px 10px;
+  border-color: transparent transparent white transparent;
+}
+
+.ks-arrow-left {
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 10px 0 10px 10px;
+  border-color: transparent transparent transparent white;
+}
+
+.ks-arrow-right {
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 10px 10px 10px 0;
+  border-color: transparent white transparent transparent;
+}
+
+.ks-arrow-center {
+  display: none;
+}
+
+/* Highlight the targeted element */
+.ks-tour-highlight {
+  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.3) !important;
+  position: relative;
+  z-index: 10002;
+}

@@ -1,0 +1,568 @@
+/* ConsOnboard.css */
+
+/* --- Manual Tour Restart Button --- */
+.tour-restart-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    background-color: #479d16ff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.tour-restart-btn:hover {
+    transform: scale(1.1);
+    background-color: #479d16ff;
+}
+
+.tour-restart-btn .fa-info-circle {
+    font-size: 20px;
+}
+
+/* --- Hiding the Default Joyride Beacon --- */
+.react-joyride__beacon {
+    display: none !important;
+}
+
+/* --- General Tooltip Styling --- */
+.react-joyride__tooltip {
+    font-family: 'Arial', sans-serif;
+    max-width: 340px;
+    background-color: #479d16ff;
+    border: 1px solid #c8e6c9;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    color: #2e7d32;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    z-index: 10051 !important;
+}
+
+/* --- Themed Icon for the Tooltip --- */
+.react-joyride__tooltip::before {
+    content: '🛒';
+    font-size: 2.5rem;
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    opacity: 0.3;
+    z-index: -1;
+}
+
+/* --- Tooltip Header (Title) --- */
+.react-joyride__tooltip h4 {
+    color: #2b9047;
+    font-size: 1.35rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    border-bottom: 2px solid #a5d6a7;
+    padding-bottom: 0.5rem;
+}
+
+/* --- Tooltip Content (Body) --- */
+.react-joyride__tooltip p {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+}
+
+/* --- Tour Navigation Buttons --- */
+.react-joyride__buttons button {
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* 'Back' Button */
+.react-joyride__buttons button:first-child {
+    background-color: transparent;
+    color: #888;
+    margin-right: 0.5rem;
+}
+
+.react-joyride__buttons button:first-child:hover {
+    color: #2b9047;
+}
+
+/* 'Next' and 'Done' Buttons */
+.react-joyride__buttons button:not(:first-child) {
+    background-color: #479d16ff;
+    color: #ffffff;
+    box-shadow: 0 4px 8px rgba(43, 144, 71, 0.3);
+}
+
+.react-joyride__buttons button:not(:first-child):hover {
+    background-color: #479d16ff;
+    box-shadow: 0 6px 16px rgba(26, 117, 54, 0.4);
+    transform: translateY(-2px);
+}
+
+/* 'Skip' button in the tooltip header */
+.react-joyride__tooltip .react-joyride__skip {
+    color: #a5d6a7;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    transition: color 0.2s ease;
+}
+
+.react-joyride__tooltip .react-joyride__skip:hover {
+    color: #2b9047;
+}
+
+/* --- Final Step Content --- */
+.final-step-content {
+    text-align: center;
+}
+
+.final-step-text {
+    margin-bottom: 20px;
+    line-height: 1.5;
+    color: #2e7d32;
+}
+
+.final-step-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.go-to-profile-btn {
+    background-color: #479d16ff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.fill-later-btn {
+    background-color: #479d16ff;
+    color: #333;
+    border: 1px solid #ccc;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Make sure the tour appears above other elements */
+.react-joyride__tooltip {
+    z-index: 10051 !important;
+}
+
+.react-joyride__overlay {
+    z-index: 10050 !important;
+}
+
+/* Fix positioning for specific elements */
+.react-joyride__tooltip[data-placement="bottom"] {
+  margin-top: 15px !important;
+}
+
+.react-joyride__tooltip[data-placement="top"] {
+  margin-bottom: 15px !important;
+}
+
+.react-joyride__tooltip[data-placement="left"] {
+  margin-right: 15px !important;
+}
+
+.react-joyride__tooltip[data-placement="right"] {
+  margin-left: 15px !important;
+}
+
+/* Ensure tour elements are visible above other content */
+.ks-consumer-dashboard {
+  position: relative;
+}
+
+.navbar3 {
+  position: relative;
+  z-index: 10030;
+}
+
+/* Fix for the cart container */
+.cart-container {
+  position: relative;
+}
+
+/* Fix for navbar links */
+.navbar-links li .navbar-link {
+  position: relative;
+  z-index: 10040;
+}
+
+/* Fix for profile icon */
+.profile-icon-container {
+  position: relative;
+  z-index: 10040;
+}
+
+/* Fix for chatbot button */
+.chatbot-btn {
+  position: relative;
+  z-index: 10040;
+}
+
+/* Utility class for highlighting tour elements */
+.tour-highlight {
+  position: relative;
+  z-index: 10045 !important;
+  box-shadow: 0 0 0 3px rgba(43, 144, 71, 0.7) !important;
+  border-radius: 4px;
+}
+
+/* Animation for highlighted elements */
+@keyframes pulse-tour {
+  0% { box-shadow: 0 0 0 0 rgba(242, 242, 242, 0.8); }
+  70% { box-shadow: 0 0 0 10px rgba(43, 144, 71, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(43, 144, 71, 0); }
+}
+
+.tour-highlight-active {
+  animation: pulse-tour 2s infinite;
+}
+
+/* Fix for specific elements that might be causing issues */
+.ks-product-actions {
+  position: relative;
+  z-index: 10035;
+}
+
+.ks-bargaining-section {
+  position: relative;
+  z-index: 10025;
+}
+
+.ks-flash-deal-banner-new {
+  position: relative;
+  z-index: 10025;
+}
+
+.ks-participate-btn {
+  position: relative;
+  z-index: 10035;
+}
+
+.ks-cart-btn, .ks-community-btn, .ks-subscribe-btn, .ks-bargain-btn {
+  position: relative;
+  z-index: 10035;
+}
+
+/* Add to your existing ConsOnboard.css file */
+
+/* Fix for Buy Now button positioning */
+.ks-buy-btn {
+  position: relative;
+  z-index: 10035;
+}
+
+/* Ensure Buy Now button is visible during tour */
+.react-joyride__tooltip[data-step-index="11"] {
+  z-index: 10051 !important;
+}
+
+/* Additional styling for product action buttons during tour */
+.ks-product-actions .ks-buy-btn.tour-highlight-active {
+  animation: pulse-tour 2s infinite;
+  box-shadow: 0 0 0 3px rgba(43, 144, 71, 0.7) !important;
+}
+
+/* Make sure the Buy Now button is properly targeted */
+.ks-product-actions .ks-buy-btn {
+  position: relative;
+}
+
+/* ConsumerDashboardTour.css */
+
+.dashboard-tour-btn {
+    position: fixed;
+    bottom: 80px;
+    right: 25px;
+    z-index: 9999;
+    background: linear-gradient(135deg, #479d16ff 0%, #3a8012 100%);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.dashboard-tour-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    background: linear-gradient(135deg, #3a8012 0%, #2d640e 100%);
+}
+
+.start-shopping-btn {
+    background: linear-gradient(135deg, #479d16ff 0%, #3a8012 100%);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(67, 160, 71, 0.3);
+}
+
+.start-shopping-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(67, 160, 71, 0.4);
+    background: linear-gradient(135deg, #3a8012 0%, #2d640e 100%);
+}
+
+/* Tour step content styling */
+.tour-step-content {
+    text-align: left;
+}
+
+.tour-step-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.tour-step-header h3,
+.tour-step-header h4 {
+    margin: 0;
+    color: #2e7d32;
+}
+
+.step-icon {
+    font-size: 20px;
+    color: #479d16ff;
+}
+
+/* Benefits content styling */
+.marketplace-benefits-content h3,
+.bargaining-benefits-content h3,
+.subscription-benefits-content h3 {
+    color: #2e7d32;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.benefits-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin: 15px 0;
+}
+
+.benefit-item {
+    text-align: center;
+    padding: 15px;
+    background: rgba(67, 160, 71, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(67, 160, 71, 0.2);
+}
+
+.benefit-icon {
+    font-size: 24px;
+    color: #479d16ff;
+    margin-bottom: 8px;
+}
+
+.benefit-item h4 {
+    margin: 8px 0;
+    color: #2e7d32;
+    font-size: 14px;
+}
+
+.benefit-item p {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.subscription-benefits-content ul {
+    text-align: left;
+    padding-left: 20px;
+    margin: 15px 0;
+}
+
+.subscription-benefits-content li {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 14px;
+}
+
+/* Final step styling */
+.final-step-content {
+    text-align: center;
+    padding: 10px;
+}
+
+.final-step-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.final-icon {
+    font-size: 48px;
+    color: #479d16ff;
+}
+
+.final-step-header h3 {
+    color: #2e7d32;
+    margin: 0;
+}
+
+.final-step-text {
+    line-height: 1.6;
+    margin-bottom: 25px;
+    color: #4a4a4a;
+    font-size: 15px;
+}
+
+.platform-stats {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+    padding: 15px;
+    background: rgba(67, 160, 71, 0.1);
+    border-radius: 8px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.stat-item svg {
+    color: #479d16ff;
+    font-size: 20px;
+}
+
+.stat-item span {
+    font-size: 12px;
+    font-weight: 600;
+    color: #2e7d32;
+}
+
+/* Ensure tour elements are visible */
+.ks-search-location-bar,
+.ks-flash-deal-banner-new,
+.ks-recommendation-section,
+.ks-market-section,
+.ks-product-card,
+.ks-subscribe-btn,
+.ks-bargaining-section,
+.ks-farmer-card,
+.ks-bargain-btn {
+    position: relative;
+    z-index: 10040;
+}
+
+.tour-highlight {
+    position: relative;
+    z-index: 10045 !important;
+    box-shadow: 0 0 0 3px rgba(43, 144, 71, 0.7) !important;
+    border-radius: 6px;
+    animation: pulse-highlight 2s infinite;
+}
+
+@keyframes pulse-highlight {
+    0% { box-shadow: 0 0 0 0 rgba(43, 144, 71, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(43, 144, 71, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(43, 144, 71, 0); }
+}
+
+/* Custom joyride tooltip styling */
+.react-joyride__tooltip {
+    font-family: 'Arial', sans-serif;
+}
+
+.react-joyride__tooltip h4 {
+    color: #2e7d32;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.react-joyride__tooltip p {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #4a4a4a;
+}
+
+/* Progress indicator styling */
+.react-joyride__progress {
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .dashboard-tour-btn {
+        bottom: 70px;
+        right: 15px;
+        padding: 10px 15px;
+        font-size: 12px;
+    }
+    
+    .dashboard-tour-btn span {
+        display: none;
+    }
+    
+    .dashboard-tour-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        justify-content: center;
+    }
+
+    .benefits-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .platform-stats {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
