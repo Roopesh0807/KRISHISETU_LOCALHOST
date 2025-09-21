@@ -32,7 +32,6 @@ import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
 import Calendar from 'react-calendar'; // Import Calendar
 import 'react-calendar/dist/Calendar.css'; // Import Calendar CSS
-import ConsumerOnboardingTour from './ConsumerOnboardingTour';
 
 const ConsumerDashboard = () => {
     const [searchQuery, setSearchQuery] = useState("");
@@ -59,7 +58,6 @@ const ConsumerDashboard = () => {
     const [flashDealBannerProducts, setFlashDealBannerProducts] = useState([]); // New state for banner products
     const [imagesLoading, setImagesLoading] = useState(false);
     const [consumerCoords, setConsumerCoords] = useState(null);
-    const [isSearchMode, setIsSearchMode] = useState(false);
     const [recommendedProducts, setRecommendedProducts] = useState([]);
     const [pastOrders, setPastOrders] = useState([]);
     const [imageCache, setImageCache] = useState(() => {
@@ -74,11 +72,6 @@ const [flashDealTimeLeft, setFlashDealTimeLeft] = useState(0);
     const [showWalletRequiredPopup, setShowWalletRequiredPopup] = useState(false);
     // --- END: ADDED WALLET INSUFFICIENT LOGIC ---
 
-<<<<<<< HEAD
-
-    // No need for flashDealBannerRef or its JS useEffect for animation now, as we'll use CSS for marquee.
-=======
->>>>>>> 39ac42e282b855710ef96557702d598982be781c
 
     // Function to get the initial default date based on cutoff time
     const getInitialSubscriptionDate = () => {
@@ -523,10 +516,6 @@ const formatTime = (seconds) => {
 
     // Search handler for the main search bar
     const handleSearch = () => {
-        if (!searchQuery.trim()) {
-            setIsSearchMode(false);
-            return;
-        }
         const combinedProducts = [...products, ...bargainingProducts];
         const results = combinedProducts.filter(product => {
             const matchesSearch = product.product_name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -535,14 +524,7 @@ const formatTime = (seconds) => {
             return matchesSearch && matchesCategory;
         });
         setSearchResults(results);
-         setIsSearchMode(true);
         console.log("Search Results:", results);
-    };
-     // Add a function to clear search
-    const clearSearch = () => {
-        setSearchQuery("");
-        setIsSearchMode(false);
-        setSearchResults([]);
     };
    // Remove the existing `bannerCarouselSettings` object.
 // Add this updated version:
@@ -984,8 +966,6 @@ const handleBargainClick = (farmer, product, e) => {
             (buyType === "" || product.buy_type.toLowerCase() === buyType.toLowerCase())
         );
     });
-        const displayProducts = isSearchMode ? searchResults : filteredProducts;
-
 
     // Filter and sort farmers
     const filteredFarmers = farmers
@@ -1067,10 +1047,6 @@ const handleBargainClick = (farmer, product, e) => {
 
     return (
         <div className="ks-consumer-dashboard">
-<<<<<<< HEAD
-            {/* Add the tour component here */}
-  <ConsumerOnboardingTour />
-=======
             {/* --- START: ADDED WALLET INSUFFICIENT POPUP --- */}
              {showWalletRequiredPopup && (
                 <div className="popup-overlay">
@@ -1090,7 +1066,6 @@ const handleBargainClick = (farmer, product, e) => {
                 </div>
             )}
             {/* --- END: ADDED WALLET INSUFFICIENT POPUP --- */}
->>>>>>> 39ac42e282b855710ef96557702d598982be781c
             {/* Success Message Overlay for Subscription */}
             {showSuccessMessage && (
                 <div className="ks-success-overlay">
@@ -1390,7 +1365,7 @@ const handleBargainClick = (farmer, product, e) => {
                     </div>
 
                     <div className="ks-products-grid">
-                        {displayProducts.map((product) => {
+                        {filteredProducts.map((product) => {
                             const quantityForSubscriptionDisplay = selectedQuantities[product.product_id] || 1;
                             const originalPriceForSubscriptionDisplay = product.price_1kg * quantityForSubscriptionDisplay;
                             const discountedPriceForDisplay = calculateDiscountedPrice(originalPriceForSubscriptionDisplay);
@@ -1458,12 +1433,12 @@ const handleBargainClick = (farmer, product, e) => {
                                             >
                                                 <FontAwesomeIcon icon={faBolt} /> Buy Now
                                             </button>
-                                            {/* <button
+                                            <button
                                                 onClick={(e) => handleAddToCommunityOrders(product, e)}
                                                 className="ks-action-btn ks-community-btn"
                                             >
                                                 <FontAwesomeIcon icon={faUsers} /> Community
-                                            </button> */}
+                                            </button>
                                             <button
                                                 onClick={(e) => handleSubscribeClick(product, e)}
                                                 className="ks-action-btn ks-subscribe-btn"
