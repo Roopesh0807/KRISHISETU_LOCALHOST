@@ -1,0 +1,203 @@
+/* BargainTour.css */
+
+.bargain-tour-btn {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    z-index: 9999;
+    background: linear-gradient(135deg, #479d16ff 0%, #3a8012 100%);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.bargain-tour-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    background: linear-gradient(135deg, #3a8012 0%, #2d640e 100%);
+}
+
+.start-bargaining-btn {
+    background: linear-gradient(135deg, #479d16ff 0%, #3a8012 100%);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(67, 160, 71, 0.3);
+}
+
+.start-bargaining-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(67, 160, 71, 0.4);
+    background: linear-gradient(135deg, #3a8012 0%, #2d640e 100%);
+}
+
+/* Tour step content styling */
+.tour-step-content {
+    text-align: left;
+}
+
+.tour-step-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.tour-step-header h3,
+.tour-step-header h4 {
+    margin: 0;
+    color: #2e7d32;
+}
+
+.step-icon {
+    font-size: 20px;
+    color: #479d16ff;
+}
+
+/* Bargaining tips styling */
+.bargaining-tips-content h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #2e7d32;
+    margin-bottom: 15px;
+}
+
+.bargaining-tips-content ul {
+    text-align: left;
+    padding-left: 20px;
+    margin: 15px 0;
+}
+
+.bargaining-tips-content li {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.tip-icon {
+    color: #479d16ff;
+    margin-top: 4px;
+    flex-shrink: 0;
+}
+
+/* Final step styling */
+.final-step-content {
+    text-align: center;
+    padding: 10px;
+}
+
+.final-step-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.final-icon {
+    font-size: 48px;
+    color: #479d16ff;
+}
+
+.final-step-header h3 {
+    color: #2e7d32;
+    margin: 0;
+}
+
+.final-step-text {
+    line-height: 1.6;
+    margin-bottom: 25px;
+    color: #4a4a4a;
+}
+
+/* Ensure tour elements are visible in the bargain interface */
+.krishi-form-select,
+.krishi-form-input,
+.krishi-price-summary,
+.krishi-btn-primary,
+.krishi-chat-interface,
+.krishi-chat-product-info,
+.krishi-price-suggestions,
+.krishi-counter-offer,
+.krishi-connection-status {
+    position: relative;
+    z-index: 10040;
+}
+
+.tour-highlight {
+    position: relative;
+    z-index: 10045 !important;
+    box-shadow: 0 0 0 3px rgba(43, 144, 71, 0.7) !important;
+    border-radius: 6px;
+    animation: pulse-highlight 2s infinite;
+}
+
+@keyframes pulse-highlight {
+    0% { box-shadow: 0 0 0 0 rgba(43, 144, 71, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(43, 144, 71, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(43, 144, 71, 0); }
+}
+
+/* Custom joyride tooltip styling */
+.react-joyride__tooltip {
+    font-family: 'Arial', sans-serif;
+}
+
+.react-joyride__tooltip h4 {
+    color: #2e7d32;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.react-joyride__tooltip p {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #4a4a4a;
+}
+
+/* Progress indicator styling */
+.react-joyride__progress {
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .bargain-tour-btn {
+        bottom: 15px;
+        right: 15px;
+        padding: 10px 15px;
+        font-size: 12px;
+    }
+    
+    .bargain-tour-btn span {
+        display: none;
+    }
+    
+    .bargain-tour-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        justify-content: center;
+    }
+}
