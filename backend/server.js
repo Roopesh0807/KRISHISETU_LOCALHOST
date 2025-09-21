@@ -703,7 +703,7 @@ app.use((req, res, next) => {
 "/api/farmers",
 "/api/products",
 "/api/agmarknet-prices",
-"/api/community-flashdeals",
+// "/api/community-flashdeals",
 
     // Add more public routes if needed
   ];
@@ -821,30 +821,30 @@ app.get('/api/agmarknet-prices', async (req, res) => {
 });
 
 
-// Add before app.use(authMiddleware) // flash deals
-app.get("/api/community-flashdeals", async (req, res) => {
-  try {
-    const products = await queryDatabase(`
-      SELECT 
-        product_id,
-        produce_name,
-        price_per_kg,
-        minimum_price,
-        availability
-      FROM add_produce
-      WHERE market_type = 'Bargaining Market'
-    `);
+// // Add before app.use(authMiddleware) // flash deals
+// app.get("/api/community-flashdeals", async (req, res) => {
+//   try {
+//     const products = await queryDatabase(`
+//       SELECT 
+//         product_id,
+//         produce_name,
+//         price_per_kg,
+//         minimum_price,
+//         availability
+//       FROM add_produce
+//       WHERE market_type = 'Bargaining Market'
+//     `);
 
-    res.json(products || []);
-  } catch (err) {
-    console.error("Error fetching flash deals:", err);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching flash deals",
-      error: err.message,
-    });
-  }
-});
+//     res.json(products || []);
+//   } catch (err) {
+//     console.error("Error fetching flash deals:", err);
+//     res.status(500).json({
+//       success: false,
+//       message: "Error fetching flash deals",
+//       error: err.message,
+//     });
+//   }
+// });
 
 
 // server.js
@@ -858,62 +858,117 @@ app.post('/api/contact', async (req, res) => {
 
 // ✅ New: Public route for checking flash deals status
 app.get('/api/community-flash-deals-status/:pincode', async (req, res) => {
-  const { pincode } = req.params;
-  const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const { pincode } = req.params;
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
 
-  try {
-    const [countResult] = await queryDatabase(
-      "SELECT COUNT(*) as consumer_count FROM consumerprofile WHERE pincode = ?",
-      [pincode]
-    );
+    try {
+        const [countResult] = await queryDatabase(
+            "SELECT COUNT(*) as consumer_count FROM consumerprofile WHERE pincode = ?",
+            [pincode]
+        );
 
-    const consumerCount = countResult.consumer_count;
-    const showFlashDeal = consumerCount > 1;
+        const consumerCount = countResult.consumer_count;
+        const requiredCount = 2; // Set your required user count here
+        let showFlashDeal = consumerCount >= requiredCount;
 
-    const flashDealsUrl = `${baseUrl}/community-flash-deals?pincode=${pincode}`;
-    const shareableMessage = encodeURIComponent(
-      `Join me for exclusive flash deals in our community! Click the link to participate: ${flashDealsUrl}`
-    );
-    const whatsappLink = `https://wa.me/?text=${shareableMessage}`;
+        let timerData = null;
 
-    res.json({
-      showFlashDeal,
-      shareableLink: flashDealsUrl,
-      whatsappLink,
-    });
-  } catch (error) {
-    console.error("Error checking for flash deals status:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to check flash deals status",
-    });
-  }
+        const [statusRecord] = await queryDatabase(
+            "SELECT start_time FROM flash_deals_status WHERE pincode = ?",
+            [pincode]
+        );
+
+        const now = new Date();
+        const activeDuration = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+        const frozenDuration = 72 * 60 * 60 * 1000; // 72 hours (2 days) in milliseconds
+
+        if (statusRecord) {
+            const startTime = new Date(statusRecord.start_time);
+            const elapsedTime = now.getTime() - startTime.getTime();
+            const totalCycleTime = activeDuration + frozenDuration;
+
+            if (elapsedTime < totalCycleTime) {
+                // If the current cycle is still ongoing
+                timerData = { start_time: statusRecord.start_time };
+                if (elapsedTime > activeDuration) {
+                    // It's in the frozen (cool-down) period
+                    showFlashDeal = false;
+                }
+            } else {
+                // The previous cycle has completed, start a new one
+                if (showFlashDeal) {
+                    const newStartTime = now.toISOString();
+                    await queryDatabase(
+                        "UPDATE flash_deals_status SET start_time = ? WHERE pincode = ?",
+                        [newStartTime, pincode]
+                    );
+                    timerData = { start_time: newStartTime };
+                } else {
+                    // Conditions for a new deal are not met yet
+                    timerData = { start_time: null }; 
+                }
+            }
+        } else {
+            // No record exists for this pincode, check if conditions are met to start a new deal
+            if (showFlashDeal) {
+                const newStartTime = now.toISOString();
+                await queryDatabase(
+                    "INSERT INTO flash_deals_status (pincode, start_time) VALUES (?, ?)",
+                    [pincode, newStartTime]
+                );
+                timerData = { start_time: newStartTime };
+            } else {
+                // Conditions not met, return no timer data
+                timerData = { start_time: null };
+            }
+        }
+
+        const flashDealsUrl = `${baseUrl}/community-flash-deals?pincode=${pincode}`;
+        const shareableMessage = encodeURIComponent(
+            `Join me for exclusive flash deals in our community! Click the link to participate: ${flashDealsUrl}`
+        );
+        const whatsappLink = `https://wa.me/?text=${shareableMessage}`;
+
+        res.json({
+            showFlashDeal,
+            shareableLink: flashDealsUrl,
+            whatsappLink,
+            timerData,
+        });
+
+    } catch (error) {
+        console.error("Error checking for flash deals status:", error);
+        res.status(500).json({
+            success: false,
+            error: "Failed to check flash deals status",
+        });
+    }
 });
 
-// ✅ New: Public route for fetching the flash deal products
-app.get("/api/community-flashdeals", async (req, res) => {
-  try {
-    const products = await queryDatabase(`
-      SELECT 
-        product_id,
-        produce_name,
-        price_per_kg,
-        minimum_price,
-        availability
-      FROM add_produce
-      WHERE market_type = 'Bargaining Market'
-    `);
+// // ✅ New: Public route for fetching the flash deal products
+// app.get("/api/community-flashdeals", async (req, res) => {
+//   try {
+//     const products = await queryDatabase(`
+//       SELECT 
+//         product_id,
+//         produce_name,
+//         price_per_kg,
+//         minimum_price,
+//         availability
+//       FROM add_produce
+//       WHERE market_type = 'Bargaining Market'
+//     `);
 
-    res.json(products || []);
-  } catch (err) {
-    console.error("Error fetching flash deals:", err);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching flash deals",
-      error: err.message,
-    });
-  }
-});
+//     res.json(products || []);
+//   } catch (err) {
+//     console.error("Error fetching flash deals:", err);
+//     res.status(500).json({
+//       success: false,
+//       message: "Error fetching flash deals",
+//       error: err.message,
+//     });
+//   }
+// });
 
 
 
@@ -1079,116 +1134,176 @@ io.use((socket, next) => {
 });
 
 
+// io.on("connection", (socket) => {
+//   const user = socket.user;
+//   const userType = user?.userType;
+//   const bargainId = socket.handshake.query?.bargainId;
+
+//   console.log("🎯 New connection from:", userType, socket.id);
+
+//   // 🔒 Authentication check
+//   if (!user || (userType !== "farmer" && userType !== "consumer")) {
+//     console.warn(`❌ Unauthorized connection: ${socket.id}`);
+//     socket.disconnect(true);
+//     return;
+//   }
+
+//   // 🏠 Join bargain room if ID exists (removed isValidBargainId check)
+//   if (bargainId) {
+//     socket.join(bargainId);
+//     console.log(`🏠 ${userType} joined room: ${bargainId}`);
+//   } else {
+//     console.warn("⚠️ No bargainId provided in connection query");
+//   }
+
+//   // 💬 Handle chat messages
+//   socket.on("bargainMessage", (data) => {
+//     try {
+//       if (!data?.bargain_id) {
+//         console.warn("⚠️ Missing bargain_id in message");
+//         return;
+//       }
+
+//       console.log(`💬 Message from ${userType} in bargain ${data.bargain_id}`);
+      
+//       socket.to(data.bargain_id).emit("bargainMessage", {
+//         ...data,
+//         senderId: user.id,
+//         senderType: user.userType,
+//       });
+//     } catch (error) {
+//       console.error("❌ Error handling bargainMessage:", error);
+//     }
+//   });
+
+
+//   // ⚡ Handle price updates
+//   socket.on("updateBargainStatus", async (data) => {
+//     try {
+//       const { bargainId, status, currentPrice, userId, userType } = data;
+      
+//       // Validate required fields
+//       if (!bargainId || !status || currentPrice === undefined || !userType) {
+//         throw new Error('Missing required fields in updateBargainStatus');
+//       }
+  
+//       // Use the userType from the emitting client
+//       const initiatedBy = userType; // This should be 'farmer' or 'consumer'
+      
+//       console.log(`Status update from ${initiatedBy}:`, { bargainId, status, currentPrice });
+  
+//       // Broadcast to all in the bargain room
+//       io.to(bargainId).emit("bargainStatusUpdate", {
+//         status,
+//         currentPrice,
+//         initiatedBy, // This is the critical fix
+//         timestamp: new Date().toISOString()
+//       });
+  
+//       // Update database if needed (make sure to import your Bargain model)
+//       // Remove this if you're not using MongoDB/Mongoose
+//       /*
+//       if (BargainModel) {
+//         await BargainModel.updateOne(
+//           { _id: bargainId },
+//           { 
+//             status,
+//             current_price: currentPrice,
+//             updated_at: new Date() 
+//           }
+//         );
+//       }
+//       */
+  
+//     } catch (error) {
+//       console.error('Error in updateBargainStatus:', error.message);
+//       socket.emit('bargainError', {
+//         message: 'Failed to update status',
+//         error: error.message
+//       });
+//     }
+//   });
+ 
+//   socket.on("priceUpdate", (data) => {
+//     if (!data?.bargainId) {
+//       console.warn("⚠️ Missing bargainId in price update");
+//       return;
+//     }
+    
+//     console.log(`💰 Price update in ${data.bargainId}: ₹${data.newPrice}`);
+    
+//     io.to(data.bargainId).emit("priceUpdate", {
+//       newPrice: data.newPrice,
+//       from: userType,
+//     });
+//   });
+
+//   // 🚪 Disconnect handler
+//   socket.on("disconnect", () => {
+//     console.log(`❌ ${userType} disconnected: ${socket.id}`);
+//   });
+// });
+
 io.on("connection", (socket) => {
-  const user = socket.user;
-  const userType = user?.userType;
-  const bargainId = socket.handshake.query?.bargainId;
+  const { bargainId, userType } = socket.handshake.query;
 
-  console.log("🎯 New connection from:", userType, socket.id);
+  console.log("🎯 New connection:", socket.id, "for bargain:", bargainId, "type:", userType);
 
-  // 🔒 Authentication check
-  if (!user || (userType !== "farmer" && userType !== "consumer")) {
-    console.warn(`❌ Unauthorized connection: ${socket.id}`);
+  // ✅ Basic check: only allow if bargainId + userType exist
+  if (!bargainId || !["farmer", "consumer"].includes(userType)) {
+    console.warn(`❌ Invalid connection params from ${socket.id}`);
     socket.disconnect(true);
     return;
   }
 
-  // 🏠 Join bargain room if ID exists (removed isValidBargainId check)
-  if (bargainId) {
-    socket.join(bargainId);
-    console.log(`🏠 ${userType} joined room: ${bargainId}`);
-  } else {
-    console.warn("⚠️ No bargainId provided in connection query");
-  }
+  // ✅ Use consistent room naming
+  const room = `bargain_${bargainId}`;
+  socket.join(room);
+  console.log(`🏠 ${userType} joined room: ${room}`);
 
-  // 💬 Handle chat messages
+  // 💬 Chat messages
   socket.on("bargainMessage", (data) => {
-    try {
-      if (!data?.bargain_id) {
-        console.warn("⚠️ Missing bargain_id in message");
-        return;
-      }
+    if (!data?.bargain_id) return;
 
-      console.log(`💬 Message from ${userType} in bargain ${data.bargain_id}`);
-      
-      socket.to(data.bargain_id).emit("bargainMessage", {
-        ...data,
-        senderId: user.id,
-        senderType: user.userType,
-      });
-    } catch (error) {
-      console.error("❌ Error handling bargainMessage:", error);
-    }
+    console.log(`💬 Message from ${userType} in ${room}`);
+    socket.to(room).emit("bargainMessage", {
+      ...data,
+      senderType: userType,
+      timestamp: new Date().toISOString(),
+    });
   });
 
+  // ⚡ Status updates
+  socket.on("updateBargainStatus", (data) => {
+    const { status, currentPrice } = data;
+    if (!status || currentPrice === undefined) return;
 
-  // ⚡ Handle price updates
-  socket.on("updateBargainStatus", async (data) => {
-    try {
-      const { bargainId, status, currentPrice, userId, userType } = data;
-      
-      // Validate required fields
-      if (!bargainId || !status || currentPrice === undefined || !userType) {
-        throw new Error('Missing required fields in updateBargainStatus');
-      }
-  
-      // Use the userType from the emitting client
-      const initiatedBy = userType; // This should be 'farmer' or 'consumer'
-      
-      console.log(`Status update from ${initiatedBy}:`, { bargainId, status, currentPrice });
-  
-      // Broadcast to all in the bargain room
-      io.to(bargainId).emit("bargainStatusUpdate", {
-        status,
-        currentPrice,
-        initiatedBy, // This is the critical fix
-        timestamp: new Date().toISOString()
-      });
-  
-      // Update database if needed (make sure to import your Bargain model)
-      // Remove this if you're not using MongoDB/Mongoose
-      /*
-      if (BargainModel) {
-        await BargainModel.updateOne(
-          { _id: bargainId },
-          { 
-            status,
-            current_price: currentPrice,
-            updated_at: new Date() 
-          }
-        );
-      }
-      */
-  
-    } catch (error) {
-      console.error('Error in updateBargainStatus:', error.message);
-      socket.emit('bargainError', {
-        message: 'Failed to update status',
-        error: error.message
-      });
-    }
+    console.log(`📢 Status update in ${room}: ${status} @ ₹${currentPrice}`);
+
+    io.to(room).emit("bargainStatusUpdate", {
+      status,
+      currentPrice,
+      initiatedBy: userType,
+      timestamp: new Date().toISOString(),
+    });
   });
- 
+
+  // 💰 Price updates
   socket.on("priceUpdate", (data) => {
-    if (!data?.bargainId) {
-      console.warn("⚠️ Missing bargainId in price update");
-      return;
-    }
-    
-    console.log(`💰 Price update in ${data.bargainId}: ₹${data.newPrice}`);
-    
-    io.to(data.bargainId).emit("priceUpdate", {
+    if (!data?.newPrice) return;
+
+    console.log(`💰 Price update in ${room}: ₹${data.newPrice}`);
+    io.to(room).emit("priceUpdate", {
       newPrice: data.newPrice,
       from: userType,
     });
   });
 
-  // 🚪 Disconnect handler
+  // 🚪 Disconnect
   socket.on("disconnect", () => {
     console.log(`❌ ${userType} disconnected: ${socket.id}`);
   });
 });
-
 
 
 const mysql = require("mysql");
@@ -4311,6 +4426,217 @@ app.get('/api/check-community-flash-deals/:pincode', authenticateToken, async (r
 // ... (rest of server.js)
 
 // ... (rest of server.js)
+
+// New endpoint to handle community flash deals order placement
+app.post("/api/place-community-flash-deals-order", verifyToken, async (req, res) => {
+  try {
+    const {
+      consumer_id,
+      name,
+      mobile_number,
+      email,
+      produce_name,
+      quantity,
+      amount,
+      is_self_delivery,
+      payment_method,
+      payment_status,
+      address,
+      pincode,
+      recipient_name,
+      recipient_phone,
+      subtotal,
+      discount_amount,
+      total_amount,
+      community_id
+    } = req.body;
+
+    if (!community_id) {
+      return res.status(400).json({ success: false, error: "Community ID is required." });
+    }
+
+    const result = await queryDatabase(
+      `INSERT INTO community_flash_deals_orders (
+        community_id, consumer_id, name, mobile_number, email,
+        address, pincode, produce_name, quantity, amount,
+        is_self_delivery, status, payment_method, payment_status,
+        subtotal, discount_amount, total_amount
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        community_id,
+        consumer_id, name, mobile_number, email,
+        address, pincode, produce_name, quantity, amount,
+        is_self_delivery, 'Pending', payment_method, payment_status,
+        subtotal, discount_amount, total_amount
+      ]
+    );
+
+    const orderId = result.insertId;
+
+    if (payment_method === 'razorpay') {
+      const razorpayOrder = await razorpay.orders.create({
+        amount: total_amount * 100,
+        currency: "INR",
+        receipt: `community_flash_deals_order_${orderId}`,
+        payment_capture: 1
+      });
+
+      await queryDatabase(
+        `UPDATE community_flash_deals_orders SET razorpay_order_id = ? WHERE order_id = ?`,
+        [razorpayOrder.id, orderId]
+      );
+
+      return res.json({
+        success: true,
+        order_id: orderId,
+        razorpay_order: razorpayOrder,
+        message: "Community flash deals order created for payment."
+      });
+    }
+
+    res.json({
+      success: true,
+      order_id: orderId,
+      message: "Community flash deals order placed successfully.",
+    });
+
+  } catch (error) {
+    console.error("Community flash deals order placement error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to place community flash deals order",
+      details: error.message,
+    });
+  }
+});
+// In server.js, add a new Razorpay verification endpoint for community orders
+app.post('/api/razorpay/verify-community-flash-deals-order', authenticateToken, async (req, res) => {
+  try {
+    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, order_id, amount } = req.body;
+
+    const generatedSignature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest('hex');
+
+    if (generatedSignature !== razorpay_signature) {
+      return res.status(400).json({ error: "Invalid payment signature" });
+    }
+
+    // Update the community_flash_deals_orders table
+    const updateResult = await queryDatabase(
+      `UPDATE community_flash_deals_orders
+       SET payment_status = 'Paid',
+           razorpay_payment_id = ?,
+           razorpay_order_id = ?,
+           razorpay_signature = ?,
+           status = 'Processing'
+       WHERE order_id = ?`,
+      [razorpay_payment_id, razorpay_order_id, razorpay_signature, order_id]
+    );
+
+    if (updateResult.affectedRows === 0) {
+      throw new Error("No community flash deals order found to update");
+    }
+
+    res.json({
+      success: true,
+      message: "Payment verified and community flash deals order updated"
+    });
+
+  } catch (error) {
+    console.error("Community flash deals payment verification error:", error);
+    res.status(500).json({
+      error: "Payment verification failed",
+      details: error.message
+    });
+  }
+});
+// ... other imports and middleware ...
+
+// ... other imports and middleware ...
+
+// ✅ New: Protected route for fetching the flash deal products with full details
+app.get("/api/community-flashdeals", authenticateToken, async (req, res) => {
+  try {
+    const products = await queryDatabase(`
+      SELECT
+        ap.*,
+        CONCAT('http://localhost:5000', pd.profile_photo) AS profile_photo,
+        fd.farm_address,
+        fd.farm_photographs,
+        COALESCE(AVG(r.rating), 0) AS average_rating,
+        GROUP_CONCAT(JSON_OBJECT('consumer_name', r.consumer_name, 'rating', r.rating, 'comment', r.comment, 'created_at', r.created_at) SEPARATOR '|||') AS reviews_json
+      FROM add_produce ap
+      LEFT JOIN personaldetails pd ON ap.farmer_id = pd.farmer_id
+      LEFT JOIN farmdetails fd ON ap.farmer_id = fd.farmer_id
+      LEFT JOIN reviews r ON ap.farmer_id = r.farmer_id
+      WHERE ap.market_type = 'Bargaining Market'
+      GROUP BY ap.product_id, ap.farmer_id, pd.profile_photo, fd.farm_address, fd.farm_photographs
+    `);
+
+    // Parse the JSON string from GROUP_CONCAT to an array of objects
+    const formattedProducts = products.map(product => {
+      // Parse reviews
+      if (product.reviews_json) {
+        product.reviews = product.reviews_json
+          .split('|||')
+          .map(jsonStr => JSON.parse(jsonStr));
+      } else {
+        product.reviews = [];
+      }
+      delete product.reviews_json;
+
+      // Handle farm photos
+      if (product.farm_photographs) {
+        // Assuming farm_photographs is a comma-separated string or single URL
+        product.farm_photographs = product.farm_photographs.split(',').map(path => path.trim()).filter(Boolean);
+      } else {
+        product.farm_photographs = [];
+      }
+      
+      return product;
+    });
+
+    res.json(formattedProducts || []);
+  } catch (err) {
+    console.error("Error fetching flash deals:", err);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching flash deals",
+      error: err.message,
+    });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Add this new route to your server.js file
 app.post("/api/community-cart", async (req, res) => {

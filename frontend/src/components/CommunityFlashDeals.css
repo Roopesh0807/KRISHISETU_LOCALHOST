@@ -1,5 +1,4 @@
-/* FlashDealPage.css - Enhanced Styles for the Flash Deals page */
-/* Replaced from provided CSS to include new elements and fonts */
+/* FlashDealPage.css - Final Merged Styles */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
 body {
@@ -12,15 +11,16 @@ body {
     min-height: 100vh;
     color: #333;
     position: relative;
+    margin-top: 50px;
 }
 
-.dashboard-header {
+/* .dashboard-header {
     background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
     border-radius: 15px;
     padding: 1rem 2rem;
     margin-bottom: 30px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
+} */
 
 .header-top {
     display: flex;
@@ -231,10 +231,29 @@ body {
     z-index: 3;
 }
 
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+.produce-type-tag {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 3;
+    text-transform: uppercase;
+}
+
+.produce-type-tag.organic {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+}
+
+.produce-type-tag.standard {
+    background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
 }
 
 .discount-tag {
@@ -260,10 +279,78 @@ body {
 }
 
 .deal-content h3 {
-    margin: 0 0 15px;
+    margin: 0 0 10px;
     color: #2c3e50;
     font-size: 1.4rem;
     font-weight: 600;
+}
+
+.farmer-info-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.farmer-profile-photo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.farmer-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.farmer-name {
+    font-size: 1rem;
+    color: #555;
+    margin: 0;
+}
+
+.farm-location {
+    font-size: 0.9rem;
+    color: #777;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.rating-display {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.star.filled-star {
+    color: #f39c12;
+}
+
+.star.half-star {
+    color: #f39c12;
+}
+
+.star.empty-star {
+    color: #ddd;
+}
+
+.rating-text {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.no-ratings-text {
+    font-size: 0.9rem;
+    color: #999;
+    font-style: italic;
+    margin: 0;
 }
 
 .deal-price {
@@ -302,30 +389,53 @@ body {
     transition: width 0.5s ease;
 }
 
-.availability-bar span {
+.availability-text {
     font-size: 0.8rem;
     color: #666;
+    margin-top: 5px;
+    display: block;
+    text-align: right;
+    font-weight: 500;
 }
 
-.deal-timer {
-    color: #ff5722;
-    font-weight: bold;
-    margin: 15px 0;
-    font-size: 1rem;
+.deal-actions-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: auto;
+}
+
+.reviews-btn, .farm-photos-btn {
+    flex: 1;
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    color: white;
+    border: none;
+    padding: 15px 10px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
 }
 
-.timer-icon {
-    font-size: 1.2rem;
+.farm-photos-btn {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+}
+
+.reviews-btn:hover, .farm-photos-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 15px rgba(0, 0, 0, 0.1);
 }
 
 .deal-action-btn {
+    grid-column: 1 / -1;
     background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
     color: white;
     border: none;
-    padding: 15px 25px;
+    padding: 15px 10px;
     border-radius: 50px;
     cursor: pointer;
     font-weight: 600;
@@ -333,9 +443,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    width: 100%;
     transition: all 0.3s ease;
-    margin-top: auto;
     font-size: 1rem;
     position: relative;
     overflow: hidden;
@@ -428,8 +536,21 @@ body {
     margin-left: 15px;
 }
 
-/* New Styles for Shareable Link Container */
+/* Shareable Link and How It Works Container */
+.link-and-info-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding: 15px;
+    background: #f0f8ff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
 .shareable-link-container {
+    flex-grow: 1;
+    max-width: 60%;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -437,7 +558,6 @@ body {
     border-radius: 15px;
     padding: 10px 20px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    margin-bottom: 30px;
     position: relative;
     z-index: 11;
 }
@@ -492,6 +612,32 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+.how-it-works-btn {
+    background: linear-gradient(45deg, #FFC107, #FF9800);
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.how-it-works-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.how-it-works-btn .fa-info-circle {
+    font-size: 18px;
+}
 
 /* Share Pop-up Styles */
 .share-popup {
@@ -587,19 +733,28 @@ body {
     cursor: pointer;
 }
 
-/* New Styles for Locked/Frozen Page */
+/* Lock overlay styles */
+.deal-card-list {
+    position: relative; /* Set position to relative for the overlay to be positioned correctly within it */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    justify-content: center;
+    padding: 0 10px;
+}
+
 .page-status-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(240, 242, 245, 0.0);
+    background-color: transparent;
     backdrop-filter: blur(0px);
     display: flex;
-    justify-content: flex-start;
-    align-items: center;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
     z-index: 10;
     opacity: 0;
     pointer-events: none;
@@ -609,60 +764,38 @@ body {
 .page-status-overlay.show {
     opacity: 1;
     pointer-events: all;
+    background-color: rgba(255, 255, 255, 0.1); /* Light, translucent white background for the overlay */
+    backdrop-filter: blur(0px);
 }
 
 .status-message-box {
-    position: relative;
-    width: 100%;
-    height: auto;
     text-align: center;
-    padding-top: 50px;
-    margin-bottom: 20px;
+    padding: 80px 30px;
+    position: relative;
+        background-color: rgba(255, 255, 255, 0.6); /* Light, translucent white background for the overlay */
+    backdrop-filter: blur(0px);
 }
 
-.overlay-lock-icon {
-    font-size: 30vw;
-    color: rgba(255, 82, 82, 0.418);
+.lock-icon {
+    font-size: 20vw; /* Using viewport width for a very large icon */
+    color: rgba(255, 82, 82, 0.4);
     animation: shake 1s infinite;
     position: relative;
-    transform: none;
     z-index: -1;
-    margin-top: 550px;
-    
-}
-
-.overlay-text {
-    position: absolute;
-    
-    top: 550px;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 1;
+    margin-bottom: -100px; /* Pull the text up over the icon */
 }
 
 .status-reason {
     font-size: 1.5rem;
-    margin: 0;
     font-weight: bold;
-    color: #f9f6f6;
-    padding: 5px 10px;
-    background-color: rgba(255, 82, 82, 0.2);
-    border-radius: 5px;
+    color: #ff5252;
+    margin: 20px 0 10px;
 }
 
 .status-instruction {
     font-size: 1.1rem;
-    margin-top: 10px;
     font-weight: bold;
-    color: #f6f3f3;
-    padding: 5px 10px;
-    background-color: rgba(255, 82, 82, 0.2);
-    border-radius: 5px;
+    color: #666;
 }
 
 @keyframes shake {
@@ -676,98 +809,186 @@ body {
     100% { transform: rotate(0deg); }
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .deal-card-list {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 20px;
-    }
-    
-    .dashboard-header {
-        padding: 1rem;
-    }
-    
-    .logo-text {
-        font-size: 1.5rem;
-    }
-    
-    .heading-line-1 {
-        font-size: 2.2rem;
-    }
-    
-    .heading-line-2 {
-        font-size: 1.4rem;
-    }
-
-    .shareable-link-container {
-        flex-direction: column;
-        gap: 10px;
-        padding: 15px;
-    }
-    .short-url {
-        font-size: 0.9rem;
-    }
-
-    .overlay-lock-icon {
-        font-size: 20rem;
-    }
-
-    .status-reason {
-        font-size: 1.2rem;
-    }
-
-    .status-instruction {
-        font-size: 1.0rem;
-    }
+.timer-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.15);
+    padding: 10px 20px;
+    border-radius: 50px;
+    margin-top: 15px;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-@media (max-width: 480px) {
-    .flash-deal-page-container {
-        padding: 10px;
-    }
-    
-    .deal-card-list {
-        grid-template-columns: 1fr;
-    }
-    
-    .header-top {
-        flex-direction: column;
-        gap: 15px;
-    }
-    
-    .page-header {
-        padding: 20px 15px;
-    }
-    
-    .heading-line-1 {
-        font-size: 1.8rem;
-    }
-    
-    .heading-line-2 {
-        font-size: 1.2rem;
-    }
-
-    .page-description {
-        font-size: 0.9rem;
-    }
+.timer-icon {
+    color: white;
+    font-size: 1.5rem;
 }
-/* New CSS for Quantity Pop-up */
 
-/* Full-screen overlay to dim the background */
-.quantity-popup {
+.timer-text {
+    color: white;
+    font-weight: 600;
+    font-size: 1.2rem;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Reviews and Farm Photos Popups */
+.reviews-popup {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    background-color: rgba(0, 0, 0, 0.6);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 2000; /* Ensure it's on top of all other content */
+    z-index: 2000;
+    transition: opacity 0.3s ease;
 }
 
-/* The actual pop-up box */
+.reviews-popup-content {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: slide-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes slide-in {
+    from { transform: translateY(50px) scale(0.9); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.reviews-popup-content h3 {
+    margin-top: 0;
+    font-size: 1.8rem;
+    color: #2c3e50;
+    text-align: center;
+}
+
+.reviews-for-farmer {
+    font-size: 1rem;
+    color: #777;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.review-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.review-item {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+}
+
+.review-comment {
+    font-style: italic;
+    color: #555;
+    margin: 0;
+}
+
+.review-consumer {
+    text-align: right;
+    font-weight: 600;
+    color: #333;
+    margin-top: 10px;
+    font-size: 0.9rem;
+}
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.review-consumer {
+    font-weight: 600;
+    color: #333;
+}
+
+.review-rating-stars .star-rating {
+    display: flex;
+    gap: 2px;
+}
+
+.review-comment {
+    font-style: italic;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.review-date {
+    font-size: 0.8rem;
+    color: #999;
+    text-align: right;
+}
+
+.no-reviews-message {
+    text-align: center;
+    color: #999;
+    font-style: italic;
+}
+
+.reviews-popup-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: #999;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.reviews-popup-close-btn:hover {
+    color: #333;
+}
+
+.farm-photos-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.farm-photo-item {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+/* Quantity Pop-up Styles (Merged from old code) */
+.quantity-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    opacity: 1; /* Always visible when active */
+    transition: opacity 0.3s ease;
+}
+
 .quantity-popup-content {
     background-color: white;
     padding: 30px;
@@ -779,11 +1000,24 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    position: relative;
+    transform: scale(1);
+    animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-.quantity-popup-content h3 {
-    margin: 0;
+.popup-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
     font-size: 1.5rem;
+    color: #999;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.popup-close-btn:hover {
     color: #333;
 }
 
@@ -865,9 +1099,217 @@ body {
 .add-to-cart-btn {
     background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
     color: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
 }
 
 .add-to-cart-btn:hover {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     transform: translateY(-2px);
+}
+
+/* Instructions Popup Styles (from old code) */
+.instructions-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.instructions-popup-content {
+    background: linear-gradient(135deg, #ffffff, #f0f0f5);
+    padding: 40px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+    transform: scale(0.9);
+}
+
+.instructions-popup-content .close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #a0a0a0;
+    transition: all 0.3s ease;
+}
+
+.instructions-popup-content .close-btn:hover {
+    color: #555;
+    transform: rotate(90deg);
+}
+
+.instructions-popup-content h3 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #3f51b5;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.instructions-popup-content h3 .fa-question-circle {
+    margin-right: 10px;
+    font-size: 24px;
+    color: #4CAF50;
+}
+
+.instruction-item {
+    margin-bottom: 25px;
+    padding: 20px;
+    border-radius: 12px;
+    background-color: #f9f9f9;
+    border-left: 5px solid #4CAF50;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.instruction-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.instruction-item h4 {
+    color: #3f51b5;
+    font-size: 20px;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.instruction-item p {
+    color: #666;
+    line-height: 1.7;
+    margin-top: 0;
+    font-size: 16px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .deal-card-list {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    .dashboard-header {
+        padding: 1rem;
+    }
+    
+    .logo-text {
+        font-size: 1.5rem;
+    }
+    
+    .heading-line-1 {
+        font-size: 2.2rem;
+    }
+    
+    .heading-line-2 {
+        font-size: 1.4rem;
+    }
+
+    .shareable-link-container {
+        flex-direction: column;
+        gap: 10px;
+        padding: 15px;
+    }
+    .short-url {
+        font-size: 0.9rem;
+    }
+
+    .timer-display {
+        font-size: 0.9rem;
+        padding: 8px 15px;
+    }
+
+    .link-and-info-container {
+        flex-direction: column;
+    }
+
+    .shareable-link-container {
+        max-width: 100%;
+        margin-bottom: 15px;
+    }
+
+    .status-message-box {
+        padding: 20px;
+        width: 80%;
+    }
+    
+    .lock-icon {
+        font-size: 3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .flash-deal-page-container {
+        padding: 10px;
+    }
+    
+    .deal-card-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .header-top {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .page-header {
+        padding: 20px 15px;
+    }
+    
+    .heading-line-1 {
+        font-size: 1.8rem;
+    }
+    
+    .heading-line-2 {
+        font-size: 1.2rem;
+    }
+    
+    .page-description {
+        font-size: 0.9rem;
+    }
+
+    .deal-actions-container .reviews-btn,
+    .deal-actions-container .farm-photos-btn,
+    .deal-actions-container .deal-action-btn {
+        grid-column: 1 / -1;
+    }
 }

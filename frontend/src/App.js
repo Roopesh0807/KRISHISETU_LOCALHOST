@@ -38,6 +38,7 @@ import OrderPage from "./components/OrderPage";
 import Chatbot from "./components/Chatbot";
 import HelpFarmers from "./components/HelpFarmers"
 
+
 //bargaining
 import ConsumerChatList from './components/bargaining/ConsumerChatList';
 import ConsumerChatWindow from './components/bargaining/ConsumerChatWindow';
@@ -47,6 +48,8 @@ import FarmerBargainOrders from './components/bargaining/farmerbargainorders';
 import ConsumerBargainOrders from './components/bargaining/consumerbargainorders';
 import BargainCart from './components/bargaining/bargainCart';
 import BargainOrderPage from './components/bargaining/bargainOrderPage';
+import BargainPopup from './components/bargaining/BargainPopup';
+import FarmerChatDashboard from './components/bargaining/FarmerChatDashboard';
 
 import HomePageC from './pages/HomePage';
 import JoinCommunity from './pages/JoinCommunity';
@@ -56,7 +59,7 @@ import AdminCommunityPage from './pages/AdminCommunityPage';
 import MemberCommunityPage from './pages/MemberCommunityPage';
 import OrderPageC from './pages/OrderPage';
 import MemberOrderPage from "./pages/MemberOrderPage";
-import CommunityOrderPage from "./pages/CommunityOrderPage";
+import CommunityOrderPage from "./pages/CommunityFlashDealsOrderPage";
 
 // In your main App.js or routing file
 import PaymentSuccess from './components/PaymentSuccess';
@@ -67,7 +70,7 @@ import GoogleTranslate from "./components/GoogleTranslate";
 import MyOrders from './components/MyOrders';
 import Transactions from './components/Transactions';
 
-
+import CommunityFlashDealsOrderPage from "./components/CommunityFlashDealsOrderPage";
 import CommunityFlashDeals from "./components/CommunityFlashDeals";
 import CombinedOrderPage from './components/CombinedOrderPage';
 
@@ -263,9 +266,8 @@ const Main = () => {
           <Route path="/community-page/:communityId/member" element={<MemberCommunityPage />} />
           <Route path="/order/:communityId" element={<OrderPageC />} />
           <Route path="/community/:communityId/member/:memberId" element={<MemberOrderPage />} />
-          <Route path="/community/:communityId/order/:orderId" 
-          
-               element={<CommunityOrderPage />} />
+          {/* <Route path="/community/:communityId/order/:orderId" element={<CommunityOrderPage />} /> */}
+        <Route path="/community-flash-deals-orderpage" element={<CommunityFlashDealsOrderPage />} />  
 <Route path="/community-flash-deals" element={<CommunityFlashDeals />} />
           // Add these to your routes
 <Route path="/payment-success" element={<PaymentSuccess />} />
@@ -278,7 +280,7 @@ const Main = () => {
         {/* <Route path="/bargain/:session_id" element={<ConsumerChatWindow />} /> */}
 
         <Route path="/bargain/:bargainId" element={<ConsumerChatWindow />} />
-
+        <Route path="/initiate-bargain/:farmerId" element={<BargainPopup />} />
         {/* Farmer Routes */}
         <Route path="/farmer/bargain" element={<FarmerChatList />} />
         {/* // In your router configuration */}
@@ -296,6 +298,9 @@ const Main = () => {
           <Route path="/consumer-orders" element={<ConsumerBargainOrders />} />
           <Route path="/bargain-cart" element={<BargainCart />} />
           <Route path="/bargain-orderpage" element={<BargainOrderPage />} />
+          <Route path="/initiate-bargain/:farmerId" element={<BargainPopup />} />
+          <Route path="bargain/dashboard/:farmerId" element={<FarmerChatDashboard />} />
+           
 
           <Route path="/add-produce" element={<AddProduce />} />
           <Route path="/productDetails/:product_id" element={<ProductDetails />} />

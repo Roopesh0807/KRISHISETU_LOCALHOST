@@ -13,6 +13,7 @@ import {
     faChevronLeft,
     faChevronRight,
     faSpinner,
+    faClock,
     faPercentage,
     faTimes, // Added for close button in subscription popup
     faCheckCircle, // Added for success message in subscription popup
@@ -66,9 +67,18 @@ const ConsumerDashboard = () => {
         return savedCache ? JSON.parse(savedCache) : {};
     });
     const [showFlashDealBanner, setShowFlashDealBanner] = useState(false);
+const [flashDealTimeLeft, setFlashDealTimeLeft] = useState(0);
+    // --- START: ADDED WALLET INSUFFICIENT LOGIC ---
+    // Wallet state for the popup
+    const [walletBalance, setWalletBalance] = useState(0);
+    const [showWalletRequiredPopup, setShowWalletRequiredPopup] = useState(false);
+    // --- END: ADDED WALLET INSUFFICIENT LOGIC ---
 
+<<<<<<< HEAD
 
     // No need for flashDealBannerRef or its JS useEffect for animation now, as we'll use CSS for marquee.
+=======
+>>>>>>> 39ac42e282b855710ef96557702d598982be781c
 
     // Function to get the initial default date based on cutoff time
     const getInitialSubscriptionDate = () => {
@@ -104,7 +114,13 @@ const ConsumerDashboard = () => {
     const [dateSelectionError, setDateSelectionError] = useState("");
     const [selectedFrequency, setSelectedFrequency] = useState("");
 
-
+// Add this function, it's a copy from CommunityFlashDeals.js
+const formatTime = (seconds) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+};
     // Haversine formula to calculate the distance between two lat/lon points
     const calculateDistance = (lat1, lon1, lat2, lon2) => {
         const R = 6371;
@@ -428,6 +444,20 @@ const ConsumerDashboard = () => {
                 if (flashDealData.showFlashDeal) {
                     setShowFlashDealBanner(true);
                     // Fetch products for the banner
+                    if (flashDealData.timerData) {
+                const startTime = new Date(flashDealData.timerData.start_time).getTime();
+                const now = new Date().getTime();
+                const activeDuration = 24 * 60 * 60 * 1000;
+                const frozenDuration = 72 * 60 * 60 * 1000;
+                const cycleDuration = activeDuration + frozenDuration;
+                const elapsedTimeInCycle = (now - startTime) % cycleDuration;
+                
+                if (elapsedTimeInCycle < activeDuration) {
+                    setFlashDealTimeLeft(Math.floor((activeDuration - elapsedTimeInCycle) / 1000));
+                } else {
+                    setFlashDealTimeLeft(Math.floor((cycleDuration - elapsedTimeInCycle) / 1000));
+                }
+            }
                     const bannerProductsResponse = await fetch(`http://localhost:5000/api/community-flashdeals/banner-data`, {
                         headers: {
                             "Authorization": `Bearer ${consumer.token}`,
@@ -452,6 +482,7 @@ const ConsumerDashboard = () => {
 
                 } else {
                     setShowFlashDealBanner(false);
+                     setFlashDealTimeLeft(0);
                 }
             } catch (error) {
                 console.error("Error checking flash deals:", error);
@@ -460,10 +491,35 @@ const ConsumerDashboard = () => {
         };
 
         checkFlashDeals();
+        // Add the interval to update the timer every second
+    const timer = setInterval(() => {
+        setFlashDealTimeLeft(prevTime => Math.max(0, prevTime - 1));
+    }, 1000);
+    
+    // Cleanup function for the timer
+    return () => clearInterval(timer);
     }, [consumer]);
 
-    // Removed the JS animation useEffect for the flash deal banner. CSS will handle the marquee.
-
+    // --- START: ADDED WALLET INSUFFICIENT LOGIC ---
+    // New useEffect to fetch wallet balance on component load
+    useEffect(() => {
+      const fetchWalletBalance = async () => {
+          if (!consumer?.consumer_id || !consumer?.token) return;
+          try {
+              const response = await fetch(`http://localhost:5000/api/wallet/balance/${consumer.consumer_id}`, {
+                  headers: { "Authorization": `Bearer ${consumer.token}` }
+              });
+              const data = await response.json();
+              if (data.success) {
+                  setWalletBalance(data.balance);
+              }
+          } catch (error) {
+              console.error("Error fetching wallet balance:", error);
+          }
+      };
+      fetchWalletBalance();
+    }, [consumer]);
+    // --- END: ADDED WALLET INSUFFICIENT LOGIC ---
 
     // Search handler for the main search bar
     const handleSearch = () => {
@@ -622,67 +678,89 @@ const bannerCarouselSettings = {
     };
     
     // Handle bargain initiation
-    const handleBargainClick = async (farmer, product, e) => {
-        if (e) e.stopPropagation();
-        try {
-            setIsLoading(true);
-            setError(null);
+    // const handleBargainClick = async (farmer, product, e) => {
+    //     if (e) e.stopPropagation();
+    //     try {
+    //         setIsLoading(true);
+    //         setError(null);
             
-            const response = await fetch(`http://localhost:5000/api/create-bargain`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${consumer.token}`
-                },
-                body: JSON.stringify({
-                    farmer_id: farmer.farmer_id
-                })
-            });
+    //         const response = await fetch(`http://localhost:5000/api/create-bargain`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': `Bearer ${consumer.token}`
+    //             },
+    //             body: JSON.stringify({
+    //                 farmer_id: farmer.farmer_id
+    //             })
+    //         });
             
-            const data = await response.json();
+    //         const data = await response.json();
             
-            if (!data.success) {
-                throw new Error(data.error || 'Failed to create bargain session');
-            }
+    //         if (!data.success) {
+    //             throw new Error(data.error || 'Failed to create bargain session');
+    //         }
             
-            const productResponse = await fetch(`http://localhost:5000/api/add-bargain-product`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${consumer.token}`
-                },
-                body: JSON.stringify({
-                    bargain_id: data.bargainId,
-                    product_id: product.product_id,
-                    quantity: 10
-                })
-            });
+    //         const productResponse = await fetch(`http://localhost:5000/api/add-bargain-product`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': `Bearer ${consumer.token}`
+    //             },
+    //             body: JSON.stringify({
+    //                 bargain_id: data.bargainId,
+    //                 product_id: product.product_id,
+    //                 quantity: 10
+    //             })
+    //         });
             
-            const productData = await productResponse.json();
+    //         const productData = await productResponse.json();
             
-            if (!productData.success) {
-                throw new Error(productData.error || 'Failed to add product');
-            }
+    //         if (!productData.success) {
+    //             throw new Error(productData.error || 'Failed to add product');
+    //         }
             
-            navigate(`/bargain/${data.bargainId}`, {
-                state: {
-                    farmer,
-                    product: {
-                        ...product,
-                        price_per_kg: productData.price_per_kg,
-                        quantity: productData.quantity
-                    }
-                }
-            });
+    //         navigate(`/bargain/${data.bargainId}`, {
+    //             state: {
+    //                 farmer,
+    //                 product: {
+    //                     ...product,
+    //                     price_per_kg: productData.price_per_kg,
+    //                     quantity: productData.quantity
+    //                 }
+    //             }
+    //         });
             
-        } catch (error) {
-            setError(error.message);
-            console.error("Bargain error:", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    //     } catch (error) {
+    //         setError(error.message);
+    //         console.error("Bargain error:", error);
+    //     } finally {
+    //         setIsLoading(false);
+    //     }
+    // };
+const handleBargainClick = (farmer, product, e) => {
+  if (e) e.stopPropagation();
 
+  try {
+    setIsLoading(true);
+    setError(null);
+
+    // ✅ Navigate to popup page with ALL farmer products
+    navigate(`/initiate-bargain/${farmer.farmer_id}`, {
+      state: { 
+        farmer, 
+        product, // Current product (optional)
+        products: farmer.products // All products for selection
+      },
+    });
+
+  } catch (error) {
+    setError(error.message);
+    console.error("Bargain navigation error:", error);
+  } finally {
+    setIsLoading(false);
+  }
+};
     // Handle quantity change for products
     const handleQuantityChange = (productId, event) => {
         const value = parseInt(event.target.value, 10);
@@ -721,23 +799,43 @@ const bannerCarouselSettings = {
         navigate(`/community-home`);
     };
 
-    // New subscription handlers
-    const handleSubscribeClick = (product, e) => {
-        e.stopPropagation();
-        if (!consumer) {
-            alert("Please login first");
-            navigate("/consumer-login");
-            return;
-        }
-        setSelectedProductForSubscription(product);
-        setShowSubscriptionPopup(true);
-        setShowCalendar(false); // Reset calendar view
-        setSubscriptionConfirmed(false); // Reset confirmation view
-        setSelectedFrequency(""); // Reset frequency
-        setSelectedDate(getInitialSubscriptionDate()); // Set initial default date here
-        setDateSelectionError(""); // Clear any previous errors
-    };
+    // --- START: ADDED WALLET INSUFFICIENT LOGIC ---
+    const handleSubscribeClick = async (product, e) => {
+      e.stopPropagation();
+      if (!consumer) {
+          alert("Please login first");
+          navigate("/consumer-login");
+          return;
+      }
+      
+      try {
+          const response = await fetch(`http://localhost:5000/api/wallet/balance/${consumer.consumer_id}`, {
+              headers: { "Authorization": `Bearer ${consumer.token}` }
+          });
+          const data = await response.json();
+          setWalletBalance(data.balance);
+          
+          if (data.balance < 5) { // Assuming a minimum balance of 5 is required to subscribe
+              setShowWalletRequiredPopup(true);
+              return;
+          }
+      } catch (error) {
+          console.error("Error fetching wallet balance:", error);
+          alert("Could not fetch wallet balance. Please ensure your wallet is funded.");
+      }
 
+      setSelectedProductForSubscription(product);
+      setShowSubscriptionPopup(true);
+      setShowCalendar(false);
+      setSubscriptionConfirmed(false);
+      setSelectedFrequency("");
+      setSelectedDate(getInitialSubscriptionDate());
+      setDateSelectionError("");
+    };
+    // --- END: ADDED WALLET INSUFFICIENT LOGIC ---
+
+
+    // New subscription handlers
     const handleFrequencySelect = (frequency) => {
         setSelectedFrequency(frequency);
         setShowCalendar(true);
@@ -969,8 +1067,30 @@ const bannerCarouselSettings = {
 
     return (
         <div className="ks-consumer-dashboard">
+<<<<<<< HEAD
             {/* Add the tour component here */}
   <ConsumerOnboardingTour />
+=======
+            {/* --- START: ADDED WALLET INSUFFICIENT POPUP --- */}
+             {showWalletRequiredPopup && (
+                <div className="popup-overlay">
+                    <div className="wallet-required-popup popup-content">
+                        <div className="popup-header">
+                            <h3>Wallet Balance Low</h3>
+                            <button className="close-popup" onClick={() => setShowWalletRequiredPopup(false)}>&times;</button>
+                        </div>
+                        <div className="popup-body">
+                            <p>You need to have a minimum balance to subscribe to a product.</p>
+                            <p>Your current balance is ₹{walletBalance.toFixed(2)}.</p>
+                            <button className="add-money-btn" onClick={() => navigate('/subscribe', { state: { scrollToWallet: true } })}>
+                                Add Money to Wallet
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* --- END: ADDED WALLET INSUFFICIENT POPUP --- */}
+>>>>>>> 39ac42e282b855710ef96557702d598982be781c
             {/* Success Message Overlay for Subscription */}
             {showSuccessMessage && (
                 <div className="ks-success-overlay">
@@ -1130,6 +1250,10 @@ const bannerCarouselSettings = {
                             <h3>COMMUNITY DEALS</h3>
                             <p>Limited Time Offers</p>
                         </div>
+                         <div className="ks-banner-timer">
+        <FontAwesomeIcon icon={faClock} />
+        <span>{formatTime(flashDealTimeLeft)}</span>
+    </div>
                     </div>
                     <div className="ks-banner-carousel-container">
                         <Slider {...bannerCarouselSettings}>
@@ -1143,7 +1267,8 @@ const bannerCarouselSettings = {
                                     <div className="ks-banner-product-details">
                                         <h4>{deal.produce_name}</h4>
                                         <p className="ks-banner-price">
-                                            <span className="ks-original-price">₹{deal.price_per_kg}/kg</span>
+                                            <span className="ks-original-price">₹{deal.price_per_kg}/kg</span></p>
+                                            <p className="ks-banner-price">
                                             <span className="ks-flash-price">₹{deal.minimum_price}/kg</span>
                                         </p>
                                     </div>

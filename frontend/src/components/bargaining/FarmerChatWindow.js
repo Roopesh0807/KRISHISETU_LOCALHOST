@@ -52,6 +52,7 @@ const FarmerChatWindow = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [originalPrice, setOriginalPrice] = useState(initialProduct?.price_per_kg || 0);
   const [waitingForConsumerResponse, setWaitingForConsumerResponse] = useState(false);
+const [, setFreezeUI] = useState(false);
 
   // Generate price suggestions based on current price
   const generatePriceSuggestions = useCallback((basePrice) => {
@@ -175,37 +176,35 @@ const FarmerChatWindow = () => {
       }
     });
 
-    socket.current.on('systemMessage', (message) => {
-      if (message?.content) {
-        setMessages(prev => [...prev, {
-          content: message.content,
-          sender_type: 'system',
-          timestamp: message.timestamp || new Date().toISOString()
-        }]);
-      }
-    });
-
-    socket.current.on('newMessage', (message) => {
+    // ✅ FIX: Use unified event name
+    socket.current.on('bargainMessage', (message) => {
       if (message?.message_content) {
         const formattedMessage = {
           ...message,
           content: message.message_content,
           timestamp: message.created_at,
-          sender_type: message.sender_role === 'system' ? 'system' : message.sender_role
+          sender_type: message.sender_role
         };
         
         setMessages(prev => [...prev, formattedMessage]);
         
-        if (message.sender_role === 'consumer') {
-          // Show price suggestions when consumer makes an offer
-          const priceMatch = message.message_content.match(/₹(\d+)/);
-          const price = priceMatch ? parseFloat(priceMatch[1]) : currentPrice;
-          
-          const suggestions = generatePriceSuggestions(price);
-          setPriceSuggestions(suggestions);
-          setShowPriceSuggestions(true);
-          setCurrentPrice(price);
-        }
+   if (message.sender_role === 'consumer') {
+  const priceMatch = message.message_content.match(/₹(\d+)/);
+  const price = priceMatch ? parseFloat(priceMatch[1]) : currentPrice;
+
+  setCurrentPrice(price);
+
+  // Preload counter suggestions for farmer
+  const suggestions = generatePriceSuggestions(price);
+  setPriceSuggestions(suggestions);
+
+  // ✅ Unlock the buttons
+  setWaitingForConsumerResponse(false);
+
+  // Keep Accept/Reject visible until farmer clicks Counter
+  setShowPriceSuggestions(false);
+}
+
       }
     });
 
@@ -214,14 +213,12 @@ const FarmerChatWindow = () => {
       
       // Farmer's perspective
       if (initiatedBy === 'farmer') {
-        // Farmer initiated this action
         if (status === 'accepted') {
           addSystemMessage(`✅ You accepted the offer at ₹${currentPrice}/kg`);
         } else if (status === 'rejected') {
           addSystemMessage(`❌ You rejected the offer at ₹${currentPrice}/kg`);
         }
       } else {
-        // Consumer initiated this action
         if (status === 'accepted') {
           addSystemMessage(`🎉 ${selectedConsumer.first_name} accepted your offer at ₹${currentPrice}/kg`);
         } else if (status === 'rejected') {
@@ -371,9 +368,13 @@ const FarmerChatWindow = () => {
             setQuantity(data.product.quantity || 1);
           }
           
-          if (data.status) {
-            setBargainStatus(data.status);
+         if (data.status) {
+          setBargainStatus(data.status);
+          if (data.status === 'accepted' || data.status === 'rejected') {
+            setFreezeUI(true);       // ✅ Keep frozen after refresh
           }
+        }
+
         }
         
         initializeSocketConnection();
