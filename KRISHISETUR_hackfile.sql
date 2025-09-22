@@ -1883,3 +1883,38 @@ BEGIN
 END //
 
 DELIMITER ;
+
+-- place order order_id
+
+CREATE TABLE IF NOT EXISTS order_seq (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY
+);
+
+-- Step 1: calculate the current max order number
+SELECT IFNULL(MAX(CAST(SUBSTRING(order_id, 4) AS UNSIGNED)), 0) + 1 
+INTO @next_start
+FROM placeorder
+WHERE order_id REGEXP '^ORD[0-9]+$';
+
+-- Step 2: set AUTO_INCREMENT to that number
+SET @qry = CONCAT('ALTER TABLE order_seq AUTO_INCREMENT = ', @next_start);
+PREPARE stmt FROM @qry;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+
+DELIMITER $$
+DROP TRIGGER IF EXISTS before_insert_placeorder$$
+
+CREATE TRIGGER before_insert_placeorder
+BEFORE INSERT ON placeorder
+FOR EACH ROW
+BEGIN
+  DECLARE next_num INT UNSIGNED;
+
+  INSERT INTO order_seq (id) VALUES (NULL);
+  SET next_num = LAST_INSERT_ID();
+
+  SET NEW.order_id = CONCAT('ORD', LPAD(next_num, 3, '0'));
+END$$
+DELIMITER ;
