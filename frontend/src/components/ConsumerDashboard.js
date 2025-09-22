@@ -1441,11 +1441,16 @@ const filteredProducts = products.filter((product) => {
         <FontAwesomeIcon icon={faBolt} /> Buy Now
     </button>
     <button
-        onClick={(e) => handleSubscribeClick(product, e)}
-        className="ks-action-btn ks-subscribe-btn"
-    >
-        <FontAwesomeIcon icon={faCalendarAlt} /> Subscribe 
-    </button>
+    onClick={(e) => handleSubscribeClick(product, e)}
+    className="ks-action-btn ks-subscribe-btn"
+>
+    <FontAwesomeIcon icon={faCalendarAlt} />
+    Subscribe @ {
+        (
+            (product.price_1kg * (selectedQuantities[product.product_id] || 1)) * 0.95
+        ).toFixed(2)
+    }
+</button>
 </div>
                                     </div>
                                 </div>
