@@ -1798,9 +1798,16 @@ CREATE TABLE flash_deals_status (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- consumer registration trigger
+
 CREATE TABLE consumer_seq (
-    id INT AUTO_INCREMENT=13 PRIMARY KEY
+    id INT AUTO_INCREMENT PRIMARY KEY
 );
+TRUNCATE TABLE consumer_seq;
+
+ALTER TABLE consumer_seq AUTO_INCREMENT = 13;
+
+drop TRIGGER if EXISTS before_insert_consumer;
 
 DELIMITER $$
 
@@ -1819,5 +1826,60 @@ BEGIN
     SET next_id = CONCAT('KRST01CS', LPAD(next_num, 3, '0'));
     SET NEW.consumer_id = next_id;
 END$$
+
+DELIMITER ;
+
+
+-- add rpoduce triggers
+
+CREATE TABLE product_seq (
+    id INT AUTO_INCREMENT PRIMARY KEY
+);
+
+TRUNCATE TABLE product_seq;
+ALTER TABLE product_seq AUTO_INCREMENT = 16;
+
+drop TRIGGER if EXISTS before_insert_add_produce;
+
+DELIMITER //
+
+CREATE TRIGGER before_insert_add_produce
+BEFORE INSERT ON add_produce
+FOR EACH ROW
+BEGIN
+    DECLARE fetched_farmer_id VARCHAR(15);
+    DECLARE fetched_first_name VARCHAR(255);
+    DECLARE next_num INT;
+    DECLARE next_id VARCHAR(10);
+    DECLARE farmer_exists INT DEFAULT 0;
+
+    -- Check if farmer exists
+    SELECT COUNT(*) INTO farmer_exists
+    FROM farmerregistration
+    WHERE email = NEW.email;
+
+    IF farmer_exists = 0 THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Invalid email: No matching farmer found';
+    END IF;
+
+    -- Fetch farmer details
+    SELECT farmer_id, first_name
+    INTO fetched_farmer_id, fetched_first_name
+    FROM farmerregistration
+    WHERE email = NEW.email
+    LIMIT 1;
+
+    -- Assign farmer details
+    SET NEW.farmer_id = fetched_farmer_id;
+    SET NEW.farmer_name = fetched_first_name;
+
+    -- Generate product ID using sequence table
+    INSERT INTO product_seq VALUES (NULL);
+    SET next_num = LAST_INSERT_ID();
+    SET next_id = CONCAT('PRD', LPAD(next_num, 3, '0'));
+
+    SET NEW.product_id = next_id;
+END //
 
 DELIMITER ;
