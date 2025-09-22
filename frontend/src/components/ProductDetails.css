@@ -32,9 +32,10 @@
   text-decoration: underline;
 }
 
+/* Update the grid layout for product details */
 .ks-product-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 0.8fr 1.2fr; /* Makes image column smaller and details column bigger */
   gap: 30px;
   background: #fff;
   border-radius: 12px;
@@ -42,20 +43,12 @@
   overflow: hidden;
 }
 
+/* Make the image container a specific size and center the image */
 .ks-product-gallery {
-  background: #f9f9f9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   padding: 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.ks-main-image {
-  width: 100%;
-  max-width: 500px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .ks-product-image {
@@ -64,7 +57,6 @@
   object-fit: contain;
   border-radius: 8px;
 }
-
 .ks-product-info {
   padding: 30px;
 }
@@ -170,43 +162,56 @@
   color: #7f8c8d;
 }
 
+/* Update the action buttons to match the image */
 .ks-action-buttons {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 15px;
-  margin: 30px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin: 40px 0;
+  flex-wrap: wrap;
 }
 
+/* Style the individual buttons to match the provided image */
 .ks-btn {
-  padding: 14px;
-  border-radius: 8px;
+  padding: 24px 30px;
+  border-radius: 50px;
   border: none;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
-  font-size: 15px;
+  transition: all 0.3s ease;
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  min-width: 180px;
+  height: 70px;
+  flex: 1; /* This ensures the buttons share space nicely */
 }
 
+/* Specific colors for each button */
 .ks-btn-cart {
-  background: #2e7d32;
+  background: #2e7d32; /* Green */
   color: white;
-  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.2);
 }
+
+.ks-btn-buy {
+  background: #ff8f00; /* Orange */
+  color: white;
+}
+
+.ks-btn-subscribe {
+  background: #4a148c; /* Purple */
+  color: white;
+}
+
 
 .ks-btn-cart:hover {
   background: #1b5e20;
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(46, 125, 50, 0.3);
-}
-
-.ks-btn-buy {
-  background: #ff8f00;
-  color: white;
-  box-shadow: 0 4px 12px rgba(255, 143, 0, 0.2);
 }
 
 .ks-btn-buy:hover {
@@ -215,92 +220,13 @@
   box-shadow: 0 6px 16px rgba(255, 143, 0, 0.3);
 }
 
-.ks-btn-community {
-  background: #1565c0;
-  color: white;
-  box-shadow: 0 4px 12px rgba(21, 101, 192, 0.2);
-}
-
-.ks-btn-community:hover {
-  background: #0d47a1;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(21, 101, 192, 0.3);
-}
-
-.ks-btn-subscribe {
-  background: #7b1fa2;
-  color: white;
-  box-shadow: 0 4px 12px rgba(123, 31, 162, 0.2);
-}
-
 .ks-btn-subscribe:hover {
   background: #4a148c;
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(123, 31, 162, 0.3);
 }
 
-.ks-community-section {
-  margin-top: 30px;
-  padding: 25px;
-  background: #f5f5f5;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-}
 
-.ks-community-select {
-  width: 100%;
-  padding: 12px 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  font-size: 15px;
-  background: #fff;
-}
-
-.ks-btn-confirm {
-  background: #5d4037;
-  color: white;
-  width: 100%;
-  box-shadow: 0 4px 12px rgba(93, 64, 55, 0.2);
-}
-
-.ks-btn-confirm:hover {
-  background: #3e2723;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(93, 64, 55, 0.3);
-}
-
-.ks-community-prompt {
-  margin-top: 30px;
-  padding: 25px;
-  background: #fff8e1;
-  border-radius: 8px;
-  border: 1px solid #ffe0b2;
-  text-align: center;
-}
-
-.ks-community-prompt p {
-  color: #5d4037;
-  margin-bottom: 20px;
-}
-
-.ks-community-actions {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-}
-
-.ks-btn-community-action {
-  background: #5d4037;
-  color: white;
-  box-shadow: 0 4px 12px rgba(93, 64, 55, 0.2);
-}
-
-.ks-btn-community-action:hover {
-  background: #3e2723;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(93, 64, 55, 0.3);
-}
 
 .ks-error-container, .ks-loading-container {
   padding: 50px 20px;
@@ -334,19 +260,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .ks-action-buttons, .ks-community-actions {
-    grid-template-columns: 1fr;
-  }
-  
-  .ks-product-title {
-    font-size: 24px;
-  }
-  
-  .ks-price {
-    font-size: 28px;
-  }
-}
 
 
 

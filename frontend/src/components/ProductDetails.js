@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import "./ProductDetails.css";
 import { useCart } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
-import { FaShoppingCart, FaUsers, FaCalendarAlt, FaBolt, FaMinus, FaPlus, FaArrowLeft, FaTimes, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
+import { FaShoppingCart, FaCalendarAlt, FaBolt, FaMinus, FaPlus, FaArrowLeft, FaTimes, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 // The Wallet component is no longer imported here as it's been moved to the Subscribe page.
@@ -19,11 +19,6 @@ const ProductDetails = () => {
   const [error, setError] = useState(null);
   const { addToCart } = useCart();
   const [selectedQuantity, setSelectedQuantity] = useState(1);
-  const [communities, setCommunities] = useState([]);
-  const [selectedCommunity, setSelectedCommunity] = useState("");
-  const [showCommunitySelect, setShowCommunitySelect] = useState(false);
-  const [addedToCommunityCart, setAddedToCommunityCart] = useState(false);
-  const [showCommunityOptions, setShowCommunityOptions] = useState(false);
   const { consumer } = React.useContext(AuthContext);
 
   const [walletBalance, setWalletBalance] = useState(0);
@@ -81,110 +76,6 @@ const ProductDetails = () => {
     return price * 0.95;
   };
 
-  const handleAddToCommunityCart = async () => {
-    if (!consumer) {
-      alert("Please login first");
-      navigate("/consumer-login");
-      return;
-    }
-
-    if (addedToCommunityCart) {
-      navigate("/member-order-page");
-      return;
-    }
-
-    try {
-      const response = await fetch(`http://localhost:5000/api/consumer-communities/${consumer.consumer_id}`,{
-        headers: { 
-          "Authorization": `Bearer ${localStorage.getItem('token')}`
-        },
-      });
-      const data = await response.json();
-      
-      if (response.ok) {
-        if (data.error === "Consumer not found") {
-          alert("Your session might be expired. Please login again.");
-          navigate("/consumer-login");
-          return;
-        }
-        
-        if (data.length === 0) {
-          setShowCommunityOptions(true);
-          return;
-        }
-        
-        setCommunities(data);
-        setShowCommunitySelect(true);
-      } else {
-        throw new Error(data.error || "Failed to fetch communities");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      alert(error.message);
-      
-      if (error.message.includes("Consumer not found") || 
-          error.message.includes("session")) {
-        navigate("/consumer-login");
-      }
-    }
-  };
-
-  const handleConfirmAddToCommunityCart = async () => {
-    if (!selectedCommunity) {
-      alert("Please select a community first");
-      return;
-    }
-  
-    try {
-      const response = await fetch("http://localhost:5000/api/community-cart", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${consumer?.token}`,
-        },
-        body: JSON.stringify({
-          community_id: selectedCommunity,
-          product_id: product.product_id,
-          consumer_id: consumer.consumer_id,
-          quantity: selectedQuantity,
-          price: selectedQuantity * product.price_1kg,
-        })
-      });
-      const data = await response.json();
-      
-      if (!response.ok) {
-        if (data.error === "Consumer not found") {
-          alert("Your account wasn't found. Please log in again.");
-          navigate("/consumer-login");
-          return;
-        }
-        if (data.error === "Membership not found") {
-          alert("You need to join this community first");
-          setShowCommunityOptions(true);
-          setShowCommunitySelect(false);
-          return;
-        }
-
-        if (data.error === "Community is frozen") {
-          alert(`This community is currently frozen for orders. ${data.message}`);
-          return;
-        }
-        throw new Error(data.error || "Failed to add to community cart");
-      }
-  
-      setAddedToCommunityCart(true);
-      alert(`Added to ${data.community_name || 'community'} cart!`);
-    } catch (error) {
-      console.error("Error:", error);
-      alert(error.message);
-      
-      if (error.message.includes("not a member") || 
-          error.message.includes("Membership not found")) {
-        setShowCommunityOptions(true);
-        setShowCommunitySelect(false);
-      }
-    }
-  };
 
   const handleSubscribe = async () => {
     if (!consumer) {
@@ -442,58 +333,11 @@ const ProductDetails = () => {
               <button className="ks-btn ks-btn-buy" onClick={handleBuyNow}>
                 <FaBolt /> Buy Now
               </button>
-              <button className="ks-btn ks-btn-community" onClick={handleAddToCommunityCart}>
-                <FaUsers /> {addedToCommunityCart ? "Community Cart" : "Community Order"}
-              </button>
+
               <button className="ks-btn ks-btn-subscribe" onClick={handleSubscribe}>
-                <FaCalendarAlt /> Subscribe (5% off - ₹{discountedPrice.toFixed(2)})
+                <FaCalendarAlt /> Subscribe At (5% off - ₹{discountedPrice.toFixed(2)})
               </button>
             </div>
-
-            {showCommunitySelect && !addedToCommunityCart && (
-              <div className="ks-community-section">
-                <h3 className="ks-section-title">Select Your Community</h3>
-                <select
-                  value={selectedCommunity}
-                  onChange={(e) => setSelectedCommunity(e.target.value)}
-                  className="ks-community-select"
-                >
-                  <option value="">Select your community</option>
-                  {communities.map(community => (
-                    <option key={community.community_id} value={community.community_id}>
-                      {community.community_name}
-                    </option>
-                  ))}
-                </select>
-                <button 
-                  className="ks-btn ks-btn-confirm"
-                  onClick={handleConfirmAddToCommunityCart}
-                >
-                  Confirm Community Selection
-                </button>
-              </div>
-            )}
-
-            {showCommunityOptions && !showCommunitySelect && (
-              <div className="ks-community-prompt">
-                <h3 className="ks-section-title">Join a Community</h3>
-                <p>To use community ordering, you need to be part of a farming community</p>
-                <div className="ks-community-actions">
-                  <button 
-                    className="ks-btn ks-btn-community-action"
-                    onClick={() => navigate("/create-community")}
-                  >
-                    Create New Community
-                  </button>
-                  <button 
-                    className="ks-btn ks-btn-community-action"
-                    onClick={() => navigate("/join-community")}
-                  >
-                    Join Existing Community
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>

@@ -91,15 +91,6 @@ const Navbar3 = () => {
         </li>
         <li>
           <Link
-            to="/community-home"
-            className={`navbar-link ${isHovered === 4 ? 'hover' : ''} ${isActive("/communityHome") ? 'active' : ''}`}
-            onMouseEnter={() => handleMouseEnter(4)}
-            onMouseLeave={handleMouseLeave}>
-            Community Orders
-          </Link>
-        </li>
-        <li>
-          <Link
             to="/community-flash-deals"
             className={`navbar-link ${isHovered === 12 ? 'hover' : ''} ${isActive("/community-flash-deals") ? 'active' : ''}`}
             onMouseEnter={() => handleMouseEnter(12)}
@@ -225,15 +216,6 @@ const Navbar3 = () => {
             onClick={() => setMobileMenuOpen(false)}
           >
             Bargain
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="/community-home"
-            className="navbar-link"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Community Orders
           </Link>
         </li>
         <li>

@@ -357,18 +357,13 @@ body {
 }
 
 .ks-cart-btn {
-  background-color: #FFEB3B;
-  color: #F57F17;
+  background-color: #E1BEE7;
+  color: #7B1FA2;
 }
 
 .ks-buy-btn {
   background-color: var(--secondary-orange);
   color: white;
-}
-
-.ks-community-btn {
-  background-color: #E1BEE7;
-  color: #7B1FA2;
 }
 
 .ks-subscribe-btn {
@@ -1839,4 +1834,19 @@ body {
         opacity: 1;
         transform: translateY(0);
     }
+}
+/* Add this new CSS rule */
+.ks-product-actions-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+
+/* Remove this old CSS rule */
+.ks-product-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: auto;
 }

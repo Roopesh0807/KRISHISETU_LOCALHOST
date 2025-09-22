@@ -288,6 +288,13 @@
 .navbar3-hamburger.open div:nth-child(2) {
   opacity: 0;
 }
+.navbar3-hamburger{
+  color: #eaf0ea; 
+}
+
+.navbar3-hamburger:hover{
+  color: #65f365; 
+}
 
 .navbar3-hamburger.open div:nth-child(3) {
   transform: rotate(45deg) translate(-5px, -6px);

@@ -72,7 +72,10 @@ const [flashDealTimeLeft, setFlashDealTimeLeft] = useState(0);
     const [showWalletRequiredPopup, setShowWalletRequiredPopup] = useState(false);
     // --- END: ADDED WALLET INSUFFICIENT LOGIC ---
 
-
+// Add this function to ConsumerDashboard.js
+const calculateDiscountedPrice = (price) => {
+    return price * 0.95;
+};
     // Function to get the initial default date based on cutoff time
     const getInitialSubscriptionDate = () => {
         const now = new Date();
@@ -856,10 +859,6 @@ const handleBargainClick = (farmer, product, e) => {
         setDateSelectionError("");
     };
 
-    // Calculate discounted price (5% off)
-    const calculateDiscountedPrice = (price) => {
-        return price * 0.95;
-    };
 
     const saveSubscription = async () => {
         try {
@@ -958,15 +957,21 @@ const handleBargainClick = (farmer, product, e) => {
         }
     };
 
-    // Filter products based on search and filter terms
-    const filteredProducts = products.filter((product) => {
-        return (
-            product.product_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            (category === "" || product.category.toLowerCase() === category.toLowerCase()) &&
-            (buyType === "" || product.buy_type.toLowerCase() === buyType.toLowerCase())
-        );
-    });
+// Replace the previous `filteredProducts` variable with this simplified code.
+const filteredProducts = products.filter((product) => {
+    // Check if the product name matches the search query (if one exists).
+    const matchesSearchQuery = searchQuery.length > 0
+        ? product.product_name.toLowerCase().includes(searchQuery.toLowerCase())
+        : true;
 
+    // Check if the product category matches the selected category (if one is chosen).
+    const matchesCategory = selectedCategory !== "All Categories"
+        ? product.category.toLowerCase() === selectedCategory.toLowerCase()
+        : true;
+
+    // The product must match both conditions to be included.
+    return matchesSearchQuery && matchesCategory;
+});
     // Filter and sort farmers
     const filteredFarmers = farmers
         .map((farmer) => {
@@ -1181,21 +1186,22 @@ const handleBargainClick = (farmer, product, e) => {
                 </div>
 
                 <div className="ks-search-container">
-                    <div className="ks-search-categories">
-                        <select
-                            className="ks-category-dropdown"
-                            value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                        >
-                            <option>All Categories</option>
-                            <option>Vegetables</option>
-                            <option>Fruits</option>
-                            <option>Grains & Pulses</option>
-                            <option>Dairy</option>
-                            <option>Spices</option>
-                        </select>
-                        <div className="ks-dropdown-arrow">▼</div>
-                    </div>
+
+<div className="ks-search-categories">
+    <select
+        className="ks-category-dropdown"
+        value={selectedCategory}
+        onChange={(e) => setSelectedCategory(e.target.value)}
+    >
+        <option>All Categories</option>
+        <option>Vegetables</option>
+        <option>Fruits</option>
+        <option>Grains & Pulses</option>
+        <option>Dairy</option>
+        <option>Spices</option>
+    </select>
+    <div className="ks-dropdown-arrow">▼</div>
+</div>
                     <input
                         type="text"
                         placeholder="Search products in KrishiSetu and Bargaining markets..."
@@ -1417,35 +1423,30 @@ const handleBargainClick = (farmer, product, e) => {
                                                 <option value="5">5kg - ₹{product.price_5kg}</option>
                                             </select>
                                         </div>
-                                        <div className="ks-product-actions">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    addToCart(product, selectedQuantities[product.product_id] || 1);
-                                                }}
-                                                className="ks-action-btn ks-cart-btn"
-                                            >
-                                                <FontAwesomeIcon icon={faShoppingCart} /> Cart
-                                            </button>
-                                            <button
-                                                onClick={(e) => handleBuyNow(product, e)}
-                                                className="ks-action-btn ks-buy-btn"
-                                            >
-                                                <FontAwesomeIcon icon={faBolt} /> Buy Now
-                                            </button>
-                                            <button
-                                                onClick={(e) => handleAddToCommunityOrders(product, e)}
-                                                className="ks-action-btn ks-community-btn"
-                                            >
-                                                <FontAwesomeIcon icon={faUsers} /> Community
-                                            </button>
-                                            <button
-                                                onClick={(e) => handleSubscribeClick(product, e)}
-                                                className="ks-action-btn ks-subscribe-btn"
-                                            >
-                                                <FontAwesomeIcon icon={faCalendarAlt} /> Subscribe
-                                            </button>
-                                        </div>
+                                      
+<div className="ks-product-actions-grid">
+    <button
+        onClick={(e) => {
+            e.stopPropagation();
+            addToCart(product, selectedQuantities[product.product_id] || 1);
+        }}
+        className="ks-action-btn ks-cart-btn"
+    >
+        <FontAwesomeIcon icon={faShoppingCart} /> Cart
+    </button>
+    <button
+        onClick={(e) => handleBuyNow(product, e)}
+        className="ks-action-btn ks-buy-btn"
+    >
+        <FontAwesomeIcon icon={faBolt} /> Buy Now
+    </button>
+    <button
+        onClick={(e) => handleSubscribeClick(product, e)}
+        className="ks-action-btn ks-subscribe-btn"
+    >
+        <FontAwesomeIcon icon={faCalendarAlt} /> Subscribe 
+    </button>
+</div>
                                     </div>
                                 </div>
                             );
