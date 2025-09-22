@@ -307,7 +307,7 @@
   transition: right 0.3s ease-in-out;
   z-index: 999;
   list-style: none;
-  padding: 0;
+  padding:0;
   margin: 0;
   box-shadow: -4px 0 15px rgba(0, 0, 0, 0.3);
   overflow-y: auto;
@@ -319,7 +319,7 @@
 
 .navbar3-mobile-menu li {
   text-align: left;
-  padding: 15px 20px;
+  padding: 10px 15px;
   width: 100%;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -362,7 +362,7 @@
 }
 
 .navbar3-mobile-profile .dropdown-divider {
-  margin: 10px 0;
+  margin: 5px 0;
   background: rgba(255, 255, 255, 0.1);
 }
 

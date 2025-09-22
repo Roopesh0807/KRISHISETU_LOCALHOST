@@ -1797,3 +1797,27 @@ CREATE TABLE flash_deals_status (
     start_time DATETIME NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE consumer_seq (
+    id INT AUTO_INCREMENT=13 PRIMARY KEY
+);
+
+DELIMITER $$
+
+CREATE TRIGGER before_insert_consumer
+BEFORE INSERT ON consumerregistration
+FOR EACH ROW
+BEGIN
+    DECLARE next_num INT;
+    DECLARE next_id VARCHAR(15);
+
+    -- Insert a dummy row in sequence table to get unique incremental number
+    INSERT INTO consumer_seq VALUES (NULL);
+    SET next_num = LAST_INSERT_ID();
+
+    -- Generate ID in format KRST01CS001, KRST01CS002, ...
+    SET next_id = CONCAT('KRST01CS', LPAD(next_num, 3, '0'));
+    SET NEW.consumer_id = next_id;
+END$$
+
+DELIMITER ;
