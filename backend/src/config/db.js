@@ -362,6 +362,7 @@ const dropTriggers = async () => {
     "DROP TRIGGER IF EXISTS validate_price_before_insert;",
     "DROP EVENT IF EXISTS expire_bargains;",
     "DROP TRIGGER IF EXISTS after_session_insert;",
+    
 
 
   ];
@@ -418,23 +419,7 @@ END ;
 
 `,
 
-    `
-
-CREATE TRIGGER after_session_insert
-AFTER INSERT ON bargain_sessions
-FOR EACH ROW
-BEGIN
-  -- Example: insert null values (just to replicate your issue)
-  INSERT INTO bargain_session_products 
-  (bargain_id, product_id, original_price, quantity, current_offer)
-  VALUES 
-  (NEW.bargain_id, NULL, NULL, NULL, NULL);
-END;
-
-
-
  
-`,
 `-- Trigger to ensure price is non-negative
 
 CREATE TRIGGER validate_price_before_insert

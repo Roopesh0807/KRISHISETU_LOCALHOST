@@ -87,12 +87,14 @@ router.get('/:sessionId', async (req, res) => {
     // ✅ Query 2: Get all products for the session
     const productQuery = `
       SELECT 
-        product_id,
-        original_price,
-        quantity,
-        current_offer
-      FROM bargain_session_products 
-      WHERE bargain_id = ?
+    product_id,
+    produce_name,
+    original_price,
+    quantity,
+    current_offer,
+    minimum_price
+FROM bargain_session_products 
+WHERE bargain_id = ?
     `;
     const products = await queryDatabase(productQuery, [sessionId]);
 
