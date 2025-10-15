@@ -875,7 +875,7 @@ const FarmerDetails = () => {
 
   if (!farmer) {
     return (
-      <div className="loading-container">
+      <div className="loading-overlay">
         {loadingError ? (
           <div className="error-message">
             <p>{loadingError}</p>
@@ -883,6 +883,7 @@ const FarmerDetails = () => {
           </div>
         ) : (
           <div className="loading-spinner">
+             <FontAwesomeIcon icon={faSpinner} spin size="3x" />
             <p>Loading farmer details...</p>
           </div>
         )}

@@ -29,10 +29,11 @@
 }
 
 .ks-dashboard-content {
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 0 20px;
   margin-left: 75px;
+  margin-right: 40;
 }
 
 /* Welcome Section */

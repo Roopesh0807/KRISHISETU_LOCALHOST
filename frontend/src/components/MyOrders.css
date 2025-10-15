@@ -2,11 +2,12 @@
 .my-orders-container {
   max-width: 1200px;
   margin: 2rem auto;
+  margin-top: 70px;
   padding: 0 1rem;
 }
 
 .my-orders-container h1 {
-  font-size: 2rem;
+  font-size: 2.5rem;
   color: #333;
   margin-bottom: 2rem;
   text-align: center;

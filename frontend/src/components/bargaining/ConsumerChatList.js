@@ -581,7 +581,7 @@ const ConsumerChatList = () => {
   }
 
   return (
-    <div className="bargain-container">
+    <div className="bargain-containerC">
       {/* Sidebar - Chat List */}
       <div className="bargain-sidebar">
         <div className="bargain-header">
