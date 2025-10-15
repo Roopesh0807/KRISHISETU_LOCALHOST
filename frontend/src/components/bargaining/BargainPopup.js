@@ -1150,9 +1150,9 @@ const BargainPopup = () => {
         return;
       }
 
-      // 1. Create bargain session
+      // Use the new, combined API endpoint
       const bargainResponse = await fetch(
-        `http://localhost:5000/api/create-bargain`,
+        `http://localhost:5000/api/create-bargain-with-product`,
         {
           method: "POST",
           headers: {
@@ -1161,83 +1161,40 @@ const BargainPopup = () => {
           },
           body: JSON.stringify({
             farmer_id: farmerId,
-          }),
-        }
-      );
-
-      if (!bargainResponse.ok) {
-        const errorText = await bargainResponse.text();
-        throw new Error(errorText || "Failed to create bargain session");
-      }
-
-      const bargainData = await bargainResponse.json();
-      const newBargainId = bargainData.bargainId || bargainData.bargain_id;
-
-      if (!newBargainId) {
-        throw new Error("Invalid create-bargain response");
-      }
-
-      // 2. Add product to bargain
-      const productResponse = await fetch(
-        `http://localhost:5000/api/add-bargain-product`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            bargain_id: newBargainId,
             product_id: selectedProduct.product_id || selectedProduct.produce_id,
             quantity: quantityNum,
           }),
         }
       );
 
-      if (!productResponse.ok) {
-        const errorText = await productResponse.text();
-        throw new Error(errorText || "Product addition failed");
+      if (!bargainResponse.ok) {
+        const errorData = await bargainResponse.json();
+        throw new Error(errorData.error || "Failed to create bargain session");
       }
 
-      const productData = await productResponse.json();
+      const bargainData = await bargainResponse.json();
+      const newBargainId = bargainData.bargainId;
+      const productData = bargainData.product;
 
-      if (!productData.success) {
-        throw new Error(productData.error || "Failed to add product to bargain");
+      if (!newBargainId || !productData) {
+        throw new Error("Invalid API response from create-bargain-with-product");
       }
 
-      // 3. Save SYSTEM MESSAGE
-      const systemMessageContent = `🛒 You selected ${selectedProduct.produce_name} (${quantityNum}kg) at ₹${selectedProduct.price_per_kg}/kg`;
-      const messageResponse = await fetch(
-        `http://localhost:5000/api/bargain/${newBargainId}/system-message`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            message_content: systemMessageContent,
-            message_type: "system",
-          }),
-        }
-      );
-
-      if (!messageResponse.ok) {
-        console.warn("Failed to save system message, but continuing...");
-      }
-
-      // 4. Navigate to chat UI
+      // Save SYSTEM MESSAGE is no longer needed in the frontend because it's handled by the backend trigger.
+      
+      // Navigate to chat UI
       navigate(`/bargain/${newBargainId}`, {
         state: {
           product: {
-            ...selectedProduct,
-            price_per_kg: productData.price_per_kg || selectedProduct.price_per_kg,
-            quantity: productData.quantity || quantityNum,
+            ...productData,
+            price_per_kg: productData.price_per_kg,
+            minimum_price: productData.minimum_price,
+            quantity: productData.quantity,
           },
           farmer,
-          currentPrice: productData.price_per_kg || selectedProduct.price_per_kg,
+          currentPrice: productData.price_per_kg,
           bargainId: newBargainId,
-          originalPrice: productData.price_per_kg || selectedProduct.price_per_kg,
+          originalPrice: productData.price_per_kg,
         },
         replace: true
       });

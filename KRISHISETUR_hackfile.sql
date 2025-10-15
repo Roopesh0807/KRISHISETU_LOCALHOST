@@ -1918,3 +1918,12 @@ BEGIN
   SET NEW.order_id = CONCAT('ORD', LPAD(next_num, 3, '0'));
 END$$
 DELIMITER ;
+
+
+alter table communities modify column community_id varchar(30);
+alter table members modify column community_id varchar(30);
+alter table orders modify column community_id varchar(30);
+
+alter table community_orders modify column community_id varchar(30);
+alter table community_flash_deals_orders modify column community_id varchar(30);
+
