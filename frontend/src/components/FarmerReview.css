@@ -9,7 +9,7 @@
     --text-medium: #616161;
     --text-light: #9E9E9E;
     --background-light: #FAFAFA;
-    --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --card-shadow: 0 4px 13px rgba(0, 0, 0, 0.08);
     --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
   
