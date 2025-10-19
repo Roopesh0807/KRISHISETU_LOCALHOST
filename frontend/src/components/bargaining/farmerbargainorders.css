@@ -3,7 +3,7 @@
 .orders-container {
     padding: 20px;
     margin-top: 70px;
-    margin-left: 70px;
+    margin-left: 150px;
     font-family: Arial, sans-serif;
   }
   
@@ -13,7 +13,7 @@
     margin-bottom: 20px;
   }
   
-  .loading, .error {
+  /* .loading, .error {
     color: #fff;
     background-color: #f44336;
     padding: 15px;
@@ -21,7 +21,7 @@
     border-radius: 5px;
     margin-bottom: 20px;
     font-size: 1rem;
-  }
+  } */
   
   .orders-table {
     width: 100%;

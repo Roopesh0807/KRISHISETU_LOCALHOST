@@ -24,13 +24,16 @@ body {
 }
 
 /* Overall container and layout */
-.bargain-container {
+.bargain-containerC {
   display: flex;
   height: 100vh;
   box-shadow: 0 8px 30px var(--shadow-color);
   border-radius: 16px;
   overflow: hidden;
   margin: 20px;
+  margin-left: 25px;
+  margin-top: 70px;
+  margin-right: 30px;
 }
 
 /* Sidebar - Chat List */
