@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Navbar3 from "../components/Navbar3.js";
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext.js';
 import "../styles/MemberCommunity.css";
 
 function MemberCommunityPage() {

@@ -1,6 +1,9 @@
+import "./index.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
+import App from "./App.js";
+ // or "./App.css" — whichever file you edited
+import "./App.css";
 
 // Create a root container for React to render the App
 const root = ReactDOM.createRoot(document.getElementById("root"));

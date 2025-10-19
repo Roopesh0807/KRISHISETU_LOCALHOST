@@ -705,6 +705,72 @@ app.post("/api/sms/inbound", async (req, res) => {
     res.status(200).send("OK");
 });
 
+
+
+// ===================================
+// 1. ADMIN AUTHENTICATION
+// ===================================
+
+// Admin Login
+app.post("/api/admin/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const results = await queryDatabase(
+      "SELECT * FROM admin_users WHERE email = ?",
+      [email]
+    );
+
+    if (results.length === 0) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+
+    const admin = results[0];
+    
+    // For demo purposes, accept plain password "admin123"
+    // In production, use bcrypt.compare()
+    const isPasswordValid = password === "admin123" || await bcrypt.compare(password, admin.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+
+    // Update last login
+    await queryDatabase(
+      "UPDATE admin_users SET last_login = NOW() WHERE admin_id = ?",
+      [admin.admin_id]
+    );
+
+    const token = jwt.sign(
+      {
+        admin_id: admin.admin_id,
+        email: admin.email,
+        userType: "admin",
+        role: admin.role
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" }
+    );
+
+    res.json({
+      success: true,
+      token,
+      admin: {
+        admin_id: admin.admin_id,
+        email: admin.email,
+        full_name: admin.full_name,
+        role: admin.role
+      }
+    });
+  } catch (err) {
+    console.error("Admin login error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+
+
+
 app.use((req, res, next) => {
   const publicRoutes = [
     "/api/consumerregister",
@@ -721,6 +787,7 @@ app.use((req, res, next) => {
 "/api/products",
 "/api/agmarknet-prices",
  "/api/sms/inbound",
+ "/api/admin/login"
 
     // Add more public routes if needed
   ];
@@ -1014,6 +1081,41 @@ const reviewsRoutes = require('./src/routes/reviews');
 
 
 const secretKey = process.env.JWT_SECRET;
+// ===================================
+// ADMIN PORTAL BACKEND ROUTES
+// Add these routes to your server.js file
+// ===================================
+
+
+// Admin Authentication Middleware
+const verifyAdmin = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  
+  if (!token) {
+    return res.status(401).json({ success: false, message: "No token provided" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.userType !== 'admin') {
+      return res.status(403).json({ success: false, message: "Access denied. Admin only." });
+    }
+    req.admin = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ success: false, message: "Invalid token" });
+  }
+};
+
+
+
+
+
+
+
+
+
+
 
 // Middleware to verify JWT from HTTP API
 const authenticateJWT = (req, res, next) => {
@@ -3202,6 +3304,1224 @@ app.get('/api/subscriptions/:consumer_id', authenticateToken, async (req, res) =
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ===================================
+// 2. DASHBOARD STATISTICS
+// ===================================
+
+app.get("/api/admin/stats", verifyAdmin, async (req, res) => {
+  try {
+    // Get total farmers
+    const farmers = await queryDatabase("SELECT COUNT(*) as total FROM farmerregistration");
+    
+    // Get total consumers
+    const consumers = await queryDatabase("SELECT COUNT(*) as total FROM consumerregistration");
+    
+    // Get total products
+    const products = await queryDatabase("SELECT COUNT(*) as total FROM products");
+    
+    // Get total revenue from placeorder table with 'Paid' payment_status
+    const revenue = await queryDatabase("SELECT COALESCE(SUM(amount), 0) as total FROM placeorder WHERE payment_status = 'Paid'");
+    
+    // Get pending orders from placeorder table with 'Pending' status
+    const pendingOrders = await queryDatabase("SELECT COUNT(*) as total FROM placeorder WHERE status = 'Pending'");
+    
+    // Get active flash deals (assuming a flash_deals_status table)
+    const flashDeals = await queryDatabase("SELECT COUNT(*) as total FROM flash_deals_status");
+
+    res.json({
+      success: true,
+      stats: {
+        totalFarmers: farmers[0].total || 0,
+        totalConsumers: consumers[0].total || 0,
+        totalProducts: products[0].total || 0,
+        totalRevenue: parseFloat(revenue[0].total) || 0,
+        pendingOrders: pendingOrders[0].total || 0,
+        activeFlashDeals: flashDeals[0].total || 0
+      }
+    });
+  } catch (err) {
+    console.error("Stats error:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch statistics" });
+  }
+});
+
+// // ===================================
+// // 3. ANALYTICS
+// // ===================================
+// // ===================================
+// // 3. ANALYTICS
+// // ===================================
+app.get("/api/admin/analyticsdashboard", verifyAdmin, async (req, res) => {
+    try {
+        // Revenue trend over the last 6 months
+        const revenueTrend = await queryDatabase(`
+            SELECT
+                DATE_FORMAT(order_date, '%Y-%m') as month,
+                SUM(amount) as revenue
+            FROM placeorder
+            WHERE payment_status = 'Paid'
+            GROUP BY month
+            ORDER BY month DESC
+            LIMIT 6
+        `);
+
+        // Order types distribution from orderall table
+        const orderTypeDistribution = await queryDatabase(`
+            SELECT
+                order_type AS name,
+                COUNT(orderid) AS value
+            FROM orderall
+            GROUP BY order_type
+        `);
+
+        // Fetch all produce_name strings to process them in the application layer
+        const allProduceNames = await queryDatabase(`
+            SELECT produce_name FROM placeorder
+        `);
+        
+        const cropsCount = new Map();
+        allProduceNames.forEach(row => {
+            const crops = row.produce_name.split(',').map(crop => crop.trim());
+            crops.forEach(crop => {
+                const count = cropsCount.get(crop) || 0;
+                cropsCount.set(crop, count + 1);
+            });
+        });
+
+        // Convert the Map to an array of objects for the chart
+        const topCrops = Array.from(cropsCount.entries())
+            .map(([crop, orders]) => ({ crop, orders }))
+            .sort((a, b) => b.orders - a.orders)
+            .slice(0, 10); // Changed to take the top 10 crops
+
+        res.json({
+            success: true,
+            data: {
+                revenueTrend: revenueTrend.reverse(),
+                orderTypeDistribution,
+                topCrops
+            }
+        });
+
+    } catch (err) {
+        console.error("Analytics fetch error:", err);
+        res.status(500).json({ success: false, message: "Failed to fetch analytics data" });
+    }
+});
+// ===================================
+// 3. FARMER MANAGEMENT
+// ===================================
+
+// Get all farmers
+app.get("/api/admin/farmers", verifyAdmin, async (req, res) => {
+  try {
+    const farmers = await queryDatabase(`
+      SELECT 
+        f.farmer_id,
+        CONCAT(f.first_name, ' ', f.last_name) as farmer_name,
+        f.email,
+        f.phone_number,
+        f.status,
+        COUNT(DISTINCT p.product_id) as total_products,
+        COUNT(DISTINCT o.orderid) as total_orders,
+        COALESCE(SUM(o.amount), 0) as total_earnings
+      FROM farmerregistration f
+      LEFT JOIN products p ON f.farmer_id = p.farmer_id
+      LEFT JOIN orderall o ON f.farmer_id = o.farmer_id
+      GROUP BY f.farmer_id
+      ORDER BY f.farmer_id DESC
+    `);
+
+    res.json({ success: true, farmers });
+  } catch (err) {
+    console.error("Farmers fetch error:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch farmers" });
+  }
+});
+
+// Get single farmer details
+app.get("/api/admin/farmers/:id", verifyAdmin, async (req, res) => {
+  try {
+    const farmerId = req.params.id;
+    
+    // Get farmer basic info
+    const farmer = await queryDatabase(`
+      SELECT f.*, p.dob, p.gender, p.contact_no, p.aadhaar_no, p.residential_address,
+             fd.farm_address, fd.farm_size, fd.crops_grown, fd.farming_method
+      FROM farmerregistration f
+      LEFT JOIN personaldetails p ON f.farmer_id = p.farmer_id
+      LEFT JOIN farmdetails fd ON f.farmer_id = fd.farmer_id
+      WHERE f.farmer_id = ?
+    `, [farmerId]);
+
+    if (farmer.length === 0) {
+      return res.status(404).json({ success: false, message: "Farmer not found" });
+    }
+
+    res.json({ success: true, farmer: farmer[0] });
+  } catch (err) {
+    console.error("Farmer details error:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch farmer details" });
+  }
+});
+
+// Approve farmer
+app.put("/api/admin/farmers/:id/approve", verifyAdmin, async (req, res) => {
+  try {
+    const farmerId = req.params.id;
+    const adminId = req.admin.admin_id;
+
+    await queryDatabase(`
+      UPDATE farmerregistration 
+      SET status = 'approved', reviewed_by = ?, reviewed_at = NOW()
+      WHERE farmer_id = ?
+    `, [adminId, farmerId]);
+
+    res.json({ success: true, message: "Farmer approved successfully" });
+  } catch (err) {
+    console.error("Farmer approve error:", err);
+    res.status(500).json({ success: false, message: "Failed to approve farmer" });
+  }
+});
+
+// Reject farmer
+app.put("/api/admin/farmers/:id/reject", verifyAdmin, async (req, res) => {
+  try {
+    const farmerId = req.params.id;
+    const { reason } = req.body;
+    const adminId = req.admin.admin_id;
+
+    await queryDatabase(`
+      UPDATE farmerregistration 
+      SET status = 'rejected', rejection_reason = ?, reviewed_by = ?, reviewed_at = NOW()
+      WHERE farmer_id = ?
+    `, [reason, adminId, farmerId]);
+
+    res.json({ success: true, message: "Farmer rejected" });
+  } catch (err) {
+    console.error("Farmer reject error:", err);
+    res.status(500).json({ success: false, message: "Failed to reject farmer" });
+  }
+});
+
+// Ban farmer
+app.put("/api/admin/farmers/:id/ban", verifyAdmin, async (req, res) => {
+  try {
+    const farmerId = req.params.id;
+    const adminId = req.admin.admin_id;
+
+    await queryDatabase(`
+      UPDATE farmerregistration 
+      SET status = 'banned', reviewed_by = ?, reviewed_at = NOW()
+      WHERE farmer_id = ?
+    `, [adminId, farmerId]);
+
+    res.json({ success: true, message: "Farmer banned successfully" });
+  } catch (err) {
+    console.error("Farmer ban error:", err);
+    res.status(500).json({ success: false, message: "Failed to ban farmer" });
+  }
+});
+
+// ===================================
+// 4. CONSUMER MANAGEMENT
+// ===================================
+
+// Get all consumers
+app.get("/api/admin/consumers", verifyAdmin, async (req, res) => {
+  try {
+    const consumers = await queryDatabase(`
+      SELECT 
+        c.consumer_id,
+        CONCAT(c.first_name, ' ', c.last_name) as consumer_name,
+        c.email,
+        c.phone_number,
+        c.status,
+        c.wallet_balance,
+        COUNT(DISTINCT o.orderid) as total_orders
+      FROM consumerregistration c
+      LEFT JOIN orderall o ON c.consumer_id = o.consumer_id
+      GROUP BY c.consumer_id
+      ORDER BY c.consumer_id DESC
+    `);
+
+    res.json({ success: true, consumers });
+  } catch (err) {
+    console.error("Consumers fetch error:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch consumers" });
+  }
+});
+
+// Update consumer wallet
+app.put("/api/admin/consumers/:id/wallet", verifyAdmin, async (req, res) => {
+  try {
+    const consumerId = req.params.id;
+    const { amount, operation } = req.body; // operation: 'add' or 'deduct'
+
+    const query = operation === 'add' 
+      ? "UPDATE consumerregistration SET wallet_balance = wallet_balance + ? WHERE consumer_id = ?"
+      : "UPDATE consumerregistration SET wallet_balance = wallet_balance - ? WHERE consumer_id = ?";
+
+    await queryDatabase(query, [amount, consumerId]);
+
+    res.json({ success: true, message: "Wallet updated successfully" });
+  } catch (err) {
+    console.error("Wallet update error:", err);
+    res.status(500).json({ success: false, message: "Failed to update wallet" });
+  }
+});
+
+// ===================================
+// 5. PRODUCT MANAGEMENT
+// ===================================
+
+
+
+// Get all products from the add_produce table
+app.get("/api/admin/products", verifyAdmin, async (req, res) => {
+  try {
+    const { status, marketType } = req.query;
+    
+    let query = `
+      SELECT 
+        p.product_id,
+        p.produce_name as product_name,
+        p.produce_type as farming_method,
+        p.market_type,
+        p.price_per_kg,
+        p.status,
+        p.availability,
+        CONCAT(f.first_name, ' ', f.last_name) as farmer_name
+      FROM add_produce p
+      LEFT JOIN farmerregistration f ON p.farmer_id = f.farmer_id
+    `;
+    
+    const conditions = [];
+    const params = [];
+
+    if (status && status !== 'all') {
+      conditions.push(`p.status = ?`);
+      params.push(status);
+    }
+    if (marketType && marketType !== 'all') {
+      conditions.push(`p.market_type = ?`);
+      params.push(marketType);
+    }
+
+    if (conditions.length > 0) {
+      query += ` WHERE ` + conditions.join(' AND ');
+    }
+    
+    query += ` ORDER BY p.created_at DESC`;
+
+    const products = await queryDatabase(query, params);
+    res.json({ success: true, products });
+  } catch (err) {
+    console.error("Products fetch error:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch products" });
+  }
+});
+
+// Approve product
+app.put("/api/admin/products/:id/approve", verifyAdmin, async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const adminId = req.admin.admin_id;
+
+    await queryDatabase(`
+      UPDATE add_produce 
+      SET status = 'approved', reviewed_by = ?, reviewed_at = NOW()
+      WHERE product_id = ?
+    `, [adminId, productId]);
+
+    res.json({ success: true, message: "Product approved successfully" });
+  } catch (err) {
+    console.error("Product approve error:", err);
+    res.status(500).json({ success: false, message: "Failed to approve product" });
+  }
+});
+
+// Reject product
+app.put("/api/admin/products/:id/reject", verifyAdmin, async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const adminId = req.admin.admin_id;
+
+    await queryDatabase(`
+      UPDATE add_produce 
+      SET status = 'rejected', reviewed_by = ?, reviewed_at = NOW()
+      WHERE product_id = ?
+    `, [adminId, productId]);
+
+    res.json({ success: true, message: "Product rejected" });
+  } catch (err) {
+    console.error("Product reject error:", err);
+    res.status(500).json({ success: false, message: "Failed to reject product" });
+  }
+});
+
+// ===================================
+// 6. ORDER MANAGEMENT
+// ===================================
+
+// Get all orders
+app.get("/api/admin/orders", verifyAdmin, async (req, res) => {
+  try {
+    const { type } = req.query;
+    
+    let query = `
+      SELECT 
+        o.orderid,
+        o.order_date,
+        o.produce_name,
+        o.quantity,
+        o.amount,
+        o.status,
+        o.payment_status,
+        o.order_type,
+        CONCAT(f.first_name, ' ', f.last_name) as farmer_name,
+        CONCAT(c.first_name, ' ', c.last_name) as consumer_name
+      FROM orderall o
+      LEFT JOIN farmerregistration f ON o.farmer_id = f.farmer_id
+      LEFT JOIN consumerregistration c ON o.consumer_id = c.consumer_id
+    `;
+
+    if (type && type !== 'all') {
+      query += ` WHERE o.order_type = '${type}'`;
+    }
+    
+    query += ` ORDER BY o.order_date DESC LIMIT 100`;
+
+    const orders = await queryDatabase(query);
+    res.json({ success: true, orders });
+  } catch (err) {
+    console.error("Orders fetch error:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch orders" });
+  }
+});
+
+// Update order status
+app.put("/api/admin/orders/:id/status", verifyAdmin, async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const { status } = req.body;
+
+    await queryDatabase("UPDATE orderall SET status = ? WHERE orderid = ?", [status, orderId]);
+
+    res.json({ success: true, message: "Order status updated" });
+  } catch (err) {
+    console.error("Order update error:", err);
+    res.status(500).json({ success: false, message: "Failed to update order" });
+  }
+});
+// server.js
+// ===================================
+// 7. PAYMENT MANAGEMENT
+// ===================================
+
+// Get all payments from multiple tables
+app.get("/api/admin/payments", verifyAdmin, async (req, res) => {
+  try {
+    const payments = await queryDatabase(`
+      (
+        SELECT 
+          po.order_id as payment_id,
+          po.order_id,
+          CONCAT(c.first_name, ' ', c.last_name) as consumer_name,
+          po.amount as amount,  -- FIXED: Changed from po.total_amount to po.amount
+          po.payment_method,
+          po.razorpay_payment_id,
+          po.payment_status as status,
+          po.order_date as payment_date
+        FROM placeorder po
+        LEFT JOIN consumerregistration c ON po.consumer_id = c.consumer_id
+      )
+      UNION ALL
+      (
+        SELECT 
+          cfdo.order_id,
+          cfdo.order_id,
+          CONCAT(c.first_name, ' ', c.last_name),
+          cfdo.total_amount,
+          cfdo.payment_method,
+          cfdo.razorpay_payment_id,
+          cfdo.payment_status,
+          cfdo.order_date
+        FROM community_flash_deals_orders cfdo
+        LEFT JOIN consumerregistration c ON cfdo.consumer_id = c.consumer_id
+      )
+      ORDER BY payment_date DESC
+      LIMIT 100
+    `);
+
+    // Mapping 'Paid' status to 'success' for consistency in frontend
+    const formattedPayments = payments.map(p => ({
+      ...p,
+      status: p.status === 'Paid' ? 'success' : p.status.toLowerCase(),
+      payment_id: p.payment_id || 'N/A', // Fallback for missing IDs
+      order_id: p.order_id || 'N/A',
+      consumer_name: p.consumer_name || 'N/A',
+      razorpay_payment_id: p.razorpay_payment_id || 'N/A',
+    }));
+
+    res.json({ success: true, payments: formattedPayments });
+  } catch (err) {
+    console.error("Payments fetch error:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch payments" });
+  }
+});
+
+// ===================================
+// 8. ANALYTICS & DEMAND PREDICTION
+// ===================================
+
+
+
+// Get demand prediction data
+app.get("/api/admin/demand", verifyAdmin, async (req, res) => {
+    try {
+        const { crop } = req.query;
+        
+        // FIX: Use SQL aliases to match frontend field names.
+        // We use historical_orders as total_orders since that's the only real 'order' data available.
+        let query = `
+            SELECT 
+                locality,
+                pincode,
+                crop_name,
+                CAST(historical_orders AS DECIMAL(10, 2)) AS total_orders, 
+                CAST(predicted_demand AS DECIMAL(10, 2)) AS predicted_demand,
+                CAST(growth_rate AS DECIMAL(10, 2)) AS growth_rate,
+                CAST(avg_quantity AS DECIMAL(10, 2)) AS avg_quantity,
+                -- Mock a confidence score as the DB table lacks this column
+                90 AS confidence
+            FROM demand_prediction
+        `;
+        
+        const params = [];
+
+        if (crop && crop !== 'all' && crop !== 'undefined') {
+            query += " WHERE crop_name = ?";
+            params.push(crop);
+        }
+
+        query += " ORDER BY predicted_demand DESC";
+
+        const localityDemand = await queryDatabase(query, params);
+
+        // --- Mock Data for Trends and Market Share ---
+        const trends = [
+            { month: 'Jan', actual: 65, predicted: 70 },
+            { month: 'Feb', actual: 75, predicted: 85 },
+            { month: 'Mar', actual: 90, predicted: 105 },
+            { month: 'Apr', actual: 110, predicted: 120 },
+            { month: 'May', actual: 130, predicted: 145 },
+            { month: 'Jun', actual: 150, predicted: 165 },
+        ];
+        
+        const marketShare = [
+            { name: 'North Region', value: 400 },
+            { name: 'South Region', value: 300 },
+            { name: 'West Region', value: 200 },
+            { name: 'East Region', value: 100 },
+        ];
+        // ---------------------------------------------
+
+        res.json({ 
+            success: true, 
+            data: {
+                localityDemand,
+                trends,
+                marketShare,
+            }
+        });
+    } catch (err) {
+        console.error("Demand fetch error:", err);
+        res.status(500).json({ success: false, message: "Failed to fetch demand data" });
+    }
+});
+
+// app.get("/api/admin/demand", verifyAdmin, async (req, res) => {
+//     try {
+//         const { crop } = req.query;
+        
+//         let query = `
+//             SELECT 
+//                 po.pincode,
+//                 po.produce_name AS crop_name,
+//                 COUNT(po.order_id) AS total_orders, 
+//                 SUM(po.quantity) AS total_quantity,
+//                 AVG(po.quantity) AS avg_quantity,
+//                 -- Get a sample address to use for locality approximation
+//                 SUBSTRING_INDEX(GROUP_CONCAT(cp.address ORDER BY po.order_date DESC), ',', 1) AS sample_address
+//             FROM placeorder po
+//             JOIN consumerprofile cp ON po.consumer_id = cp.consumer_id
+//             WHERE po.status NOT IN ('Cancelled', 'Pending') 
+//         `;
+        
+//         const params = [];
+
+//         if (crop && crop !== 'all' && crop !== 'undefined') {
+//             query += " AND po.produce_name = ?";
+//             params.push(crop);
+//         }
+
+//         // FIX: Grouping only by Pincode and Crop to consolidate metrics
+//         query += `
+//             GROUP BY po.pincode, po.produce_name
+//             HAVING COUNT(po.order_id) > 0
+//             ORDER BY total_orders DESC
+//             LIMIT 50
+//         `;
+
+//         const rawDemandData = await queryDatabase(query, params);
+
+//         // --- Post-processing and Mocking AI/Prediction Fields ---
+//         const localityDemand = rawDemandData.map(d => {
+//             const historical = parseFloat(d.total_orders);
+//             const growthFactor = 1.15; 
+//             const growthRate = 15.00; 
+
+//             // Extract Locality from the sample address
+//             // Use the part before the first comma, or just the Pincode if extraction fails.
+//             const localityMatch = String(d.sample_address).match(/^([^,]+)/);
+//             const localityName = localityMatch ? localityMatch[1].trim() : `Pincode ${d.pincode}`;
+
+//             return {
+//                 locality: localityName,
+//                 pincode: d.pincode,
+//                 crop_name: d.crop_name,
+//                 total_orders: historical, 
+//                 predicted_demand: Math.ceil(historical * growthFactor),
+//                 growth_rate: growthRate,
+//                 avg_quantity: parseFloat(d.avg_quantity).toFixed(1),
+//                 confidence: 90
+//             };
+//         });
+        
+//         // ... (Mock Data for Trends and Market Share remains the same)
+
+//         const trends = [
+//             // ... trends mock data
+//         ];
+        
+//         const marketShare = [
+//             // ... marketShare mock data
+//         ];
+
+//         res.json({ 
+//             success: true, 
+//             data: {
+//                 localityDemand,
+//                 trends,
+//                 marketShare,
+//             }
+//         });
+//     } catch (err) {
+//         console.error("Demand fetch error:", err);
+//         res.status(500).json({ success: false, message: "Failed to fetch demand data" });
+//     }
+// });
+
+
+
+// app.get("/api/admin/analytics", verifyAdmin, async (req, res) => {
+//   try {
+//     // Revenue trend (last 6 months)
+//     const revenueTrend = await queryDatabase(`
+//       SELECT 
+//         DATE_FORMAT(payment_date, '%Y-%m') as month,
+//         SUM(amount) as revenue
+//       FROM payments
+//       WHERE status = 'success' AND payment_date >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+//       GROUP BY month
+//       ORDER BY month
+//     `);
+
+//     // Order type distribution
+//     const orderTypes = await queryDatabase(`
+//       SELECT 
+//         order_type,
+//         COUNT(*) as count
+//       FROM orderall
+//       GROUP BY order_type
+//     `);
+
+//     // Top crops
+//     const topCrops = await queryDatabase(`
+//       SELECT 
+//         produce_name as crop,
+//         COUNT(*) as orders,
+//         SUM(quantity) as total_quantity
+//       FROM orderall
+//       GROUP BY produce_name
+//       ORDER BY orders DESC
+//       LIMIT 10
+//     `);
+
+//     res.json({ 
+//       success: true, 
+//       analytics: {
+//         revenueTrend,
+//         orderTypes,
+//         topCrops
+//       }
+//     });
+//   } catch (err) {
+//     console.error("Analytics fetch error:", err);
+//     res.status(500).json({ success: false, message: "Failed to fetch analytics" });
+//   }
+// });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Add this helper function outside the route handler
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const processTopCrops = (allOrderCrops) => {
+    // Aggregates counts of each crop from the comma-separated produce_name list
+    const cropCounts = {};
+    let totalCrops = 0;
+
+    allOrderCrops.forEach(order => {
+        // Splitting crops and cleaning up whitespace
+        const crops = (order.produce_name || '').split(',').map(c => c.trim()).filter(c => c.length > 0);
+        crops.forEach(crop => {
+            cropCounts[crop] = (cropCounts[crop] || 0) + 1;
+            totalCrops += 1;
+        });
+    });
+
+    // Defining fixed colors for better consistency
+    const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FF0000'];
+
+    // Convert to the required TopCropData format
+    const topCrops = Object.entries(cropCounts)
+        .sort(([, countA], [, countB]) => countB - countA)
+        .slice(0, 5) // Limit to top 5 crops
+        .map(([name, count], index) => ({
+            name: name,
+            value: count, // Renamed 'count' to 'value' for PieChart
+            color: COLORS[index % COLORS.length],
+            percentage: totalCrops > 0 ? parseFloat(((count / totalCrops) * 100).toFixed(1)) : 0
+        }));
+
+    return topCrops;
+};
+
+
+// server.js - Corrected and Enhanced Analytics Route
+
+// ... (Existing imports and functions, including processTopCrops, queryDatabase, verifyAdmin)
+
+// Helper function for percentage calculation (Already in place, but good to ensure it's here)
+const calculateChange = (current, previous) => {
+    current = parseFloat(current) || 0;
+    previous = parseFloat(previous) || 0;
+    if (previous === 0) return current > 0 ? 100.0 : 0.0;
+    return parseFloat((((current - previous) / previous) * 100).toFixed(1));
+};
+
+// Get analytics data
+app.get("/api/admin/analytics", verifyAdmin, async (req, res) => {
+    try {
+        const timeRangeMap = {
+            '1m': '1 MONTH',
+            '3m': '3 MONTH',
+            '6m': '6 MONTH',
+            '1y': '1 YEAR'
+        };
+        const timeKey = req.query.timeRange || '6m';
+        const timePeriodFull = timeRangeMap[timeKey] || '6 MONTH';
+
+        // Split interval string for correct SQL calculation (e.g., '6 MONTH' -> 6, MONTH)
+        const [timeValue, timeUnit] = timePeriodFull.split(' ');
+        const timeValueNum = parseInt(timeValue);
+        const prevTimeValueNum = timeValueNum * 2;
+        
+        const currentPeriodCondition = `order_date >= DATE_SUB(NOW(), INTERVAL ${timeValueNum} ${timeUnit})`;
+        const previousPeriodCondition = `
+            order_date >= DATE_SUB(NOW(), INTERVAL ${prevTimeValueNum} ${timeUnit}) 
+            AND order_date < DATE_SUB(NOW(), INTERVAL ${timeValueNum} ${timeUnit})
+        `;
+
+        // --- 1. Define all queries to run in parallel ---
+        const queries = {
+            // Revenue & Order Trend (Current Period)
+            revenueTrendRaw: `
+                SELECT 
+                    DATE_FORMAT(order_date, '%Y-%m') as month,
+                    SUM(amount) as revenue_sum,
+                    COUNT(order_id) as orders_count
+                FROM placeorder
+                WHERE payment_status = 'Paid' AND ${currentPeriodCondition}
+                GROUP BY month
+                ORDER BY month
+            `,
+            // Order Type Distribution (Overall)
+            orderTypesRaw: `
+                SELECT 
+                    order_type AS type,
+                    COUNT(*) AS count
+                FROM orderall
+                GROUP BY order_type
+            `,
+            // Crops for post-processing (Current Period)
+            allOrderCrops: `
+                SELECT produce_name, quantity
+                FROM placeorder
+                WHERE status NOT IN ('Cancelled', 'Pending') AND ${currentPeriodCondition}
+            `,
+            // Overall Stats for the CURRENT time period
+            totalStatsResult: `
+                SELECT 
+                    SUM(amount) AS total_revenue, 
+                    COUNT(order_id) AS total_orders,
+                    AVG(amount) AS avg_order_value
+                FROM placeorder 
+                WHERE payment_status = 'Paid' AND ${currentPeriodCondition}
+            `,
+            // Overall Stats for PREVIOUS time period (FIXED: uses split interval)
+            prevTotalStatsResult: `
+                SELECT 
+                    SUM(amount) AS total_revenue, 
+                    COUNT(order_id) AS total_orders,
+                    AVG(amount) AS avg_order_value
+                FROM placeorder 
+                WHERE payment_status = 'Paid' AND ${previousPeriodCondition}
+            `,
+            // Monthly User Growth (Farmers) - FIXED: Uses 'reviewed_at' as the registration date proxy
+            farmerGrowthRaw: `
+                SELECT 
+                    DATE_FORMAT(reviewed_at, '%Y-%m') as month, 
+                    COUNT(*) as count
+                FROM farmerregistration
+                WHERE status = 'approved' AND reviewed_at IS NOT NULL AND reviewed_at >= DATE_SUB(NOW(), INTERVAL ${timePeriodFull})
+                GROUP BY month
+                ORDER BY month
+            `,
+            // Monthly User Growth (Consumers) - FIXED: Uses FIRST ORDER DATE as proxy for active consumer growth
+            consumerGrowthRaw: `
+                SELECT
+                    DATE_FORMAT(first_order_date, '%Y-%m') as month,
+                    COUNT(consumer_id) AS count
+                FROM (
+                    SELECT
+                        po.consumer_id,
+                        MIN(po.order_date) AS first_order_date
+                    FROM placeorder po
+                    INNER JOIN consumerregistration cr ON po.consumer_id = cr.consumer_id
+                    WHERE cr.status = 'active' AND po.payment_status = 'Paid'
+                      AND po.order_date >= DATE_SUB(NOW(), INTERVAL ${timePeriodFull})
+                    GROUP BY po.consumer_id
+                ) AS first_orders
+                GROUP BY month
+                ORDER BY month
+            `,
+        };
+
+        // --- 2. Execute all queries concurrently ---
+        const [
+            revenueTrendRaw, 
+            orderTypesRaw, 
+            allOrderCrops, 
+            totalStatsResult, 
+            farmerGrowthRaw, 
+            consumerGrowthRaw,
+            prevTotalStatsResult,
+        ] = await Promise.all([
+            queryDatabase(queries.revenueTrendRaw),
+            queryDatabase(queries.orderTypesRaw),
+            queryDatabase(queries.allOrderCrops),
+            queryDatabase(queries.totalStatsResult).then(res => res[0]),
+            queryDatabase(queries.farmerGrowthRaw),
+            queryDatabase(queries.consumerGrowthRaw),
+            queryDatabase(queries.prevTotalStatsResult).then(res => res[0]),
+        ]);
+
+
+        // --- 3. Process Data and Calculate Stats ---
+
+        // Overall Stats
+        const totalRevenue = parseFloat(totalStatsResult?.total_revenue) || 0;
+        const totalOrders = parseInt(totalStatsResult?.total_orders) || 0;
+        const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+        
+        // Previous Overall Stats
+        const prevTotalRevenue = parseFloat(prevTotalStatsResult?.total_revenue) || 0;
+        const prevTotalOrders = parseInt(prevTotalStatsResult?.total_orders) || 0;
+        const prevAvgOrderValue = prevTotalOrders > 0 ? prevTotalRevenue / prevTotalOrders : 0;
+
+        // Order Types
+        const totalOrderTypes = orderTypesRaw.reduce((sum, item) => sum + item.count, 0);
+        const orderTypes = orderTypesRaw.map(item => ({
+            type: item.type,
+            count: parseInt(item.count),
+            percentage: totalOrderTypes > 0 ? parseFloat(((item.count / totalOrderTypes) * 100).toFixed(1)) : 0
+        }));
+
+        // Top Crops (Post-processed)
+        const topCrops = processTopCrops(allOrderCrops);
+        
+        // Revenue Trend
+        const revenue = revenueTrendRaw.map(r => {
+            const revenueValue = parseFloat(r.revenue_sum) || 0;
+            const ordersValue = parseInt(r.orders_count);
+            return {
+                month: r.month,
+                revenue: revenueValue,
+                orders: ordersValue, 
+                profit: revenueValue * 0.30 // Mock Profit: assumes a 30% margin
+            };
+        });
+
+        // User Growth (Combine and calculate cumulative sums)
+        const farmerMap = new Map(farmerGrowthRaw.map(r => [r.month, r.count]));
+        // The consumer query returns one row per month showing the number of unique consumers
+        const consumerMap = new Map(consumerGrowthRaw.map(r => [r.month, r.count]));
+        
+        const allMonths = Array.from(new Set([...farmerMap.keys(), ...consumerMap.keys()])).sort();
+        
+        let cumulativeFarmers = 0;
+        let cumulativeConsumers = 0;
+        
+        const userGrowth = allMonths.map(month => {
+            const farmersAdded = farmerMap.get(month) || 0;
+            const consumersAdded = consumerMap.get(month) || 0;
+            
+            cumulativeFarmers += farmersAdded;
+            cumulativeConsumers += consumersAdded;
+
+            return {
+                month: month,
+                farmers: cumulativeFarmers,
+                consumers: cumulativeConsumers,
+            };
+        });
+        
+        // Final User Totals and Change (Using latest cumulative count for the period)
+        const latestFarmers = cumulativeFarmers;
+        const latestConsumers = cumulativeConsumers;
+        const totalUsers = latestFarmers + latestConsumers;
+        
+        const totalPrevUsers = (userGrowth.length >= 2 && userGrowth[userGrowth.length - 2]) 
+            ? userGrowth[userGrowth.length - 2].farmers + userGrowth[userGrowth.length - 2].consumers
+            : 0;
+        
+        // Final Stats Object
+        const stats = {
+            totalRevenue: totalRevenue,
+            totalOrders: totalOrders,
+            totalUsers: totalUsers,
+            avgOrderValue: avgOrderValue,
+            revenueChange: calculateChange(totalRevenue, prevTotalRevenue),
+            ordersChange: calculateChange(totalOrders, prevTotalOrders),
+            usersChange: calculateChange(totalUsers, totalPrevUsers), 
+            aovChange: calculateChange(avgOrderValue, prevAvgOrderValue),
+        };
+        
+        res.json({ 
+            success: true, 
+            data: {
+                revenue,
+                orderTypes, 
+                topCrops,
+                stats,
+                userGrowth
+            }
+        });
+    } catch (err) {
+        console.error("Analytics fetch error:", err);
+        return res.status(500).json({ success: false, message: "Failed to fetch analytics due to a server error." });
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ===================================
+// 9. NOTIFICATIONS
+// ===================================
+
+// Get all notifications
+app.get("/api/admin/notifications", verifyAdmin, async (req, res) => {
+  try {
+    const notifications = await queryDatabase(`
+      SELECT 
+        notification_id,
+        title,
+        message,
+        type,
+        target_audience,
+        status,
+        sent_at,
+        scheduled_at,
+        created_at
+      FROM notifications
+      ORDER BY created_at DESC
+    `);
+
+    // FIX: Ensure the key matches the frontend's expected format
+    res.json({ success: true, notifications }); 
+  } catch (err) {
+    console.error("Notifications fetch error:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch notifications" });
+  }
+});
+
+// Create notification (Always as 'draft' initially)
+app.post("/api/admin/notifications", verifyAdmin, async (req, res) => {
+  try {
+    const { title, message, type, target_audience, scheduled_at } = req.body;
+    const adminId = req.admin.admin_id;
+
+    // We force status to 'draft' here to ensure no unauthorized sending
+    const status = scheduled_at ? 'scheduled' : 'draft'; 
+
+    await queryDatabase(`
+      INSERT INTO notifications (title, message, type, target_audience, status, created_by, scheduled_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `, [title, message, type, target_audience, status, adminId, scheduled_at]);
+
+    res.json({ success: true, message: "Notification created successfully" });
+  } catch (err) {
+    console.error("Notification create error:", err);
+    res.status(500).json({ success: false, message: "Failed to create notification" });
+  }
+});
+
+// server.js
+// ...
+
+// NEW: Send (update status) notification
+app.put("/api/admin/notifications/:id/send", verifyAdmin, async (req, res) => {
+  try {
+    const notificationId = req.params.id;
+    const adminId = req.admin.admin_id; // Unused in this updated query
+
+    // FIX: Removed 'reviewed_by' as it does not exist in the notifications table.
+    const result = await queryDatabase(`
+      UPDATE notifications 
+      SET status = 'sent', sent_at = NOW() 
+      WHERE notification_id = ? AND status IN ('draft', 'scheduled')
+    `, [notificationId]); // Removed adminId from parameters
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: "Notification not found or already sent." });
+    }
+
+    res.json({ success: true, message: "Notification sent successfully" });
+  } catch (err) {
+    console.error("Notification send error:", err);
+    res.status(500).json({ success: false, message: "Failed to send notification" });
+  }
+});// server.js
+
+// ... (Your existing code before the NOTIFICATIONS section)
+
+// ===================================
+// 8. USER COUNTS (FOR NOTIFICATIONS/DASHBOARD STATS)
+// ===================================
+
+app.get("/api/admin/user-counts", verifyAdmin, async (req, res) => {
+    try {
+        // Count active farmers
+        const [farmerResult] = await queryDatabase(
+            "SELECT COUNT(*) AS total_farmers FROM farmerregistration WHERE status = 'approved'"
+        );
+        const totalFarmers = farmerResult.total_farmers || 0;
+
+        // Count active consumers
+        const [consumerResult] = await queryDatabase(
+            "SELECT COUNT(*) AS total_consumers FROM consumerregistration WHERE status = 'active'"
+        );
+        const totalConsumers = consumerResult.total_consumers || 0;
+
+        res.json({
+            success: true,
+            counts: {
+                farmers: totalFarmers,
+                consumers: totalConsumers,
+                all: parseInt(totalFarmers) + parseInt(totalConsumers)
+            }
+        });
+    } catch (err) {
+        console.error("User counts fetch error:", err);
+        res.status(500).json({ success: false, message: "Failed to fetch user counts" });
+    }
+});
+
+
+// ===================================
+// 9. NOTIFICATIONS
+// ===================================
+
+// ... (rest of the notifications code remains the same)
+
+// Delete notification
+app.delete("/api/admin/notifications/:id", verifyAdmin, async (req, res) => {
+  try {
+    const notificationId = req.params.id;
+
+    await queryDatabase("DELETE FROM notifications WHERE notification_id = ?", [notificationId]);
+
+    res.json({ success: true, message: "Notification deleted successfully" });
+  } catch (err) {
+    console.error("Notification delete error:", err);
+    res.status(500).json({ success: false, message: "Failed to delete notification" });
+  }
+});
+
+
+// ===================================
+// 10. SETTINGS
+// ===================================
+
+// Get all settings
+app.get("/api/admin/settings", verifyAdmin, async (req, res) => {
+  try {
+    const settings = await queryDatabase("SELECT * FROM site_settings");
+    
+    const settingsObj = {};
+    settings.forEach(setting => {
+      settingsObj[setting.setting_key] = setting.setting_value;
+    });
+
+    res.json({ success: true, settings: settingsObj });
+  } catch (err) {
+    console.error("Settings fetch error:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch settings" });
+  }
+});
+
+// Update settings
+app.put("/api/admin/settings", verifyAdmin, async (req, res) => {
+  try {
+    const settings = req.body;
+    const adminId = req.admin.admin_id;
+
+    for (const [key, value] of Object.entries(settings)) {
+      await queryDatabase(`
+        INSERT INTO site_settings (setting_key, setting_value, updated_by)
+        VALUES (?, ?, ?)
+        ON DUPLICATE KEY UPDATE setting_value = ?, updated_by = ?
+      `, [key, value, adminId, value, adminId]);
+    }
+
+    res.json({ success: true, message: "Settings updated successfully" });
+  } catch (err) {
+    console.error("Settings update error:", err);
+    res.status(500).json({ success: false, message: "Failed to update settings" });
+  }
+});
+
+// ===================================
+// END OF ADMIN ROUTES
+// ===================================
+
+
+
+
+
+
+
 
 
 
@@ -8882,36 +10202,224 @@ app.post('/api/razorpay/verify', authenticateToken, async (req, res) => {
 //     });
 //   }
 // });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//workinng
+
+// app.post("/api/place-order", verifyToken, async (req, res) => {
+//   try {
+//     const {
+//       consumer_id, name, mobile_number, email,
+//       produce_name, product_name, // Accept both
+//       quantity, amount, is_self_delivery,
+//       payment_method, address, pincode,
+//       recipient_name, recipient_phone
+//     } = req.body;
+
+//     // Pick product name from either field
+//     const finalProductName = produce_name || product_name;
+
+//     if (!finalProductName) {
+//       return res.status(400).json({
+//         success: false,
+//         error: "Product name is required (produce_name or product_name)"
+//       });
+//     }
+
+//     // Insert into placeorder table
+//     const result = await queryDatabase(
+//       `INSERT INTO placeorder (
+//         consumer_id, name, mobile_number, email,
+//         produce_name, quantity, amount,
+//         is_self_delivery, payment_method,
+//         address, pincode, recipient_name, recipient_phone
+//       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+//       [
+//         consumer_id, name, mobile_number, email,
+//         finalProductName, quantity, amount,
+//         is_self_delivery || false,
+//         payment_method || 'cash-on-delivery',
+//         address, pincode,
+//         recipient_name || null,
+//         recipient_phone || null
+//       ]
+//     );
+
+//     // Get the full order including generated order_id
+//     const [order] = await queryDatabase(
+//       `SELECT * FROM placeorder WHERE id = ?`,
+//       [result.insertId]
+//     );
+
+//     // After fallback order_id generation or successful fetch
+// if (!order || !order.order_id) {
+//   console.error("Order creation failed - no order_id generated:", order);
+//   const fallbackOrderId = `ORD${Date.now().toString().slice(-6)}`;
+//   await queryDatabase(
+//     `UPDATE placeorder SET order_id = ? WHERE id = ?`,
+//     [fallbackOrderId, result.insertId]
+//   );
+//   order.order_id = fallbackOrderId;
+// }
+
+// // ✅ Farmer Notification Trigger Here
+// if (req.body.items && Array.isArray(req.body.items)) {
+//   const farmerNotified = new Set();
+
+//   for (const item of req.body.items) {
+//     const { farmer_id, product_name, quantity } = item;
+    
+//     if (farmer_id && !farmerNotified.has(farmer_id)) {
+//       farmerNotified.add(farmer_id);
+
+//       await queryDatabase(
+//         `INSERT INTO farmer_notifications (farmer_id, order_id, message, is_read, created_at) VALUES (?, ?, ?, ?, NOW())`,
+//         [
+//           farmer_id,
+//           order.order_id,
+//           `New order placed for ${product_name} - ${quantity}kg. Please prepare for delivery.`,
+//           false
+//         ]
+//       );
+//     }
+//   }
+// }
+
+//     res.json({
+//       success: true,
+//       order_id: order.order_id,
+//       message: "Order placed successfully",
+//       order_data: order
+//     });
+
+//   } catch (error) {
+//     console.error("Order placement error:", error);
+//     res.status(500).json({
+//       success: false,
+//       error: "Failed to place order",
+//       details: error.message,
+//       sqlError: error.code,
+//       receivedData: req.body
+//     });
+//   }
+// });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// server.js (Final and most reliable /api/place-order route)
+
+// --- Helper Function to Get Next Sequential ID (MUST be placed outside the route) ---
+// This safely generates the next ID by querying the last one from the DB.
+async function generateNextOrderId() {
+    try {
+        // 1. Get the highest numeric part of the last order_id
+        const [result] = await queryDatabase(
+            `SELECT COALESCE(MAX(CAST(SUBSTRING(order_id, 4) AS UNSIGNED)), 0) AS max_num 
+             FROM placeorder 
+             WHERE order_id REGEXP '^ORD[0-9]+$'`
+        );
+        
+        const nextNum = (result.max_num || 0) + 1;
+        
+        // 2. Format it as ORD001, ORD002, etc.
+        return `ORD${String(nextNum).padStart(3, '0')}`;
+    } catch (error) {
+        console.error("Critical: Failed to generate next Order ID from DB:", error);
+        // Fallback to a timestamped ID if the DB query fails (this should be extremely rare)
+        return `ORD${Date.now().toString().slice(-6)}`;
+    }
+}
+
+
+// --- The Main Route ---
 app.post("/api/place-order", verifyToken, async (req, res) => {
   try {
     const {
       consumer_id, name, mobile_number, email,
-      produce_name, product_name, // Accept both
+      produce_name, product_name, 
       quantity, amount, is_self_delivery,
       payment_method, address, pincode,
-      recipient_name, recipient_phone
+      recipient_name, recipient_phone,
+      items
     } = req.body;
 
-    // Pick product name from either field
     const finalProductName = produce_name || product_name;
-
     if (!finalProductName) {
-      return res.status(400).json({
-        success: false,
-        error: "Product name is required (produce_name or product_name)"
-      });
+      return res.status(400).json({ success: false, error: "Product name is required" });
     }
+    
+    // *** CRITICAL FIX: Generate the ID HERE in Node.js ***
+    const newOrderId = await generateNextOrderId();
+    console.log(`Generated new Order ID: ${newOrderId}`);
 
-    // Insert into placeorder table
+
+    // --- 1. Order Insertion (Including the manually generated ID) ---
     const result = await queryDatabase(
       `INSERT INTO placeorder (
-        consumer_id, name, mobile_number, email,
+        order_id, consumer_id, name, mobile_number, email,
         produce_name, quantity, amount,
         is_self_delivery, payment_method,
         address, pincode, recipient_name, recipient_phone
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        consumer_id, name, mobile_number, email,
+        newOrderId, consumer_id, name, mobile_number, email, // Insert Order ID first
         finalProductName, quantity, amount,
         is_self_delivery || false,
         payment_method || 'cash-on-delivery',
@@ -8921,51 +10429,44 @@ app.post("/api/place-order", verifyToken, async (req, res) => {
       ]
     );
 
-    // Get the full order including generated order_id
-    const [order] = await queryDatabase(
-      `SELECT * FROM placeorder WHERE id = ?`,
-      [result.insertId]
-    );
-
-    // After fallback order_id generation or successful fetch
-if (!order || !order.order_id) {
-  console.error("Order creation failed - no order_id generated:", order);
-  const fallbackOrderId = `ORD${Date.now().toString().slice(-6)}`;
-  await queryDatabase(
-    `UPDATE placeorder SET order_id = ? WHERE id = ?`,
-    [fallbackOrderId, result.insertId]
-  );
-  order.order_id = fallbackOrderId;
-}
-
-// ✅ Farmer Notification Trigger Here
-if (req.body.items && Array.isArray(req.body.items)) {
-  const farmerNotified = new Set();
-
-  for (const item of req.body.items) {
-    const { farmer_id, product_name, quantity } = item;
+    // --- 2. Farmer Notification Logic (Uses the reliable newOrderId) ---
+    const farmerNotified = new Set();
     
-    if (farmer_id && !farmerNotified.has(farmer_id)) {
-      farmerNotified.add(farmer_id);
+    if (items && Array.isArray(items)) {
+        for (const item of items) {
+          const { farmer_id, product_name: itemName, quantity: itemQuantity } = item;
+          
+          if (farmer_id && !farmerNotified.has(farmer_id)) {
+            farmerNotified.add(farmer_id);
+            
+            const notificationDbMessage = `New order placed for ${itemName} - ${itemQuantity}kg from ${name}. Please prepare for delivery.`;
+            const notificationSmsMessage = `NEW ORDER #${newOrderId}! Item: ${itemName}, QTY: ${itemQuantity}kg. Check app for details.`;
 
-      await queryDatabase(
-        `INSERT INTO farmer_notifications (farmer_id, order_id, message, is_read, created_at) VALUES (?, ?, ?, ?, NOW())`,
-        [
-          farmer_id,
-          order.order_id,
-          `New order placed for ${product_name} - ${quantity}kg. Please prepare for delivery.`,
-          false
-        ]
-      );
+            // Fetch Farmer's Phone Number
+            const [farmerReg] = await queryDatabase(
+                "SELECT phone_number FROM farmerregistration WHERE farmer_id = ?", 
+                [farmer_id]
+            );
+            
+            if (farmerReg && farmerReg.phone_number) {
+                await sendSms(farmerReg.phone_number, notificationSmsMessage); 
+            }
+
+            // Insert notification into the DB
+            await queryDatabase(
+              `INSERT INTO farmer_notifications (farmer_id, order_id, consumer_name, message, is_read, created_at) VALUES (?, ?, ?, ?, ?, NOW())`,
+              [farmer_id, newOrderId, name, notificationDbMessage, false]
+            );
+          }
+        }
     }
-  }
-}
 
+    // Since we know the order_id, we can return it directly.
     res.json({
       success: true,
-      order_id: order.order_id,
-      message: "Order placed successfully",
-      order_data: order
+      order_id: newOrderId,
+      message: "Order placed successfully. Farmers notified.",
+      // Note: order_data requires an extra DB fetch; returning the essential ID is faster.
     });
 
   } catch (error) {
@@ -8973,12 +10474,75 @@ if (req.body.items && Array.isArray(req.body.items)) {
     res.status(500).json({
       success: false,
       error: "Failed to place order",
-      details: error.message,
-      sqlError: error.code,
-      receivedData: req.body
+      details: error.message
     });
   }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 app.get("/api/farmer-notifications/:farmerId", verifyToken, async (req, res) => {
   const { farmerId } = req.params;

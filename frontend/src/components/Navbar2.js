@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaSeedling, FaPlus, FaBell, FaUser, FaSignOutAlt, FaMicrophone, FaBars, FaTimes } from 'react-icons/fa';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext.js';
 import logo from '../assets/logo.jpg';
 import './Navbar2.css';
 

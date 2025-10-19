@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import FarmerChatList from './FarmerChatList';
-import FarmerChatWindow from './FarmerChatWindow';
+import FarmerChatList from './FarmerChatList.js';
+import FarmerChatWindow from './FarmerChatWindow.js';
 import './FarmerChatDashboard.css';
 
 const FarmerChatDashboard = () => {

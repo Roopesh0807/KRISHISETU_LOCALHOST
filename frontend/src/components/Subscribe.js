@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext.js';
 import {
     FaArrowLeft, FaClock, FaFilePdf, FaEdit, FaTrash, FaPlus, FaMinus,
     FaChevronDown, FaChevronUp, FaPlusCircle, FaExclamationTriangle, FaCheckCircle,
@@ -14,8 +14,8 @@ import Calendar from 'react-calendar'; // <--- ADDED THIS IMPORT
 import 'react-calendar/dist/Calendar.css'; // <--- ADDED THIS IMPORT
 
 // Import the new components and utils with CORRECT file paths
-import Wallet from './wallet'; // Using lowercase 'wallet.js'
-import { downloadPlanPDF, generateCombinedBillPDF } from './pdfUtils';
+import Wallet from './wallet.js'; // Using lowercase 'wallet.js'
+import { downloadPlanPDF, generateCombinedBillPDF } from './pdfUtils.js';
 
 // Import local CSS with CORRECT file paths
 import './subscribe.css';

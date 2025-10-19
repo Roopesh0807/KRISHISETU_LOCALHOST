@@ -3510,7 +3510,7 @@ import axios from 'axios';
 import './addproduce.css';
 import KSlogo from "../assets/logo.jpg";
 import BSimg from "../assets/bargain.jpeg";
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext } from '../context/AuthContext.js';
 import micIcon from '../assets/microphone.png';
 
 // Helper function to get farmer name

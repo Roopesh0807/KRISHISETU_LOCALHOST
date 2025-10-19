@@ -3816,7 +3816,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner, faLeaf, faSort, faSortUp, faSortDown } from "@fortawesome/free-solid-svg-icons";
 import { io } from 'socket.io-client';
-import FarmerChatWindow from "./FarmerChatWindow";
+import FarmerChatWindow from "./FarmerChatWindow.js";
 import "./FarmerChatList.css";
 import axios from "axios";
 

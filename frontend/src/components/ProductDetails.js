@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import "./ProductDetails.css";
-import { useCart } from "../context/CartContext";
-import { AuthContext } from "../context/AuthContext";
+import { useCart } from "../context/CartContext.js";
+import { AuthContext } from "../context/AuthContext.js";
 import { FaShoppingCart, FaCalendarAlt, FaBolt, FaMinus, FaPlus, FaArrowLeft, FaTimes, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
