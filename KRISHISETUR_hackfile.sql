@@ -79,7 +79,15 @@ END $$
 
 DELIMITER ;
 
+ALTER TABLE farmerregistration
+  ADD COLUMN google_id VARCHAR(255) NULL,
+  ADD COLUMN auth_via ENUM('manual', 'google') DEFAULT 'manual';
 
+ALTER TABLE consumerregistration
+  ADD COLUMN google_id VARCHAR(255) NULL,
+  ADD COLUMN auth_via ENUM('manual', 'google') DEFAULT 'manual';
+
+  
 -- Insert Consumer Registration Data
 INSERT INTO consumerregistration (first_name, last_name, email, phone_number, password, confirm_password) 
 VALUES 
