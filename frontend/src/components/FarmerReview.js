@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/AuthContext.js";
 import "./FarmerReview.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const FarmerReview = () => {
-    const { farmer, logout } = useContext(AuthContext);
+    const { farmer, logout } = useContext(AuthContext.js);
     const navigate = useNavigate();
     const [reviews, setReviews] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -60,7 +60,7 @@ const FarmerReview = () => {
             }
         };
 
-        // Add slight delay to ensure AuthContext is fully initialized
+        // Add slight delay to ensure AuthContext.js is fully initialized
         const timer = setTimeout(fetchReviews, 100);
         return () => clearTimeout(timer);
     }, [farmer, navigate, logout]);

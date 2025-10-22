@@ -88,7 +88,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar3 from '../components/Navbar3.js';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext.js';
 import '../styles/JoinCommunity.css';
 
 function JoinCommunity() {

@@ -1,6 +1,6 @@
 // src/components/ContactUs.js
 import React, { useState } from "react";
-import { submitContactForm } from "../services/contactApi"; // Import the API function
+import { submitContactForm } from "../services/contactApi.js"; // Import the API function
 import "./styles.css";
 
 

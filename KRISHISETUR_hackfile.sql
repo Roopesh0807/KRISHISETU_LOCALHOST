@@ -1933,3 +1933,262 @@ alter table orders modify column community_id varchar(30);
 alter table community_orders modify column community_id varchar(30);
 alter table community_flash_deals_orders modify column community_id varchar(30);
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- ===================================
+-- ADMIN PORTAL DATABASE UPDATES
+-- Run these SQL commands to add admin functionality
+-- ===================================
+
+
+
+-- 1. Create Admin Users Table
+CREATE TABLE IF NOT EXISTS admin_users (
+    admin_id VARCHAR(15) PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    full_name VARCHAR(255) NOT NULL,
+    role ENUM('super_admin', 'admin', 'moderator') DEFAULT 'admin',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP NULL
+);
+
+-- Insert default admin user (password: admin123 - hashed with bcrypt)
+-- You should change this password after first login
+INSERT INTO admin_users (admin_id, email, password, full_name, role) 
+VALUES ('ADMIN001', 'admin@krishisetu.com', '$2a$10$rN9K8aXqQZqZ4rN9K8aXqOJ9K8aXqQZqZ4rN9K8aXqOJ9K8aXqQZ', 'Admin User', 'super_admin');
+
+-- 2. Add status column to farmer registration
+ALTER TABLE farmerregistration 
+ADD COLUMN IF NOT EXISTS status ENUM('pending', 'approved', 'rejected', 'banned') DEFAULT 'pending',
+ADD COLUMN IF NOT EXISTS reviewed_by VARCHAR(15) NULL,
+ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMP NULL,
+ADD COLUMN IF NOT EXISTS rejection_reason TEXT NULL;
+
+-- 3. Add status column to consumer registration  
+ALTER TABLE consumerregistration
+ADD COLUMN IF NOT EXISTS status ENUM('active', 'suspended', 'banned') DEFAULT 'active',
+ADD COLUMN IF NOT EXISTS wallet_balance DECIMAL(10,2) DEFAULT 0.00;
+
+-- 4. Update products table for admin review
+ALTER TABLE products
+ADD COLUMN IF NOT EXISTS farmer_id VARCHAR(15) NULL,
+ADD COLUMN IF NOT EXISTS status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+ADD COLUMN IF NOT EXISTS availability VARCHAR(50) DEFAULT 'In Stock',
+ADD COLUMN IF NOT EXISTS farming_method VARCHAR(50) DEFAULT 'Organic',
+ADD COLUMN IF NOT EXISTS description TEXT NULL,
+ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN IF NOT EXISTS reviewed_by VARCHAR(15) NULL,
+ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMP NULL;
+
+-- Add foreign key for farmer_id in products if not exists
+ALTER TABLE products
+ADD CONSTRAINT fk_products_farmer FOREIGN KEY (farmer_id) 
+REFERENCES farmerregistration(farmer_id) ON DELETE CASCADE;
+
+
+
+-- 6. Create notifications table
+CREATE TABLE IF NOT EXISTS notifications (
+    notification_id VARCHAR(15) PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    type ENUM('info', 'success', 'warning', 'alert') DEFAULT 'info',
+    target_audience ENUM('all', 'farmers', 'consumers') DEFAULT 'all',
+    status ENUM('draft', 'scheduled', 'sent') DEFAULT 'draft',
+    created_by VARCHAR(15) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    scheduled_at TIMESTAMP NULL,
+    sent_at TIMESTAMP NULL,
+    FOREIGN KEY (created_by) REFERENCES admin_users(admin_id)
+);
+
+-- Trigger for auto-generating notification ID
+DELIMITER //
+CREATE TRIGGER IF NOT EXISTS before_insert_notification
+BEFORE INSERT ON notifications
+FOR EACH ROW
+BEGIN
+    DECLARE max_id INT DEFAULT 0;
+    DECLARE next_id VARCHAR(15);
+    
+    SELECT IFNULL(CAST(SUBSTRING(notification_id, 6) AS UNSIGNED), 0) INTO max_id 
+    FROM notifications ORDER BY notification_id DESC LIMIT 1;
+    
+    SET next_id = CONCAT('NOTIF', LPAD(max_id + 1, 4, '0'));
+    SET NEW.notification_id = next_id;
+END;
+//
+DELIMITER ;
+
+-- 7. Create site settings table
+CREATE TABLE IF NOT EXISTS site_settings (
+    setting_key VARCHAR(100) PRIMARY KEY,
+    setting_value TEXT NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_by VARCHAR(15) NULL,
+    FOREIGN KEY (updated_by) REFERENCES admin_users(admin_id)
+);
+
+-- Insert default settings
+INSERT INTO site_settings (setting_key, setting_value) VALUES
+('site_name', 'KrishiSetu'),
+('support_email', 'support@krishisetu.com'),
+('support_phone', '+91 98765 43210'),
+('about_us', 'KrishiSetu connects farmers directly with consumers, ensuring fair prices and fresh produce.'),
+('address', 'Bangalore, Karnataka, India')
+ON DUPLICATE KEY UPDATE setting_value=VALUES(setting_value);
+
+-- 8. Update orderall table with order type
+ALTER TABLE orderall
+ADD COLUMN IF NOT EXISTS order_type ENUM('instant', 'subscription', 'bargain', 'flash_deal') DEFAULT 'instant',
+ADD COLUMN IF NOT EXISTS consumer_id VARCHAR(15) NULL,
+ADD COLUMN IF NOT EXISTS delivery_address TEXT NULL,
+ADD COLUMN IF NOT EXISTS delivery_date DATE NULL,
+ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE orderall
+ADD CONSTRAINT fk_order_consumer FOREIGN KEY (consumer_id) 
+REFERENCES consumerregistration(consumer_id) ON DELETE SET NULL;
+
+-- 9. Create demand_prediction table for analytics
+CREATE TABLE IF NOT EXISTS demand_prediction (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    locality VARCHAR(255) NOT NULL,
+    pincode VARCHAR(10) NOT NULL,
+    crop_name VARCHAR(100) NOT NULL,
+    historical_orders INT DEFAULT 0,
+    predicted_demand INT DEFAULT 0,
+    growth_rate DECIMAL(5,2) DEFAULT 0.00,
+    avg_quantity DECIMAL(10,2) DEFAULT 0.00,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_locality (locality),
+    INDEX idx_pincode (pincode),
+    INDEX idx_crop (crop_name)
+);
+
+-- -- 10. Create flash deals table
+-- CREATE TABLE IF NOT EXISTS flash_deals (
+--     deal_id VARCHAR(15) PRIMARY KEY,
+--     locality VARCHAR(255) NOT NULL,
+--     pincode VARCHAR(10) NOT NULL,
+--     product_id VARCHAR(10) NOT NULL,
+--     farmer_id VARCHAR(15) NOT NULL,
+--     original_price DECIMAL(10,2) NOT NULL,
+--     deal_price DECIMAL(10,2) NOT NULL,
+--     discount_percentage DECIMAL(5,2) NOT NULL,
+--     min_participants INT DEFAULT 5,
+--     current_participants INT DEFAULT 0,
+--     status ENUM('active', 'completed', 'expired') DEFAULT 'active',
+--     start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     end_date TIMESTAMP NOT NULL,
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     FOREIGN KEY (product_id) REFERENCES products(product_id),
+--     FOREIGN KEY (farmer_id) REFERENCES farmerregistration(farmer_id)
+-- );
+
+-- -- Trigger for auto-generating flash deal ID
+-- DELIMITER //
+-- CREATE TRIGGER IF NOT EXISTS before_insert_flash_deal
+-- BEFORE INSERT ON flash_deals
+-- FOR EACH ROW
+-- BEGIN
+--     DECLARE max_id INT DEFAULT 0;
+--     DECLARE next_id VARCHAR(15);
+    
+--     SELECT IFNULL(CAST(SUBSTRING(deal_id, 6) AS UNSIGNED), 0) INTO max_id 
+--     FROM flash_deals ORDER BY deal_id DESC LIMIT 1;
+    
+--     SET next_id = CONCAT('FLASH', LPAD(max_id + 1, 4, '0'));
+--     SET NEW.deal_id = next_id;
+-- END;
+-- //
+-- DELIMITER ;
+
+-- -- 11. Create reviews table if not exists
+-- CREATE TABLE IF NOT EXISTS reviews (
+--     review_id VARCHAR(15) PRIMARY KEY,
+--     product_id VARCHAR(10) NOT NULL,
+--     consumer_id VARCHAR(15) NOT NULL,
+--     farmer_id VARCHAR(15) NOT NULL,
+--     rating DECIMAL(2,1) NOT NULL CHECK (rating >= 0 AND rating <= 5),
+--     review_text TEXT NULL,
+--     review_images TEXT NULL,
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     FOREIGN KEY (product_id) REFERENCES products(product_id),
+--     FOREIGN KEY (consumer_id) REFERENCES consumerregistration(consumer_id),
+--     FOREIGN KEY (farmer_id) REFERENCES farmerregistration(farmer_id)
+-- );
+
+-- 12. Update existing data with default statuses
+UPDATE farmerregistration SET status = 'approved' WHERE status IS NULL;
+UPDATE consumerregistration SET status = 'active' WHERE status IS NULL;
+UPDATE products SET status = 'approved' WHERE status IS NULL;
+
+-- 13. Create indexes for better performance
+CREATE INDEX idx_farmer_status ON farmerregistration(status);
+CREATE INDEX idx_consumer_status ON consumerregistration(status);
+CREATE INDEX idx_product_status ON products(status);
+CREATE INDEX idx_order_status ON orderall(status);
+CREATE INDEX idx_payment_status ON payments(status);
+CREATE INDEX idx_order_date ON orderall(order_date);
+CREATE INDEX idx_payment_date ON payments(payment_date);
+
+-- ===================================
+-- SAMPLE DATA FOR TESTING
+-- ===================================
+
+-- Insert sample payments
+-- INSERT INTO payments (order_id, consumer_id, amount, payment_method, razorpay_payment_id, status) VALUES
+-- ('ORD001', 'KRST01CS001', 200.00, 'UPI', 'pay_abc123def456', 'success'),
+-- ('ORD002', 'KRST01CS002', 150.00, 'Card', 'pay_xyz789ghi012', 'success'),
+-- ('ORD003', 'KRST01CS003', 180.00, 'UPI', 'pay_mno345pqr678', 'success');
+
+-- Insert sample demand prediction data
+INSERT INTO demand_prediction (locality, pincode, crop_name, historical_orders, predicted_demand, growth_rate, avg_quantity) VALUES
+('Koramangala', '560034', 'Tomatoes', 150, 180, 20.00, 5.5),
+('Whitefield', '560066', 'Potatoes', 200, 220, 10.00, 4.8),
+('Indiranagar', '560038', 'Onions', 120, 160, 33.33, 6.2),
+('HSR Layout', '560102', 'Tomatoes', 180, 200, 11.11, 5.0),
+('Marathahalli', '560037', 'Carrots', 90, 120, 33.33, 4.5);
+
+-- -- Insert sample flash deals
+-- INSERT INTO flash_deals (locality, pincode, product_id, farmer_id, original_price, deal_price, discount_percentage, current_participants, end_date) VALUES
+-- ('Koramangala', '560034', 'PRD001', 'KRST01FR001', 27.00, 22.00, 18.52, 8, DATE_ADD(NOW(), INTERVAL 2 DAY)),
+-- ('Whitefield', '560066', 'PRD002', 'KRST01FR002', 25.00, 20.00, 20.00, 12, DATE_ADD(NOW(), INTERVAL 3 DAY));
+
+
+
+
+
+
+--sms
+-- Remove all triggers related to placeorder ID generation
+DROP TRIGGER IF EXISTS before_insert_placeorder;
+DROP TRIGGER IF EXISTS after_insert_placeorder;
+
+-- Optionally, drop the external sequence table (it is no longer needed)
+DROP TABLE IF EXISTS order_seq; 
+
+-- Ensure the order_id column can be set by the Node.js code
+-- Note: Your Node.js code relies on the 'id' (AUTO_INCREMENT) to get the row back, 
+-- but we need to set 'order_id' manually now.
+ALTER TABLE placeorder MODIFY COLUMN order_id VARCHAR(10) NOT NULL;

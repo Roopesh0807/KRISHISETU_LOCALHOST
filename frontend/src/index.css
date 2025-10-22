@@ -1,0 +1,190 @@
+/* src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Futuristic Admin Theme - Deep Navy & Electric Blue */
+    --background: 220 25% 97%;
+    --foreground: 220 15% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 15%;
+
+    /* Primary - Deep Indigo */
+    --primary: 233 47% 25%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 233 47% 20%;
+    
+    /* Secondary - Electric Blue */
+    --secondary: 210 100% 95%;
+    --secondary-foreground: 233 47% 25%;
+
+    /* Accent - Vibrant Electric */
+    --accent: 199 89% 48%;
+    --accent-foreground: 0 0% 100%;
+    
+    /* Success - Emerald */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    
+    /* Warning - Amber */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --muted: 220 13% 95%;
+    --muted-foreground: 220 9% 46%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 199 89% 48%;
+
+    --radius: 0.75rem;
+    
+  /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(233 47% 25%) 0%, hsl(233 47% 35%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(199 89% 48%) 0%, hsl(210 100% 55%) 100%);
+    --gradient-mesh: radial-gradient(at 0% 0%, hsla(233, 47%, 35%, 0.1) 0px, transparent 50%),
+                      radial-gradient(at 100% 100%, hsla(199, 89%, 48%, 0.08) 0px, transparent 50%);
+    --gradient-card: linear-gradient(135deg, hsla(233, 47%, 25%, 0.05) 0%, hsla(199, 89%, 48%, 0.05) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(142 76% 46%) 100%);
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --shadow-glow: 0 0 20px hsla(199, 89%, 48%, 0.3);
+    --shadow-glow-success: 0 0 20px hsla(142, 76%, 36%, 0.3);
+    
+    /* Sidebar */
+    --sidebar-background: 233 47% 25%;
+    --sidebar-foreground: 220 13% 95%;
+    --sidebar-primary: 199 89% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 233 47% 30%;
+    --sidebar-accent-foreground: 220 13% 95%;
+    --sidebar-border: 233 47% 30%;
+    --sidebar-ring: 199 89% 48%;
+  }
+
+  .dark {
+    --background: 220 25% 8%;
+    --foreground: 220 13% 95%;
+
+    --card: 220 20% 12%;
+    --card-foreground: 220 13% 95%;
+
+    --popover: 220 20% 12%;
+    --popover-foreground: 220 13% 95%;
+
+    --primary: 199 89% 48%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 199 89% 55%;
+
+    --secondary: 233 47% 20%;
+    --secondary-foreground: 220 13% 95%;
+
+    --accent: 199 89% 48%;
+    --accent-foreground: 0 0% 100%;
+    
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --muted: 220 15% 20%;
+    --muted-foreground: 220 9% 65%;
+
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 20%;
+    --input: 220 15% 20%;
+    --ring: 199 89% 48%;
+    
+    --gradient-primary: linear-gradient(135deg, hsl(199 89% 48%) 0%, hsl(210 100% 55%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(233 47% 35%) 0%, hsl(233 47% 45%) 100%);
+    --gradient-mesh: radial-gradient(at 0% 0%, hsla(199, 89%, 48%, 0.15) 0px, transparent 50%),
+                      radial-gradient(at 100% 100%, hsla(233, 47%, 35%, 0.12) 0px, transparent 50%);
+    
+    --sidebar-background: 220 20% 10%;
+    --sidebar-foreground: 220 13% 95%;
+    --sidebar-primary: 199 89% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 18%;
+    --sidebar-accent-foreground: 220 13% 95%;
+    --sidebar-border: 220 15% 18%;
+    --sidebar-ring: 199 89% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  
+  .mesh-background {
+    background-image: var(--gradient-mesh);
+  }
+  
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  .gradient-accent {
+    background: var(--gradient-accent);
+  }
+}
+
+@layer utilities {
+  .stat-card {
+    @apply rounded-xl border bg-card p-6 shadow-sm transition-all hover:shadow-md;
+  }
+  
+  .stat-card-premium {
+    @apply rounded-xl border bg-gradient-to-br from-primary/5 to-accent/5 p-6 shadow-lg transition-all hover:shadow-xl hover:scale-[1.02];
+  }
+  
+  .admin-button {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-all hover:scale-105;
+  }
+  
+  .glow-accent {
+    box-shadow: var(--shadow-glow);
+  }
+  
+  .glow-success {
+    box-shadow: var(--shadow-glow-success);
+  }
+  
+  .glass-card {
+    @apply rounded-xl border border-white/10 bg-white/5 backdrop-blur-lg;
+  }
+  
+  .shimmer {
+    background: linear-gradient(90deg, transparent, hsla(var(--accent), 0.1), transparent);
+    animation: shimmer 2s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+}

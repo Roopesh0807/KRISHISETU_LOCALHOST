@@ -2,8 +2,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from "../assets/logo.jpg";
 import "./Navbar3.css";
-import { AuthContext } from "../context/AuthContext";
-import { useCart } from "../context/CartContext";
+import { AuthContext } from "../context/AuthContext.js";
+import { useCart } from "../context/CartContext.js";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faUser, 

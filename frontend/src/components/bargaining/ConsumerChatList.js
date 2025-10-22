@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner, faListAlt, faShoppingCart, faLeaf, faSort, faSortUp, faSortDown } from "@fortawesome/free-solid-svg-icons";
 import { io } from 'socket.io-client';
-import ConsumerChatWindow from "./ConsumerChatWindow";
+import ConsumerChatWindow from "./ConsumerChatWindow.js";
 import "./ConsumerChatList.css";
 import axios from "axios";
 

@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import FarmerOnboardingTour from './FarmerOnboardingTour'; // Add this line
+import FarmerOnboardingTour from './FarmerOnboardingTour.js'; // Add this line
 import { Line } from "react-chartjs-2";
 import { useTranslation } from "react-i18next";
 import "./../styles/FarmerDashboard.css";
-import LanguageSwitcher from "./LanguageSwitcher";
+import LanguageSwitcher from "./LanguageSwitcher.js";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext.js";
 import {
   Chart as ChartJS,
   CategoryScale,

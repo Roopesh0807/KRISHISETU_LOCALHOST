@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import Joyride from 'react-joyride';
 import { FaInfoCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext } from '../context/AuthContext.js';
 import './OnboardingTour.css';
 
 const FarmerOnboardingTour = () => {
