@@ -718,7 +718,7 @@ CREATE TABLE Users (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE communities (
-    community_id VARCHAR(15) PRIMARY KEY,  -- Auto-generated ID
+    community_id VARCHAR(30) PRIMARY KEY,  -- Auto-generated ID
     community_name VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,  -- Hashed password
     admin_id VARCHAR(15) NOT NULL,  -- References consumer_id from consumerregistration
@@ -760,7 +760,7 @@ VALUES ('Green Valley', 'hashed_password', 'KRST01CS001', '123 Green St, City', 
 
 CREATE TABLE members (
     member_id VARCHAR(15) PRIMARY KEY,  -- Auto-generated ID
-    community_id VARCHAR(15) NOT NULL,  -- References community_id from communities
+    community_id VARCHAR(30) NOT NULL,  -- References community_id from communities
     consumer_id VARCHAR(15) NOT NULL,  -- References consumer_id from consumerregistration
     member_name VARCHAR(255) NOT NULL,  -- Concatenated first_name + last_name
     member_email VARCHAR(255) NOT NULL,  -- References email from consumerregistration
@@ -820,7 +820,7 @@ VALUES ('COMM001', 'KRST01CS001');
 
 CREATE TABLE orders (
     order_id VARCHAR(15) PRIMARY KEY,  -- Auto-generated ID
-    community_id VARCHAR(15) NOT NULL,  -- References community_id from communities
+    community_id VARCHAR(30) NOT NULL,  -- References community_id from communities
     product_id VARCHAR(15) NOT NULL,  -- Assuming product_id is provided
     quantity INT NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
@@ -1260,6 +1260,7 @@ CREATE TABLE payments (
     razorpay_payment_id VARCHAR(50) NOT NULL,
     razorpay_signature VARCHAR(255) NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
+    payment_date varchar(20),
     currency VARCHAR(3) NOT NULL DEFAULT 'INR',
     status ENUM('created', 'captured', 'failed') NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -1705,7 +1706,7 @@ ALTER TABLE add_produce
 ADD COLUMN minimum_price DECIMAL(10,2) NULL CHECK (minimum_price >= 0);
 
 
-// 17/09/25
+-- 17/09/25
 ALTER TABLE wallet_transactions ADD razorpay_payment_id VARCHAR(255) NULL;
 
 
@@ -1741,7 +1742,7 @@ UPDATE add_produce SET minimum_quantity = 11, minimum_price = 90.00 WHERE produc
 
 CREATE TABLE community_flash_deals_orders (
   order_id INT AUTO_INCREMENT PRIMARY KEY,
-  community_id VARCHAR(20) NOT NULL,
+  community_id VARCHAR(30) NOT NULL,
   consumer_id VARCHAR(20) NOT NULL,
   name VARCHAR(100) NOT NULL,
   mobile_number VARCHAR(15) NOT NULL,
@@ -1920,12 +1921,12 @@ END$$
 DELIMITER ;
 
 
-alter table communities modify column community_id varchar(30);
-alter table members modify column community_id varchar(30);
-alter table orders modify column community_id varchar(30);
+-- alter table communities modify column community_id varchar(30);
+-- alter table members modify column community_id varchar(30);
+-- alter table orders modify column community_id varchar(30);
 
-alter table community_orders modify column community_id varchar(30);
-alter table community_flash_deals_orders modify column community_id varchar(30);
+-- alter table community_orders modify column community_id varchar(30);
+-- alter table community_flash_deals_orders modify column community_id varchar(30);
 
 
 
@@ -2164,18 +2165,11 @@ INSERT INTO demand_prediction (locality, pincode, crop_name, historical_orders, 
 ('HSR Layout', '560102', 'Tomatoes', 180, 200, 11.11, 5.0),
 ('Marathahalli', '560037', 'Carrots', 90, 120, 33.33, 4.5);
 
--- -- Insert sample flash deals
--- INSERT INTO flash_deals (locality, pincode, product_id, farmer_id, original_price, deal_price, discount_percentage, current_participants, end_date) VALUES
--- ('Koramangala', '560034', 'PRD001', 'KRST01FR001', 27.00, 22.00, 18.52, 8, DATE_ADD(NOW(), INTERVAL 2 DAY)),
--- ('Whitefield', '560066', 'PRD002', 'KRST01FR002', 25.00, 20.00, 20.00, 12, DATE_ADD(NOW(), INTERVAL 3 DAY));
 
 
 
 
 
-
---sms
--- Remove all triggers related to placeorder ID generation
 DROP TRIGGER IF EXISTS before_insert_placeorder;
 DROP TRIGGER IF EXISTS after_insert_placeorder;
 
@@ -2186,3 +2180,7 @@ DROP TABLE IF EXISTS order_seq;
 -- Note: Your Node.js code relies on the 'id' (AUTO_INCREMENT) to get the row back, 
 -- but we need to set 'order_id' manually now.
 ALTER TABLE placeorder MODIFY COLUMN order_id VARCHAR(10) NOT NULL;
+
+ALTER TABLE bargain_session_products
+ADD COLUMN minimum_price DECIMAL(10,2) DEFAULT NULL AFTER current_offer,
+ADD COLUMN produce_name VARCHAR(100) DEFAULT NULL AFTER minimum_price;
