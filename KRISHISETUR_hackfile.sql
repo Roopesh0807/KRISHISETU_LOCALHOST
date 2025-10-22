@@ -79,7 +79,15 @@ END $$
 
 DELIMITER ;
 
+ALTER TABLE farmerregistration
+  ADD COLUMN google_id VARCHAR(255) NULL,
+  ADD COLUMN auth_via ENUM('manual', 'google') DEFAULT 'manual';
 
+ALTER TABLE consumerregistration
+  ADD COLUMN google_id VARCHAR(255) NULL,
+  ADD COLUMN auth_via ENUM('manual', 'google') DEFAULT 'manual';
+
+  
 -- Insert Consumer Registration Data
 INSERT INTO consumerregistration (first_name, last_name, email, phone_number, password, confirm_password) 
 VALUES 
@@ -1112,6 +1120,9 @@ CREATE TABLE bargain_session_products (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
+ALTER TABLE bargain_session_products
+ADD COLUMN minimum_price DECIMAL(10,2) DEFAULT NULL AFTER current_offer,
+ADD COLUMN produce_name VARCHAR(100) DEFAULT NULL AFTER minimum_price;
 
 CREATE TABLE bargain_system_notifications (
     notification_id INT(11) NOT NULL AUTO_INCREMENT,
@@ -1392,10 +1403,6 @@ BEGIN
 END$$
 
 DELIMITER ;
-
-
-
-
 
 
 ALTER TABLE orders ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
@@ -1706,7 +1713,8 @@ ALTER TABLE add_produce
 ADD COLUMN minimum_price DECIMAL(10,2) NULL CHECK (minimum_price >= 0);
 
 
--- 17/09/25
+
+
 ALTER TABLE wallet_transactions ADD razorpay_payment_id VARCHAR(255) NULL;
 
 
