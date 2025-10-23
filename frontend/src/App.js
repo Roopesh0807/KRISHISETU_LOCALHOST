@@ -612,7 +612,9 @@ const Main = () => {
                     <Route path="/bargain/:bargainId" element={<ConsumerChatWindow />} />
                     <Route path="/initiate-bargain/:farmerId" element={<BargainPopup />} />
                     <Route path="/farmer/bargain" element={<FarmerChatList />} />
-                    <Route path="/farmer/:bargainId" element={<FarmerChatWindow />} />
+                    {/* <Route path="/farmer/:bargainId" element={<FarmerChatWindow />} /> */}
+                    <Route path="/farmer/bargain/:bargainId" element={<FarmerChatWindow />} />
+
                     <Route path="/farmer-orders" element={<FarmerBargainOrders />} />
                     <Route path="/consumer-orders" element={<ConsumerBargainOrders />} />
                     <Route path="/bargain-cart" element={<BargainCart />} />
