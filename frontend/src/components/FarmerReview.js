@@ -5,7 +5,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const FarmerReview = () => {
-    const { farmer, logout } = useContext(AuthContext.js);
+    const { farmer, logout } = useContext(AuthContext);
     const navigate = useNavigate();
     const [reviews, setReviews] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
