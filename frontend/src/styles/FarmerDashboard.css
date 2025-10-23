@@ -1,4 +1,4 @@
-/* Farmer Dashboard Styles */
+/* Farmer Dashboard Styles with 3D Effects */
 :root {
   --primary-green: #2e7d32;
   --primary-dark-green: #1b5e20;
@@ -15,6 +15,7 @@
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
   --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
   --shadow-lg: 0 10px 20px rgba(0,0,0,0.15);
+  --shadow-3d: 0 15px 30px rgba(0,0,0,0.25);
   --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
@@ -22,10 +23,12 @@
 .ks-farmer-dashboard {
   width: 100%;
   min-height: 100vh;
-  background-color: var(--light-gray);
-  padding-top: 80px; /* Adjusted for fixed navbar height */
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4efe9 100%);
+  padding-top: 80px;
   padding-bottom: 40px;
   box-sizing: border-box;
+  perspective: 1200px;
+  transform-style: preserve-3d;
 }
 
 .ks-dashboard-content {
@@ -34,11 +37,29 @@
   padding: 0 20px;
   margin-left: 75px;
   margin-right: 40;
+  transform-style: preserve-3d;
 }
 
-/* Welcome Section */
+/* Welcome Section with 3D Effect */
 .ks-welcome-section {
   margin-bottom: 40px;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.ks-welcome-section::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-dark-green) 100%);
+  border-radius: 20px;
+  filter: blur(15px);
+  opacity: 0.1;
+  z-index: -1;
+  transform: translateZ(-20px);
 }
 
 .ks-welcome-header {
@@ -46,6 +67,9 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
+  position: relative;
+  z-index: 2;
+  transform: translateZ(15px);
 }
 
 .ks-welcome-title {
@@ -53,39 +77,81 @@
   color: var(--primary-dark-green);
   margin: 0;
   font-weight: 700;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+  transform: translateZ(20px);
 }
 
 .ks-farmer-name {
   color: var(--secondary-orange);
+  position: relative;
+  display: inline-block;
+}
+
+.ks-farmer-name::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--secondary-orange), transparent);
+  border-radius: 1px;
+  transform: translateZ(10px);
 }
 
 .ks-welcome-subtitle {
   font-size: 1.1rem;
   color: var(--text-medium);
   margin: 0;
+  transform: translateZ(10px);
 }
 
 .ks-language-switcher-container {
   margin-left: 20px;
+  transform: translateZ(15px);
 }
 
-/* Section Styles */
+/* Section Styles with 3D Depth */
 .ks-section {
-  background-color: var(--white);
-  border-radius: 12px;
-  box-shadow: var(--shadow-sm);
+  background: linear-gradient(135deg, var(--white) 0%, #f8fdfa 100%);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
   padding: 25px;
   margin-bottom: 30px;
-  border: 1px solid var(--medium-gray);
+  border: none;
   transition: var(--transition);
+  transform-style: preserve-3d;
+  position: relative;
+  overflow: hidden;
 }
 
-.ks-section:hover {
-  box-shadow: var(--shadow-md);
+.ks-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-green), var(--primary-dark-green));
+  transform: translateZ(5px);
 }
 
 .ks-section-header {
   margin-bottom: 25px;
+  position: relative;
+  transform: translateZ(10px);
+}
+
+.ks-section-header::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 100px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary-green), transparent);
+  border-radius: 1px;
+  transform: translateZ(5px);
 }
 
 .ks-section-title {
@@ -95,11 +161,13 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.05);
 }
 
 .ks-section-icon {
   color: var(--primary-green);
   font-size: 1.3rem;
+  filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.1));
 }
 
 .ks-section-subtitle {
@@ -108,26 +176,35 @@
   margin: 0;
 }
 
-/* Weather Section */
+/* Weather Section with 3D Cards */
 .ks-weather-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 20px;
+  transform-style: preserve-3d;
 }
 
 .ks-weather-card {
-  background-color: var(--white);
-  border-radius: 10px;
+  background: linear-gradient(135deg, var(--white) 0%, #f1f8f4 100%);
+  border-radius: 14px;
   padding: 20px;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--medium-gray);
+  box-shadow: var(--shadow-md);
+  border: none;
   transition: var(--transition);
+  transform-style: preserve-3d;
+  position: relative;
+  overflow: hidden;
 }
 
-.ks-weather-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--primary-green);
+.ks-weather-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--primary-green), var(--primary-dark-green));
+  transform: translateZ(5px);
 }
 
 .ks-weather-card-header {
@@ -136,17 +213,21 @@
   margin-bottom: 15px;
   padding-bottom: 15px;
   border-bottom: 1px solid var(--medium-gray);
+  transform: translateZ(10px);
 }
 
 .ks-weather-icon {
   font-size: 2.5rem;
   margin-right: 15px;
+  filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.1));
+  transform: translateZ(15px);
 }
 
 .ks-weather-day {
   font-size: 1.2rem;
   color: var(--text-dark);
   margin: 0 0 5px 0;
+  font-weight: 600;
 }
 
 .ks-weather-date {
@@ -159,17 +240,23 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  transform: translateZ(5px);
 }
 
 .ks-weather-detail {
   display: flex;
   flex-direction: column;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(46, 125, 50, 0.1);
 }
 
 .ks-weather-label {
   font-size: 0.8rem;
   color: var(--text-light);
   margin-bottom: 3px;
+  font-weight: 500;
 }
 
 .ks-weather-value {
@@ -178,96 +265,141 @@
   color: var(--text-dark);
 }
 
-/* Orders Section */
+/* Orders Section with 3D Table */
 .ks-orders-table-container {
   overflow-x: auto;
-  border-radius: 8px;
+  border-radius: 12px;
   border: 1px solid var(--medium-gray);
+  box-shadow: var(--shadow-sm);
+  transform-style: preserve-3d;
+  background: linear-gradient(135deg, var(--white) 0%, #f8fdfa 100%);
 }
 
 .ks-orders-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.95rem;
+  transform-style: preserve-3d;
 }
 
 .ks-orders-table th {
-  background-color: var(--primary-dark-green);
+  background: linear-gradient(135deg, var(--primary-dark-green), var(--primary-green));
   color: var(--white);
-  padding: 12px 15px;
+  padding: 15px;
   text-align: left;
-  font-weight: 500;
+  font-weight: 600;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+  transform: translateZ(10px);
+  position: relative;
+}
+
+.ks-orders-table th::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
 }
 
 .ks-orders-table td {
-  padding: 12px 15px;
+  padding: 15px;
   border-bottom: 1px solid var(--medium-gray);
   color: var(--text-dark);
+  background: var(--white);
+  transform: translateZ(0);
+  transition: var(--transition);
 }
 
 .ks-orders-table tr:last-child td {
   border-bottom: none;
 }
 
-.ks-orders-table tr:hover {
-  background-color: var(--primary-light-green);
+.ks-orders-table tr:nth-child(even) td {
+  background: var(--primary-light-green);
 }
 
-/* Status Badges */
+/* Status Badges with 3D Effect */
 .ks-status-badge,
 .ks-payment-badge {
   display: inline-block;
-  padding: 5px 10px;
+  padding: 8px 12px;
   border-radius: 20px;
   font-size: 0.8rem;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: capitalize;
+  box-shadow: var(--shadow-sm);
+  transform: translateZ(5px);
+  position: relative;
+  overflow: hidden;
+}
+
+.ks-status-badge::before,
+.ks-payment-badge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.6s;
 }
 
 .ks-status-pending {
-  background-color: #fff3cd;
+  background: linear-gradient(135deg, #fff3cd, #ffeaa7);
   color: #856404;
+  border: 1px solid rgba(133, 100, 4, 0.2);
 }
 
 .ks-status-completed {
-  background-color: #d4edda;
+  background: linear-gradient(135deg, #d4edda, #c3e6cb);
   color: #155724;
+  border: 1px solid rgba(21, 87, 36, 0.2);
 }
 
 .ks-status-cancelled {
-  background-color: #f8d7da;
+  background: linear-gradient(135deg, #f8d7da, #f5c6cb);
   color: #721c24;
+  border: 1px solid rgba(114, 28, 36, 0.2);
 }
 
 .ks-status-processing {
-  background-color: #cce5ff;
+  background: linear-gradient(135deg, #cce5ff, #b3d7ff);
   color: #004085;
+  border: 1px solid rgba(0, 64, 133, 0.2);
 }
 
 .ks-payment-paid {
-  background-color: #d4edda;
+  background: linear-gradient(135deg, #d4edda, #c3e6cb);
   color: #155724;
+  border: 1px solid rgba(21, 87, 36, 0.2);
 }
 
 .ks-payment-unpaid {
-  background-color: #f8d7da;
+  background: linear-gradient(135deg, #f8d7da, #f5c6cb);
   color: #721c24;
+  border: 1px solid rgba(114, 28, 36, 0.2);
 }
 
-/* Tutorial Section */
+/* Tutorial Section with 3D Effects */
 .ks-tutorial-content {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 30px;
+  transform-style: preserve-3d;
 }
 
 .ks-video-container {
   position: relative;
-  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  padding-bottom: 56.25%;
   height: 0;
   overflow: hidden;
-  border-radius: 8px;
-  box-shadow: var(--shadow-md);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  transform: translateZ(10px);
+  border: 1px solid var(--medium-gray);
 }
 
 .ks-tutorial-video {
@@ -277,83 +409,123 @@
   width: 100%;
   height: 100%;
   border: none;
+  transform: translateZ(5px);
 }
 
 .ks-tips-container {
-  background-color: var(--primary-light-green);
-  padding: 20px;
-  border-radius: 8px;
+  background: linear-gradient(135deg, var(--primary-light-green) 0%, #e1f5e1 100%);
+  padding: 25px;
+  border-radius: 12px;
   border: 1px solid var(--medium-gray);
+  box-shadow: var(--shadow-md);
+  transform: translateZ(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.ks-tips-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--primary-green), var(--primary-dark-green));
+  transform: translateZ(5px);
 }
 
 .ks-tips-title {
   font-size: 1.2rem;
   color: var(--primary-dark-green);
   margin-top: 0;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--medium-gray);
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid rgba(46, 125, 50, 0.2);
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.05);
+  transform: translateZ(10px);
 }
 
 .ks-tips-list {
   list-style: none;
   padding: 0;
   margin: 0;
+  transform-style: preserve-3d;
 }
 
 .ks-tip-item {
-  padding: 8px 0;
+  padding: 12px 0;
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  line-height: 1.4;
+  gap: 12px;
+  line-height: 1.5;
+  border-bottom: 1px solid rgba(46, 125, 50, 0.1);
+  transform: translateZ(5px);
+  transition: var(--transition);
+}
+
+.ks-tip-item:last-child {
+  border-bottom: none;
 }
 
 .ks-tip-icon {
   color: var(--primary-green);
   margin-top: 3px;
   flex-shrink: 0;
+  font-size: 1.1rem;
+  filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.1));
 }
 
-/* Button Styles */
+/* Button Styles with 3D Effects */
 .ks-primary-btn {
   background: linear-gradient(135deg, var(--primary-green), var(--primary-dark-green));
   color: var(--white);
   border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
+  padding: 12px 24px;
+  border-radius: 10px;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  box-shadow: var(--shadow-md);
+  transform: translateZ(0);
+  position: relative;
+  overflow: hidden;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
 }
 
-.ks-primary-btn:hover {
-  background: linear-gradient(135deg, var(--primary-dark-green), var(--primary-green));
-  box-shadow: var(--shadow-sm);
-  transform: translateY(-2px);
+.ks-primary-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.6s;
 }
 
 .ks-retry-btn {
-  background-color: var(--secondary-orange);
+  background: linear-gradient(135deg, var(--secondary-orange), #e65100);
   color: var(--white);
   border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 10px 20px;
+  border-radius: 8px;
   font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
   margin-top: 10px;
+  box-shadow: var(--shadow-sm);
+  transform: translateZ(0);
+  position: relative;
+  overflow: hidden;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
 }
 
-.ks-retry-btn:hover {
-  background-color: #e65100;
-}
-
-/* Loading and Empty States */
+/* Loading and Empty States with 3D */
 .ks-loading-state,
 .ks-error-state,
 .ks-empty-state {
@@ -361,34 +533,41 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 60px 20px;
   text-align: center;
+  transform-style: preserve-3d;
 }
 
 .ks-spinner {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border: 4px solid rgba(46, 125, 50, 0.2);
   border-radius: 50%;
   border-top-color: var(--primary-green);
   animation: ks-spin 1s linear infinite;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+  transform: translateZ(20px);
 }
 
 @keyframes ks-spin {
-  to { transform: rotate(360deg); }
+  to { transform: rotate(360deg) translateZ(20px); }
 }
 
 .ks-error-icon {
-  font-size: 2rem;
+  font-size: 2.5rem;
   color: #d32f2f;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.1));
+  transform: translateZ(15px);
 }
 
 .ks-empty-icon {
-  font-size: 2rem;
+  font-size: 2.5rem;
   color: var(--medium-gray);
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.1));
+  transform: translateZ(15px);
 }
 
 /* Responsive Design */
@@ -427,7 +606,7 @@
   
   .ks-orders-table th,
   .ks-orders-table td {
-    padding: 8px 10px;
+    padding: 12px 8px;
   }
 }
 
@@ -460,6 +639,10 @@
     display: block;
     margin-bottom: 15px;
     border-bottom: 1px solid var(--medium-gray);
+    background: var(--white);
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    padding: 10px;
   }
   
   .ks-orders-table td {
@@ -468,12 +651,31 @@
     align-items: center;
     padding: 8px 10px;
     text-align: right;
+    border-bottom: 1px solid var(--medium-gray);
+  }
+  
+  .ks-orders-table td:last-child {
+    border-bottom: none;
   }
   
   .ks-orders-table td::before {
     content: attr(data-label);
-    font-weight: 500;
+    font-weight: 600;
     color: var(--text-light);
     margin-right: 15px;
   }
 }
+
+/* Additional 3D Enhancements */
+.ks-3d-shadow {
+  box-shadow: 
+    0 10px 20px rgba(0, 0, 0, 0.1),
+    0 6px 6px rgba(0, 0, 0, 0.1),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.5);
+}
+
+.ks-glass-effect {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}1
