@@ -477,6 +477,9 @@ const Main = () => {
 
     const getNavbar = () => {
         const path = location.pathname;
+        if (path.startsWith("/admin")) {
+    return null;
+  }
 
         if (
             path.startsWith("/farmer/") ||
