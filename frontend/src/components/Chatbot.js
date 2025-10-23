@@ -129,7 +129,7 @@ const Chatbot = ({ userType }) => {
     }
 
     try {
-      const apiKey = 'AIzaSyAuQIXWdgyQOYvSrzxWoVJy1tsPyJnpkG8';
+      const apiKey = "AIzaSyAroCxPUz4bLj7UmGgYUixBYm_R0ztqVVc";
       const response = await axios.post(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
         {

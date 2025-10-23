@@ -6,7 +6,8 @@ import {
     FaChevronDown, FaChevronUp, FaPlusCircle, FaExclamationTriangle, FaCheckCircle,
     FaUser, FaEllipsisV, FaInfoCircle // Added FaInfoCircle for the instruction button
 } from 'react-icons/fa';
-import Slider from 'react-slick';
+// import Slider from 'react-slick';
+
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import moment from 'moment'; // <--- ADDED THIS IMPORT
@@ -355,14 +356,14 @@ const Subscribe = () => {
             </div>
 
             <div className="carousel-container">
-                <Slider {...carouselSettings}>
+                {/* <Slider {...carouselSettings}>
                     {carouselImages.map((slide, index) => (
                         <div key={index} className="carousel-slide">
                             <img src={slide.img} alt={slide.title} />
                             <div className="slide-overlay"><h3>{slide.title}</h3><p>{slide.desc}</p></div>
                         </div>
                     ))}
-                </Slider>
+                </Slider> */}
             </div>
 
             <Wallet />
