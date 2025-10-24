@@ -178,9 +178,9 @@ const Dashboard = () => {
             <h1 className="ks-welcome-title">
               Welcome back, <span className="ks-farmer-name">{farmerName || "Farmer"}</span>
             </h1>
-            <div className="ks-language-switcher-container">
+            {/* <div className="ks-language-switcher-container">
               <LanguageSwitcher />
-            </div>
+            </div> */}
           </div>
           <p className="ks-welcome-subtitle">Here's what's happening with your farm today</p>
         </div>

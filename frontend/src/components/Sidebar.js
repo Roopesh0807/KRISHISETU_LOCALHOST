@@ -99,10 +99,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <button
             onClick={() => navigate('/helpfarmers')}
             className={isActive('/helpfarmers') ? 'active' : ''}
-            title="Help and Support"
+            title="Live Market prices"
           >
-            <i className="fas fa-question-circle"></i>
-            {isOpen && 'Support'}
+            <i className="fas fa-chart-line"></i>
+            {isOpen && 'Live Market prices'}
           </button>
         </div>
       </div>

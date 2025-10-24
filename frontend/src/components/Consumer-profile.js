@@ -32,57 +32,108 @@ const ConsumerProfile = () => {
       return;
     }
   
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+    // const fetchProfile = async () => {
+    //   try {
+    //     setLoading(true);
+    //     setError(null);
         
-        const response = await fetch(
-          `http://localhost:5000/api/consumer/${consumer_id}`,
-          {
-            headers: {
-              "Authorization": `Bearer ${consumer?.token}`
-            }
-          }
-        );
+    //     const response = await fetch(
+    //       `http://localhost:5000/api/consumer/${consumer_id}`,
+    //       {
+    //         headers: {
+    //           "Authorization": `Bearer ${consumer?.token}`
+    //         }
+    //       }
+    //     );
   
-        if (!response.ok) {
-          throw new Error(`Failed to fetch profile: ${response.statusText}`);
+    //     if (!response.ok) {
+    //       throw new Error(`Failed to fetch profile: ${response.statusText}`);
+    //     }
+  
+    //     const data = await response.json();
+    //     // Construct proper photo URL if it exists
+    //   const photoUrl = data.photo 
+    //   ? data.photo.startsWith('http') 
+    //     ? data.photo 
+    //     : `http://localhost:5000${data.photo}`
+    //   : null;
+
+
+      
+    //     setProfile({
+    //       consumer_id: data.consumer_id,
+    //       first_name: data.first_name,
+    //       last_name: data.last_name,
+    //       name: data.full_name,
+    //       email: data.email,
+    //       phone_number: data.phone_number,
+    //       address: data.address,
+    //       pincode: data.pincode,
+    //       location: data.location,
+    //       city: data.city, // Add this
+    //       state: data.state, // Add this
+    //       photo: photoUrl,
+    //       preferred_payment_method: data.preferred_payment_method,
+    //       subscription_method: data.subscription_method
+    //     });
+    //   } catch (err) {
+    //     console.error("Fetch error:", err);
+    //     setError(err.message);
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
+    // In the fetchProfile function, update the photo URL construction:
+const fetchProfile = async () => {
+  try {
+    setLoading(true);
+    setError(null);
+    
+    const response = await fetch(
+      `http://localhost:5000/api/consumer/${consumer_id}`,
+      {
+        headers: {
+          "Authorization": `Bearer ${consumer?.token}`
         }
-  
-        const data = await response.json();
-        // Construct proper photo URL if it exists
-      const photoUrl = data.photo 
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch profile: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    // Construct proper photo URL if it exists
+    const photoUrl = data.photo 
       ? data.photo.startsWith('http') 
         ? data.photo 
         : `http://localhost:5000${data.photo}`
       : null;
 
-
-      
-        setProfile({
-          consumer_id: data.consumer_id,
-          first_name: data.first_name,
-          last_name: data.last_name,
-          name: data.full_name,
-          email: data.email,
-          phone_number: data.phone_number,
-          address: data.address,
-          pincode: data.pincode,
-          location: data.location,
-          city: data.city, // Add this
-          state: data.state, // Add this
-          photo: photoUrl,
-          preferred_payment_method: data.preferred_payment_method,
-          subscription_method: data.subscription_method
-        });
-      } catch (err) {
-        console.error("Fetch error:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+    setProfile({
+      consumer_id: data.consumer_id,
+      first_name: data.first_name,
+      last_name: data.last_name,
+      name: data.full_name,
+      email: data.email,
+      phone_number: data.phone_number,
+      address: data.address,
+      pincode: data.pincode,
+      location: data.location,
+      city: data.city,
+      state: data.state,
+      photo: photoUrl, // This will be used by other components
+      preferred_payment_method: data.preferred_payment_method,
+      subscription_method: data.subscription_method
+    });
+  } catch (err) {
+    console.error("Fetch error:", err);
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
   
     if (consumer_id) fetchProfile();
   }, [consumer_id, consumer?.token]);
