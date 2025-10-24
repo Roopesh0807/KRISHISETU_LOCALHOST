@@ -617,12 +617,18 @@ const Main = () => {
                     <Route path="/initiate-bargain/:farmerId" element={<BargainPopup />} />
                     <Route path="/farmer/bargain" element={<FarmerChatList />} />
 <<<<<<< HEAD
+<<<<<<< HEAD
 
                     <Route path="/farmer/bargain/:bargainId" element={<FarmerChatWindow />} />
 
                    
 
 
+=======
+                    {/* <Route path="/farmer/:bargainId" element={<FarmerChatWindow />} /> */}
+                    <Route path="/farmer/bargain/:bargainId" element={<FarmerChatWindow />} />
+
+>>>>>>> a198a395cf526d3ca7bc012538373c0256714643
 =======
                     {/* <Route path="/farmer/:bargainId" element={<FarmerChatWindow />} /> */}
                     <Route path="/farmer/bargain/:bargainId" element={<FarmerChatWindow />} />
