@@ -534,17 +534,12 @@ import {
     FaChevronDown, FaChevronUp, FaPlusCircle, FaExclamationTriangle, FaCheckCircle,
     FaUser, FaEllipsisV, FaInfoCircle
 } from 'react-icons/fa';
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 
 // In Subscribe.js, around line 11:krishisetu-final\frontend\node_modules\react-slick\lib\slider.js
 // Subscribe.js (around line 11)C:\Users\Roopesh Kumar K R\Desktop\Krishisetu-integrated-localhost\krishisetu-final\frontend\node_modules\react-slick\lib\slider.js
 import * as ReactSlick from 'react-slick';
 
-=======
->>>>>>> a198a395cf526d3ca7bc012538373c0256714643
-=======
->>>>>>> a198a395cf526d3ca7bc012538373c0256714643
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import moment from 'moment';
