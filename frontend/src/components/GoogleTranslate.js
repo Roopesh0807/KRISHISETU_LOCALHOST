@@ -1,178 +1,318 @@
-// GoogleTranslate.js
-import { useEffect, useRef } from "react";
-import "./GoogleTranslator.css";
+// // // import React, { useEffect } from "react";
+// // // import "./GoogleTranslator.css"; // import the css
+
+// // // const GoogleTranslate = () => {
+// // //   useEffect(() => {
+// // //     // Create and inject the Google Translate script
+// // //     const addScript = document.createElement("script");
+// // //     addScript.src =
+// // //       "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+// // //     document.body.appendChild(addScript);
+
+// // //     // Define global callback for Google Translate
+// // //     window.googleTranslateElementInit = () => {
+// // //       new window.google.translate.TranslateElement(
+// // //         {
+// // //           pageLanguage: "en",
+// // //           autoDisplay: false,
+// // //         },
+// // //         "google_translate_element"
+// // //       );
+// // //     };
+
+// // //     // Remove Google banner iframe automatically
+// // //     const observer = new MutationObserver(() => {
+// // //       const banner = document.querySelector(".goog-te-banner-frame");
+// // //       if (banner) banner.style.display = "none";
+// // //       const body = document.querySelector("body");
+// // //       if (body) body.style.top = "0px";
+// // //     });
+// // //     observer.observe(document.body, { childList: true, subtree: true });
+// // //   }, []);
+
+// // //   // Toggle dropdown visibility
+// // //   const toggleTranslate = () => {
+// // //     const element = document.getElementById("google_translate_element");
+// // //     if (element.style.display === "none" || !element.style.display) {
+// // //       element.style.display = "block";
+// // //     } else {
+// // //       element.style.display = "none";
+// // //     }
+// // //   };
+
+// // //   return (
+// // //     <>
+// // //       <div id="google_translate_element" style={{ display: "none" }}></div>
+
+// // //       <div
+// // //         className="translate-button"
+// // //         onClick={toggleTranslate}
+// // //         title="Translate this page"
+// // //       >
+// // //         <img
+// // //           src="https://upload.wikimedia.org/wikipedia/commons/d/d7/Google_Translate_logo.svg"
+// // //           alt="Google Translate"
+// // //           className="translate-icon"
+// // //         />
+// // //       </div>
+// // //     </>
+// // //   );
+// // // };
+
+// // // export default GoogleTranslate;
+// // import React, { useEffect, useRef, useState } from "react";
+// // import "./GoogleTranslator.css";
+
+// // const GoogleTranslate = () => {
+// //   const buttonRef = useRef(null);
+// //   const [isVisible, setIsVisible] = useState(false);
+
+// //   useEffect(() => {
+// //     // Add Google Translate script
+// //     const addScript = document.createElement("script");
+// //     addScript.src =
+// //       "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+// //     document.body.appendChild(addScript);
+
+// //     // Define callback
+// //     window.googleTranslateElementInit = () => {
+// //       new window.google.translate.TranslateElement(
+// //         {
+// //           pageLanguage: "en",
+// //           autoDisplay: false,
+// //         },
+// //         "google_translate_element"
+// //       );
+// //     };
+
+// //     // Hide Google banner
+// //     const observer = new MutationObserver(() => {
+// //       const banner = document.querySelector(".goog-te-banner-frame");
+// //       if (banner) banner.style.display = "none";
+// //       const body = document.querySelector("body");
+// //       if (body) body.style.top = "0px";
+// //     });
+// //     observer.observe(document.body, { childList: true, subtree: true });
+// //   }, []);
+
+// //   // Toggle visibility
+// //   const toggleTranslate = () => {
+// //     setIsVisible(!isVisible);
+// //   };
+
+// //   // --- Make the button draggable ---
+// //   useEffect(() => {
+// //     const button = buttonRef.current;
+// //     if (!button) return;
+
+// //     let isDragging = false;
+// //     let offsetX, offsetY;
+
+// //     const onMouseDown = (e) => {
+// //       isDragging = true;
+// //       offsetX = e.clientX - button.getBoundingClientRect().left;
+// //       offsetY = e.clientY - button.getBoundingClientRect().top;
+// //       button.style.cursor = "grabbing";
+// //     };
+
+// //     const onMouseMove = (e) => {
+// //       if (isDragging) {
+// //         button.style.left = `${e.clientX - offsetX}px`;
+// //         button.style.top = `${e.clientY - offsetY}px`;
+// //       }
+// //     };
+
+// //     const onMouseUp = () => {
+// //       isDragging = false;
+// //       button.style.cursor = "grab";
+// //     };
+
+// //     button.addEventListener("mousedown", onMouseDown);
+// //     document.addEventListener("mousemove", onMouseMove);
+// //     document.addEventListener("mouseup", onMouseUp);
+
+// //     return () => {
+// //       button.removeEventListener("mousedown", onMouseDown);
+// //       document.removeEventListener("mousemove", onMouseMove);
+// //       document.removeEventListener("mouseup", onMouseUp);
+// //     };
+// //   }, []);
+
+// //   return (
+// //     <>
+// //       <div className="translate-container" ref={buttonRef}>
+// //         <div
+// //           className="translate-button"
+// //           onClick={toggleTranslate}
+// //           title="Translate this page"
+// //         >
+// //           <img
+// //             src="https://upload.wikimedia.org/wikipedia/commons/d/d7/Google_Translate_logo.svg"
+// //             alt="Google Translate"
+// //             className="translate-icon"
+// //           />
+// //         </div>
+
+// //         {/* Language box appears right beside the button */}
+// //         {isVisible && (
+// //           <div id="google_translate_element" className="translate-dropdown"></div>
+// //         )}
+// //       </div>
+// //     </>
+// //   );
+// // };
+
+// // export default GoogleTranslate;
+// import React, { useEffect } from "react";
+// import "./GoogleTranslator.css"; // import the css
+
+// const GoogleTranslate = () => {
+//   useEffect(() => {
+//     // Create and inject the Google Translate script
+//     const addScript = document.createElement("script");
+//     addScript.src =
+//       "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+//     document.body.appendChild(addScript);
+
+//     // Define global callback for Google Translate
+//     window.googleTranslateElementInit = () => {
+//       new window.google.translate.TranslateElement(
+//         {
+//           pageLanguage: "en",
+//           autoDisplay: false,
+//         },
+//         "google_translate_element"
+//       );
+//     };
+
+//     // Remove Google banner iframe automatically
+//     const observer = new MutationObserver(() => {
+//       const banner = document.querySelector(".goog-te-banner-frame");
+//       if (banner) banner.style.display = "none";
+//       const body = document.querySelector("body");
+//       if (body) body.style.top = "0px";
+//     });
+//     observer.observe(document.body, { childList: true, subtree: true });
+//   }, []);
+
+//   // Toggle dropdown visibility
+//   const toggleTranslate = () => {
+//     const element = document.getElementById("google_translate_element");
+//     if (element.style.display === "none" || !element.style.display) {
+//       element.style.display = "block";
+//     } else {
+//       element.style.display = "none";
+//     }
+//   };
+
+//   return (
+//     <>
+//       <div id="google_translate_element" style={{ display: "none" }}></div>
+
+//       <div
+//         className="translate-button"
+//         onClick={toggleTranslate}
+//         title="Translate this page"
+//       >
+//         <img
+//           src="https://upload.wikimedia.org/wikipedia/commons/d/d7/Google_Translate_logo.svg"
+//           alt="Google Translate"
+//           className="translate-icon"
+//         />
+//       </div>
+//     </>
+//   );
+// };
+
+// export default GoogleTranslate;
+import React, { useEffect } from "react";
+import "./GoogleTranslator.css"; // import the css
 
 const GoogleTranslate = () => {
-  const translateElementRef = useRef(null);
-  const hideIntervalRef = useRef(null); // Ref to store the interval ID
-
-  // Function to aggressively hide the Google Translate banner iframe
-  const aggressivelyHideGoogleTranslateBar = () => {
-    // These are common selectors for the banner iframe.
-    // We try to cover different potential Google-injected elements.
-    const selectors = [
-      '.goog-te-banner-frame', // Main banner iframe class
-      'iframe[src*="translate.google.com/translate_static/css/"]', // Iframe based on source
-      'body > .skiptranslate.goog-te-spinner-pos', // Main div for the banner
-      '#goog-gt-vt', // Another possible ID for the top bar
-      '.VIpgJd-yAWLgf' // Another class Google uses for the top bar
-    ];
-
-    let hiddenCount = 0;
-    selectors.forEach(selector => {
-      const element = document.querySelector(selector);
-      if (element) {
-        // Apply inline styles directly and forcefully
-        element.style.setProperty('display', 'none', 'important');
-        element.style.setProperty('visibility', 'hidden', 'important');
-        element.style.setProperty('height', '0px', 'important');
-        element.style.setProperty('min-height', '0px', 'important');
-        element.style.setProperty('overflow', 'hidden', 'important');
-        element.style.setProperty('border', 'none', 'important');
-        element.style.setProperty('margin', '0px', 'important');
-        element.style.setProperty('padding', '0px', 'important');
-        hiddenCount++;
+  useEffect(() => {
+    // ✅ Suppress Google Translate internal script errors
+    const handleScriptError = (event) => {
+      if (event.filename && event.filename.includes("translate")) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        console.warn("Suppressed Google Translate script error:", event.message);
       }
-    });
+    };
+    window.addEventListener("error", handleScriptError);
 
-    if (hiddenCount > 0) {
-      console.log(`Google Translate banner hidden. Elements found: ${hiddenCount}`);
+    // ✅ Create and inject the Google Translate script safely (only once)
+    if (!document.querySelector("#google-translate-script")) {
+      const addScript = document.createElement("script");
+      addScript.id = "google-translate-script";
+      addScript.src =
+        "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+      addScript.onerror = () => console.warn("Google Translate script failed to load");
+      document.body.appendChild(addScript);
+    }
+
+    // ✅ Define global callback for Google Translate safely
+    window.googleTranslateElementInit = () => {
+      try {
+        if (window.google && window.google.translate) {
+          new window.google.translate.TranslateElement(
+            {
+              pageLanguage: "en",
+              autoDisplay: false,
+            },
+            "google_translate_element"
+          );
+        }
+      } catch (err) {
+        console.warn("Google Translate init failed:", err);
+      }
+    };
+
+    // ✅ Remove Google banner iframe automatically, wrapped safely
+    try {
+      const observer = new MutationObserver(() => {
+        const banner = document.querySelector(".goog-te-banner-frame");
+        if (banner) banner.style.display = "none";
+        const body = document.querySelector("body");
+        if (body) body.style.top = "0px";
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    } catch (err) {
+      console.warn("MutationObserver issue:", err);
+    }
+
+    // ✅ Cleanup on unmount
+    return () => {
+      window.removeEventListener("error", handleScriptError);
+    };
+  }, []);
+
+  // Toggle dropdown visibility
+  const toggleTranslate = () => {
+    const element = document.getElementById("google_translate_element");
+    if (element.style.display === "none" || !element.style.display) {
+      element.style.display = "block";
+    } else {
+      element.style.display = "none";
     }
   };
 
-  useEffect(() => {
-    // --- Google Translate Widget Initialization Logic ---
-    const existingScript = document.querySelector(
-      'script[src*="translate.google.com/translate_a/element.js"]'
-    );
+  return (
+    <>
+      <div id="google_translate_element" style={{ display: "none" }}></div>
 
-    const tryInitialize = () => {
-      if (
-        window.google?.translate?.TranslateElement &&
-        typeof window.google.translate.TranslateElement === "function"
-      ) {
-        const targetElement = document.getElementById("google_translate_element");
-        if (targetElement) {
-          if (!targetElement.querySelector(".goog-te-combo")) {
-            try {
-              new window.google.translate.TranslateElement(
-                {
-                  pageLanguage: "en",
-                  includedLanguages: "en,hi,kn",
-                  layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
-                  autoDisplay: false, // Prevents the full translation banner from appearing initially
-                },
-                "google_translate_element"
-              );
-              console.log("Google Translate dropdown initialized successfully.");
-            } catch (e) {
-              console.error("Google Translate initialization error:", e);
-            }
-          }
-        } else {
-          console.warn("Target element #google_translate_element not found. Retrying initialization...");
-          setTimeout(tryInitialize, 500);
-        }
-      } else {
-        console.log("Google Translate API not ready. Retrying...");
-        setTimeout(tryInitialize, 500);
-      }
-    };
-
-    // Assign the initialization function to the global window object.
-    window.googleTranslateElementInit = tryInitialize;
-
-    if (!existingScript) {
-      const script = document.createElement("script");
-      script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
-      script.async = true;
-      script.onerror = () => console.warn("Google Translate script failed to load.");
-      document.body.appendChild(script);
-    } else {
-      tryInitialize();
-    }
-
-    // Start the continuous hiding interval
-    // This interval will run periodically to ensure the banner is hidden
-    if (hideIntervalRef.current) {
-      clearInterval(hideIntervalRef.current); // Clear any existing interval
-    }
-    hideIntervalRef.current = setInterval(aggressivelyHideGoogleTranslateBar, 200); // Check and hide every 200ms
-
-    // --- Draggable Functionality Logic (from previous versions) ---
-    const element = translateElementRef.current;
-    if (!element) return;
-
-    let isDragging = false;
-    let offsetX, offsetY;
-
-    const savedPosition = localStorage.getItem('googleTranslatePosition');
-    if (savedPosition) {
-      const { top, left } = JSON.parse(savedPosition);
-      element.style.top = `${top}px`;
-      element.style.left = `${left}px`;
-      element.style.right = 'auto';
-      element.style.bottom = 'auto';
-    }
-
-    const onMouseDown = (e) => {
-      // Prevent dragging if clicking directly on the dropdown or its arrow
-      if (e.target.closest('.goog-te-combo') || e.target.closest('.VIpgJd-ZVi9od-xl07Ob-LgbsSe-Bz112c')) {
-        return;
-      }
-      isDragging = true;
-      offsetX = e.clientX - element.getBoundingClientRect().left;
-      offsetY = e.clientY - element.getBoundingClientRect().top;
-      element.style.cursor = 'grabbing';
-      document.body.style.userSelect = 'none';
-      document.body.style.cursor = 'grabbing';
-    };
-
-    const onMouseMove = (e) => {
-      if (!isDragging) return;
-      let newLeft = e.clientX - offsetX;
-      let newTop = e.clientY - offsetY;
-      const rect = element.getBoundingClientRect();
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-
-      if (newLeft < 0) newLeft = 0;
-      if (newTop < 0) newTop = 0;
-      if (newLeft + rect.width > viewportWidth) newLeft = viewportWidth - rect.width;
-      if (newTop + rect.height > viewportHeight) newTop = viewportHeight - rect.height;
-
-      element.style.left = `${newLeft}px`;
-      element.style.top = `${newTop}px`;
-      element.style.right = 'auto';
-      element.style.bottom = 'auto';
-    };
-
-    const onMouseUp = () => {
-      isDragging = false;
-      element.style.cursor = 'grab';
-      document.body.style.userSelect = 'auto';
-      document.body.style.cursor = 'auto';
-      const { top, left } = element.getBoundingClientRect();
-      localStorage.setItem('googleTranslatePosition', JSON.stringify({ top, left }));
-    };
-
-    element.addEventListener('mousedown', onMouseDown);
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-
-    // Cleanup function: runs when the component unmounts
-    return () => {
-      clearInterval(hideIntervalRef.current); // Stop the hiding interval
-      delete window.googleTranslateElementInit; // Clean up global callback
-      if (element) { // Ensure element exists before removing listeners
-        element.removeEventListener('mousedown', onMouseDown);
-      }
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-    };
-  }, []); // Empty dependency array means this effect runs once on mount and cleans up on unmount
-
-  return <div id="google_translate_element" ref={translateElementRef} />;
+      <div
+        className="translate-button"
+        onClick={toggleTranslate}
+        title="Translate this page"
+      >
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/d/d7/Google_Translate_logo.svg"
+          alt="Google Translate"
+          className="translate-icon"
+        />
+      </div>
+    </>
+  );
 };
 
 export default GoogleTranslate;
