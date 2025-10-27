@@ -376,9 +376,7 @@ const Chatbot = ({ userType = 'guest' }) => {
             setMessages((prevMessages) => [...prevMessages, botMessage]);
             return;
         }
-
-<<<<<<< HEAD
-        // 3. Fallback to Gemini API
+// 3. Fallback to Gemini API
         if (!ai || isKeyPlaceholder) {
              const errorMessage = {
                 sender: "bot",
@@ -390,17 +388,6 @@ const Chatbot = ({ userType = 'guest' }) => {
         
         setIsTyping(true); 
         const fullPrompt = `User Context: ${userType}. Query: ${currentInputText}`;
-=======
-    try {
-      const apiKey = "AIzaSyAroCxPUz4bLj7UmGgYUixBYm_R0ztqVVc";
-      const response = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-        {
-          contents: [{ parts: [{ text: inputText }] }],
-        },
-        { headers: { "Content-Type": "application/json" } }
-      );
->>>>>>> a198a395cf526d3ca7bc012538373c0256714643
 
         try {
             const response = await ai.models.generateContent({
