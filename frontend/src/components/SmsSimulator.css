@@ -1,0 +1,294 @@
+/* SmsSimulator.css */
+
+/* ---------------------------------------------------- */
+/* 1. Global Setup and Typography */
+/* ---------------------------------------------------- */
+
+.krishi-simulator-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 3rem;
+    min-height: 100vh;
+    background-color: #f7f7f7;
+    font-family: 'SF Pro Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* ---------------------------------------------------- */
+/* 2. Phone Chassis (iPhone Style) */
+/* ---------------------------------------------------- */
+
+.krishi-phone-chassis {
+    width: 320px; /* Standard phone width */
+    height: 640px; /* Standard phone height */
+    background: #000;
+    border-radius: 40px;
+    box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.4),
+        0 0 0 10px #222222; /* Inner black bezel effect */
+    position: relative;
+    padding: 10px;
+    margin-right: 2rem;
+}
+
+.krishi-phone-screen {
+    background: #fff;
+    border-radius: 30px;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #111; /* Separation line */
+    position: relative;
+}
+
+/* The iPhone Notch */
+.krishi-phone-chassis::before {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 25px;
+    background: #000;
+    border-radius: 0 0 15px 15px;
+    z-index: 100;
+}
+
+/* ---------------------------------------------------- */
+/* 3. Status Bar and Header */
+/* ---------------------------------------------------- */
+
+.krishi-status-bar {
+    background: #fff;
+    color: #000;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    height: 35px;
+}
+.krishi-status-bar .fa-wifi,
+.krishi-status-bar .fa-battery-full {
+    color: #555;
+}
+
+.krishi-app-header {
+    background-color: #f6f6f6; /* Light gray for message header */
+    color: #000;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    height: 60px;
+}
+
+.krishi-app-header .header-details {
+    flex-grow: 1;
+    margin-left: 10px;
+}
+
+.krishi-app-header .phone-number {
+    font-size: 0.75rem;
+    color: #555;
+    margin-top: 2px;
+}
+
+/* ---------------------------------------------------- */
+/* 4. Message Area and Scrolling */
+/* ---------------------------------------------------- */
+
+.krishi-messages-display {
+    flex-grow: 1;
+    padding: 10px 12px;
+    overflow-y: auto;
+    background-color: #fff; /* White background for messages */
+}
+
+/* Scrollbar styling (iOS-like, thin) */
+.krishi-messages-display::-webkit-scrollbar {
+    width: 4px;
+}
+.krishi-messages-display::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 2px;
+}
+.krishi-messages-display::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.krishi-message-row {
+    display: flex;
+    margin-bottom: 12px;
+    width: 100%;
+}
+
+/* ---------------------------------------------------- */
+/* 5. Message Bubbles */
+/* ---------------------------------------------------- */
+
+.krishi-message-bubble {
+    max-width: 80%;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    line-height: 1.3;
+    position: relative;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+/* Farmer (Sent - Green Bubble) */
+.krishi-message-row.farmer {
+    justify-content: flex-end;
+}
+.krishi-message-row.farmer .krishi-message-bubble {
+    background-color: #e2f0cb; /* Light Green */
+    color: #333;
+    border-bottom-right-radius: 4px; /* Pointy edge */
+}
+
+/* System/Inbound (Received - Gray Bubble) */
+.krishi-message-row.system {
+    justify-content: flex-start;
+}
+.krishi-message-row.system .krishi-message-bubble {
+    background-color: #f7f7f7; /* Light Gray/White */
+    color: #333;
+    border: 1px solid #e0e0e0;
+    border-bottom-left-radius: 4px; /* Pointy edge */
+}
+
+.krishi-message-meta {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.65rem;
+    color: #999;
+    text-align: right;
+}
+
+.krishi-message-row.system .krishi-message-meta {
+    text-align: left;
+}
+
+.krishi-system-text {
+    color: #c0392b; /* Red/Alert color for system messages */
+    font-weight: 600;
+}
+
+/* ---------------------------------------------------- */
+/* 6. Input Area */
+/* ---------------------------------------------------- */
+
+.krishi-input-form {
+    padding: 10px;
+    background: #f7f7f7;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.krishi-input-field {
+    flex-grow: 1;
+    padding: 10px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    background-color: #fff;
+    transition: border-color 0.2s;
+}
+
+.krishi-input-field:focus {
+    outline: none;
+    border-color: #2ecc71; /* Green focus color */
+}
+
+.krishi-send-button {
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 50%;
+    background-color: #2ecc71; /* Vibrant green */
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+
+.krishi-send-button:disabled {
+    background-color: #bdc3c7; /* Gray when disabled */
+    cursor: not-allowed;
+}
+
+.krishi-send-button:not(:disabled):hover {
+    background-color: #27ae60;
+}
+
+/* ---------------------------------------------------- */
+/* 7. Debug/Status Panel (Kept separate from phone) */
+/* ---------------------------------------------------- */
+
+.krishi-debug-panel {
+    width: 350px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-top: 50px; /* Align visually with the phone */
+}
+
+.krishi-debug-panel h3 {
+    color: #34495e;
+    border-bottom: 2px solid #ecf0f1;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+.krishi-status-box {
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.krishi-status-box.info {
+    background-color: #eaf6ff;
+    color: #3498db;
+}
+.krishi-status-box.success {
+    background-color: #e8f9e8;
+    color: #2ecc71;
+}
+.krishi-status-box.error {
+    background-color: #ffeaea;
+    color: #e74c3c;
+}
+
+.krishi-format-rules {
+    margin-top: 15px;
+    padding: 10px;
+    border: 1px dashed #ccc;
+    border-radius: 6px;
+    background-color: #fcfcfc;
+}
+.krishi-format-rules p {
+    font-weight: 700;
+    color: #555;
+    margin-bottom: 5px;
+}
+.krishi-format-rules ul {
+    margin: 5px 0 0;
+    padding-left: 20px;
+}
+.krishi-format-rules li {
+    font-size: 0.85rem;
+    color: #777;
+    margin-bottom: 3px;
+}

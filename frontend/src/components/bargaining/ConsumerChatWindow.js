@@ -2100,18 +2100,59 @@ const BargainChatWindow = () => {
                     }
                 }
             });
-            socket.current.on('bargainStatusUpdate', (data) => {
-                if (!['accepted', 'rejected'].includes(data.status)) return;
-                setBargainStatus(data.status);
-                setCurrentPrice(data.currentPrice);
-                setIsBargainComplete(true);
-                setFreezeUI(true);
-                setWaitingForResponse(false);
-                setHasFarmerCounterOffer(false);
-                setShowPriceSuggestions(false);
-                setBargainResult(data.status);
-                addSystemMessage(data.status === 'accepted' ? `🎉 Bargain accepted at ₹${data.currentPrice}/kg` : `❌ Bargain rejected`);
-            });
+            // socket.current.on('bargainStatusUpdate', (data) => {
+            //     if (!['accepted', 'rejected'].includes(data.status)) return;
+            //     setBargainStatus(data.status);
+            //     setCurrentPrice(data.currentPrice);
+            //     setIsBargainComplete(true);
+            //     setFreezeUI(true);
+            //     setWaitingForResponse(false);
+            //     setHasFarmerCounterOffer(false);
+            //     setShowPriceSuggestions(false);
+            //     setBargainResult(data.status);
+            //     addSystemMessage(data.status === 'accepted' ? `🎉 Bargain accepted at ₹${data.currentPrice}/kg` : `❌ Bargain rejected`);
+            // });
+            // ConsumerChatWindow.js (Around line 160-180)
+
+// ConsumerChatWindow.js (Inside useEffect, updating the socket listener)
+
+socket.current.on('bargainStatusUpdate', (data) => {
+    // Determine the status received from the farmer's SMS reply
+    const status = data.status;
+
+    // --- FINAL STATES: Accepted or Rejected ---
+    if (status === 'accepted' || status === 'rejected') {
+        setBargainStatus(status);
+        setCurrentPrice(data.currentPrice);
+        setIsBargainComplete(true);
+        setFreezeUI(true);
+        setWaitingForResponse(false);
+        setHasFarmerCounterOffer(false); // Game is over
+        setShowPriceSuggestions(false);
+        setBargainResult(status);
+        addSystemMessage(status === 'accepted' ? 
+            `🎉 Bargain accepted at ₹${data.currentPrice}/kg` : `❌ Bargain rejected`);
+        
+    } else if (status === 'countered') {
+        // --- INTERMEDIATE STATE: Farmer countered via SMS ---
+        setBargainStatus(status);
+        setCurrentPrice(data.currentPrice);
+        setWaitingForResponse(false);
+        
+        // CRITICAL: Reset flags to enable negotiation buttons
+        setHasFarmerCounterOffer(true); // Show the Accept/Decline/Counter buttons
+        setIsBargainComplete(false); // Keep chat active
+        setFreezeUI(false); 
+        setShowPriceSuggestions(false); // Hide price grid, show action buttons
+
+        // Note: The message itself will arrive via the separate 'bargainMessage' listener
+        // But we update the suggestions list here based on the farmer's new price.
+        const fetchedBasePrice = selectedProduct.price_per_kg; 
+        const fetchedMinPrice = minPrice; 
+        const suggestions = generatePriceSuggestions(data.currentPrice, fetchedMinPrice, fetchedBasePrice);
+        setPriceSuggestions(suggestions);
+    }
+});
             socket.current.on('typing', (isTyping) => setIsTyping(Boolean(isTyping)));
             socket.current.on('error', (error) => setError(error.message || "WebSocket communication error"));
         } else {
@@ -2433,7 +2474,11 @@ const BargainChatWindow = () => {
 
           {/* Chat Controls */}
           <div className="krishi-chat-controls">
-            {bargainStatus === 'pending' ? (
+            {!(isBargainComplete || bargainStatus === 'accepted' || bargainStatus === 'rejected') ? (
+  // 👆 NEW CONDITION: This shows controls if the status is NOT definitive.
+  // This covers 'pending', 'countered', and any other intermediate state.
+  
+  // --- ACTIVE NEGOTIATION CONTROLS ---
               <>
                 {showPriceSuggestions && (
                   <div className="krishi-price-suggestions">
