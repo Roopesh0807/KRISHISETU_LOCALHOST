@@ -965,7 +965,7 @@ const FarmerDetails = () => {
             )}
           </div>
 
-          <div className="action-buttons">
+          {/* <div className="action-buttons">
             <button
               onClick={() => navigate(`/consumer-dashboard`)}
               className="action-button back-button"
@@ -987,7 +987,34 @@ const FarmerDetails = () => {
                 )}
               </button>
             )}
-          </div>
+          </div> */}
+
+        <div className="action-buttons">
+  {/* Back to Dashboard */}
+  <button
+    onClick={() => navigate("/consumer-dashboard")}
+    className="action-button back-button"
+  >
+    ← Back to Dashboard
+  </button>
+
+  {/* Bargain Button */}
+  {farmer.products && farmer.products.length > 0 && (
+    <button
+      onClick={() => navigate(`/initiate-bargain/${farmer.farmer_id}`)}
+      className="ks-farmer-action-btn ks-bargain-btn"
+      disabled={isLoading}
+    >
+      {isLoading ? (
+        <FontAwesomeIcon icon={faSpinner} spin />
+      ) : (
+        <>
+          <FontAwesomeIcon icon={faHandshake} /> Bargain Now
+        </>
+      )}
+    </button>
+  )}
+</div>
 
           {showAddReviewForm && (
             <div className="add-review-form">

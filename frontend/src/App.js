@@ -476,9 +476,14 @@ const Main = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const path = location.pathname;
 
+ 
     const getNavbar = () => {
         const path = location.pathname;
         if (path.startsWith("/admin")) {
+    return null;
+  }
+      // 🧠 Hide navbar completely for SMS Simulator
+  if (path === "/sms-simulator") {
     return null;
   }
 
@@ -523,7 +528,8 @@ const Main = () => {
             path.startsWith("/my-orders") ||
             path.startsWith("/transactions") ||
             path.startsWith("/community-flash-deals") ||
-            path === "/subscribe"
+            path === "/subscribe" ||
+            path === "/combined-checkout"
         ) {
             return (
                 <>
